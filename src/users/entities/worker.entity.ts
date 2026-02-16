@@ -1,13 +1,17 @@
-import { User } from "./user.entity";
+import { User, UserType } from './user.entity';
 
 export class Worker extends User {
-  readonly kind = 'worker' as const;
+  override readonly type: UserType = UserType.WORKER;
   role: WorkerRole;
   salary: number;
   hoursToWorkPerDay: number | null;
   startWorkAt: Date;
   endWorkAt: Date;
 
+  constructor(data: Partial<Worker>) {
+    super(data);
+    Object.assign(this, data);
+  }
 }
 
 export enum WorkerRole {

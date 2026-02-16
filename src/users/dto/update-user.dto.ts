@@ -2,8 +2,10 @@ import { Gender } from '../entities/athlete.entity';
 import { MemberRole } from '../entities/member.entity';
 import { WorkerRole } from '../entities/worker.entity';
 import { CreateUserDto } from './create-user.dto';
+import { UserType } from '../entities/user.entity';
 
 export interface UpdateUserDto extends Partial<CreateUserDto> {
+  type: UserType;
   id: number;
   name?: string;
   email?: string;

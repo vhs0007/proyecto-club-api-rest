@@ -1,7 +1,8 @@
-import { Member } from "./member.entity";
+import { Member } from './member.entity';
+import { UserType } from './user.entity';
 
 export class Athlete extends Member {
-  readonly kind = 'athlete' as const;
+  override readonly type: UserType = UserType.ATHLETE;
   weight: number;
   height: number;
   gender: Gender;
@@ -12,6 +13,11 @@ export class Athlete extends Member {
   allergies : string | null;
   medications : string | null;
   medicalConditions : string | null;
+
+  constructor(data: Partial<Athlete>) {
+    super(data);
+    Object.assign(this, data);
+  }
 }
 
 export enum Gender {

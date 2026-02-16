@@ -1,15 +1,17 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException, Injectable, NotFoundException,
+} from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { Athlete, Gender } from './entities/athlete.entity';
-import { MemberRole } from './entities/member.entity';
+import { Member, MemberRole } from './entities/member.entity';
 import { Worker, WorkerRole } from './entities/worker.entity';
+import { UserType } from './entities/user.entity';
 
 @Injectable()
 export class UsersService {
-  members: Athlete[] = [
-    {
-      kind: 'athlete',
+  members: Member[] = [
+    new Athlete({
       id: 1,
       name: 'John Doe',
       email: 'john.doe@example.com',
@@ -18,45 +20,36 @@ export class UsersService {
       updatedAt: null,
       deletedAt: null,
       isActive: true,
+      role: MemberRole.Standard,
       weight: 80,
       height: 180,
       gender: Gender.MALE,
       birthDate: new Date('1990-01-01'),
-      diet: 'Vegetarian',
-      trainingPlan: 'Beginner',
-      medicalHistory: 'None',
-      allergies: 'None',
-      medications: 'None',
-      medicalConditions: 'None',
-      role: MemberRole.ATHLETE,
-    },
-    {
-      kind: 'athlete',
+      diet: 'vegetarian',
+      trainingPlan: 'basic',
+      medicalHistory: 'none',
+      allergies: 'none',
+      medications: 'none',
+      medicalConditions: 'none',
+      type: UserType.ATHLETE,
+    }),
+    new Member({
       id: 2,
       name: 'Jane Doe',
       email: 'jane.doe@example.com',
       password: 'password',
-      createdAt: new Date('2026-01-02'),
+      createdAt: new Date('2026-01-01'),
       updatedAt: null,
       deletedAt: null,
       isActive: true,
-      weight: 60,
-      height: 160,
-      gender: Gender.FEMALE,
-      birthDate: new Date('1995-05-15'),
-      diet: 'Vegetarian',
-      trainingPlan: 'Beginner',
-      medicalHistory: 'None',
-      allergies: 'None',
-      medications: 'None',
-      medicalConditions: 'None',
-      role: MemberRole.ATHLETE,
-    },
+      role: MemberRole.Standard,
+      type: UserType.MEMBER,
+    }),
   ];
 
   workers: Worker[] = [
-    {
-      kind: 'worker',
+    new Worker({
+      type: UserType.WORKER,
       id: 10,
       name: 'Coach Mike',
       email: 'coach@club.com',
@@ -70,9 +63,9 @@ export class UsersService {
       hoursToWorkPerDay: 8,
       startWorkAt: new Date('2026-01-01T09:00:00'),
       endWorkAt: new Date('2026-01-01T17:00:00'),
-    },
-    {
-      kind: 'worker',
+    }),
+    new Worker({
+      type: UserType.WORKER,
       id: 11,
       name: 'Admin Lisa',
       email: 'admin@club.com',
@@ -86,10 +79,10 @@ export class UsersService {
       hoursToWorkPerDay: 8,
       startWorkAt: new Date('2026-01-01T08:00:00'),
       endWorkAt: new Date('2026-01-01T16:00:00'),
-    },
+    }),
   ];
 
-  private findById(id: number): Athlete | Worker | null {
+  private findById(id: number): Member | Worker | null {
     const member = this.members.find((m) => m.id === id);
     if (member) return member;
     const worker = this.workers.find((w) => w.id === id);
@@ -97,48 +90,111 @@ export class UsersService {
     return null;
   }
 
-  create(createUserDto: CreateUserDto) {
-    return 'This action adds a new user';
+  create(createUserDto: CreateUserDto): Member | Worker {
+    const now = new Date();
+    const base = {
+      ...createUserDto,
+      createdAt: createUserDto.createdAt ?? now,
+      updatedAt: null as Date | null,
+      deletedAt: null as Date | null,
+      isActive: createUserDto.isActive ?? true,
+    };
+
+    if (createUserDto.type === UserType.MEMBER) {
+      const id = Math.max(0, ...this.members.map((m) => m.id)) + 1;
+      const member = new Member({
+        ...base,
+        id,
+        role: (createUserDto.role as MemberRole) ?? null,   
+        type: UserType.MEMBER,
+      });
+      this.members.push(member);
+      return member;
+    }
+
+    if (createUserDto.type === UserType.ATHLETE) {
+      const id = Math.max(0, ...this.members.map((m) => m.id)) + 1;
+      const athlete = new Athlete({
+        ...base,
+        id,
+        role: (createUserDto.role as MemberRole) ?? MemberRole.Standard,
+        weight: createUserDto.weight ?? 0,
+        height: createUserDto.height ?? 0,
+        gender: createUserDto.gender ?? Gender.MALE,
+        birthDate: createUserDto.birthDate ?? new Date(),
+        diet: createUserDto.diet ?? '',
+        trainingPlan: createUserDto.trainingPlan ?? '',
+        medicalHistory: createUserDto.medicalHistory ?? '',
+        allergies: createUserDto.allergies ?? '',
+        medications: createUserDto.medications ?? '',
+        medicalConditions: createUserDto.medicalConditions ?? '',
+        type: UserType.ATHLETE,
+      });
+      this.members.push(athlete);
+      return athlete;
+    }
+
+    if (createUserDto.type === UserType.WORKER) {
+      const id = Math.max(0, ...this.workers.map((w) => w.id)) + 1;
+      const worker = new Worker({
+        ...base,
+        id,
+        role: (createUserDto.role as WorkerRole) ?? WorkerRole.ADMIN,
+        salary: createUserDto.salary ?? 0,
+        hoursToWorkPerDay: createUserDto.hoursToWorkPerDay ?? 0,
+        startWorkAt: createUserDto.startWorkAt ?? new Date(),
+        endWorkAt: createUserDto.endWorkAt ?? new Date(),
+        type: UserType.WORKER,
+      });
+      this.workers.push(worker);
+      return worker;
+    }
+
+    throw new BadRequestException('Unsupported user type');
   }
 
   findAll() {
-    return `This action returns all users`;
+    return [...this.members, ...this.workers];
   }
 
   findOne(id: number) {
-    return `This action returns a #${id} user`;
-  }
-
-  update(id: number, updateUserDto: UpdateUserDto): Athlete | Worker {
     const entity = this.findById(id);
     if (!entity) {
       throw new NotFoundException('User not found');
     }
+    return entity;
+  }
 
-    // Member no tiene lista propia: Athlete extiende Member, así que athlete "es" member
-    if (entity.kind === 'athlete') {
-      const athlete = entity as Athlete;
-      athlete.name = updateUserDto.name ?? athlete.name;
-      athlete.email = updateUserDto.email ?? athlete.email;
-      athlete.password = updateUserDto.password ?? athlete.password;
-      athlete.createdAt = updateUserDto.createdAt ?? athlete.createdAt;
-      athlete.deletedAt = updateUserDto.deletedAt ?? athlete.deletedAt;
-      athlete.isActive = updateUserDto.isActive ?? athlete.isActive;
-      athlete.role = (updateUserDto.role as MemberRole) ?? athlete.role;
-      athlete.weight = updateUserDto.weight ?? athlete.weight;
-      athlete.height = updateUserDto.height ?? athlete.height;
-      athlete.gender = updateUserDto.gender ?? athlete.gender;
-      athlete.birthDate = updateUserDto.birthDate ?? athlete.birthDate;
-      athlete.diet = updateUserDto.diet ?? athlete.diet;
-      athlete.trainingPlan = updateUserDto.trainingPlan ?? athlete.trainingPlan;
-      athlete.medicalHistory =
-        updateUserDto.medicalHistory ?? athlete.medicalHistory;
-      athlete.allergies = updateUserDto.allergies ?? athlete.allergies;
-      athlete.medications = updateUserDto.medications ?? athlete.medications;
-      athlete.medicalConditions =
-        updateUserDto.medicalConditions ?? athlete.medicalConditions;
-      athlete.updatedAt = new Date();
-      return athlete;
+  update(id: number, updateUserDto: UpdateUserDto): Member | Worker | Athlete {
+    const entity = this.findById(id);
+    if (!entity) {
+      throw new NotFoundException('User not found');
+    } 
+    if (entity.type === UserType.ATHLETE || entity.type === UserType.MEMBER) {
+      const member = entity as Member | Athlete;
+      member.name = updateUserDto.name ?? member.name;
+      member.email = updateUserDto.email ?? member.email;
+      member.password = updateUserDto.password ?? member.password;
+      member.createdAt = updateUserDto.createdAt ?? member.createdAt;
+      member.deletedAt = updateUserDto.deletedAt ?? member.deletedAt;
+      member.isActive = updateUserDto.isActive ?? member.isActive;
+      member.role = (updateUserDto.role as MemberRole) ?? member.role;
+      if (member.type === UserType.ATHLETE) {
+        const athlete = member as Athlete;
+        athlete.weight = updateUserDto.weight ?? athlete.weight;
+        athlete.height = updateUserDto.height ?? athlete.height;
+        athlete.gender = updateUserDto.gender ?? athlete.gender;
+        athlete.birthDate = updateUserDto.birthDate ?? athlete.birthDate;
+        athlete.diet = updateUserDto.diet ?? athlete.diet;
+        athlete.trainingPlan = updateUserDto.trainingPlan ?? athlete.trainingPlan;
+        athlete.medicalHistory = updateUserDto.medicalHistory ?? athlete.medicalHistory;
+        athlete.allergies = updateUserDto.allergies ?? athlete.allergies;
+        athlete.medications = updateUserDto.medications ?? athlete.medications;
+        athlete.medicalConditions = updateUserDto.medicalConditions ?? athlete.medicalConditions;
+      }
+      member.updatedAt = new Date();
+      console.log('member updated', member);
+      return member;
     }
 
     const worker = entity as Worker;
@@ -159,6 +215,15 @@ export class UsersService {
   }
 
   remove(id: number) {
-    return `This action removes a #${id} user`;
+    const entity = this.findById(id);
+    if (!entity) {
+      throw new NotFoundException('User not found');
+    }
+
+    this.members = this.members.filter((m) => m.id !== id);
+    this.workers = this.workers.filter((w) => w.id !== id);
+    console.log('members', this.members);
+    console.log('workers', this.workers);
+    return entity;
   }
 }
