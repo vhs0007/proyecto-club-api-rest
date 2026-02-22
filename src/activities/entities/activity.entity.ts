@@ -1,9 +1,17 @@
-import { Activities } from "./activities.entity";
-
-export class Activity extends Activities {
+export class Activity {
+    id: number;
+    name: string;
+    type: string;
+    startAt: Date;
+    endAt: Date;
+    userId: number;
+    cost: number;
+    createdAt: Date;
+    updatedAt: Date | null;
+    deletedAt: Date | null;
+    isActive: boolean;
+  
   constructor(data: Partial<Activity>) {
-    super(data);
     Object.assign(this, data);
   }
 }
-
