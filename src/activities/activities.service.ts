@@ -3,12 +3,11 @@ import {
 } from '@nestjs/common';
 import { CreateActivitiesDto } from './dto/create-activities.dto';
 import { UpdateActivitiesDto } from './dto/update-user.dto';
-import { Activities } from './entities/activities.entity';
 import { Activity } from './entities/activity.entity';
 
 @Injectable()
 export class ActivitiesService {
-  activities: Activities[] = [
+  activities: Activity[] = [
     new Activity({
       id: 1,
       name: 'Soccer game',
@@ -37,13 +36,13 @@ export class ActivitiesService {
     }),
   ];
 
-  private findById(id: number): Activities | null {
+  private findById(id: number): Activity | null {
     const activity = this.activities.find((a) => a.id === id);
     if (activity) return activity;
     return null;
   }
 
-  create(createActivitiesDto: CreateActivitiesDto): Activities {
+  create(createActivitiesDto: CreateActivitiesDto): Activity {
     const now = new Date();
     const id = Math.max(0, ...this.activities.map((a) => a.id)) + 1;
     const activity = new Activity({
@@ -70,7 +69,7 @@ export class ActivitiesService {
     return entity;
   }
 
-  update(id: number, updateActivitiesDto: UpdateActivitiesDto): Activities {
+  update(id: number, updateActivitiesDto: UpdateActivitiesDto): Activity {
     const entity = this.findById(id);
     if (!entity) {
       throw new NotFoundException('Activity not found');

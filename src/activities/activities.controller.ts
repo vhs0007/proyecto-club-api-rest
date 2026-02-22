@@ -3,7 +3,7 @@ import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { ActivitiesService } from './activities.service';
 import type { CreateActivitiesDto } from './dto/create-activities.dto';
 import type { UpdateActivitiesDto } from './dto/update-user.dto';
-import { AuthGuard } from '../auth/guards/jwt-auth/jwt-auth.guard';
+import { AuthGuard } from '../users/guards/jwt-auth/jwt-auth.guard';
 
 @ApiTags('Activities')
 @ApiBearerAuth()
