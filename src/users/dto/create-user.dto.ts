@@ -2,6 +2,7 @@ import type { MemberRole } from "../entities/member.entity";
 import type { WorkerRole } from "../entities/worker.entity";
 import type { Gender } from "../entities/athlete.entity";
 import type { UserType } from "../entities/user.entity";
+import type { MembershipType } from "../../membership/entities/membership.entity";
 
 export interface CreateUserDto {
   name: string;
@@ -12,6 +13,7 @@ export interface CreateUserDto {
   updatedAt?: Date;
   deletedAt?: Date;
   isActive?: boolean;
+  membership?: MembershipType;
   role?: MemberRole | WorkerRole;
   salary?: number;
   hoursToWorkPerDay?: number;
