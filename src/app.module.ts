@@ -8,7 +8,7 @@ import { FacilitiesModule } from './facilities/facilities.module';
 import { MembershipModule } from './membership/membership.module';
 
 @Module({
-  imports: [AuthModule, UsersModule, ActivitiesModule, FacilitiesModule, MembershipModule,],
+  imports: [AuthModule,UsersModule,ActivitiesModule,FacilitiesModule,MembershipModule,],
   controllers: [AppController],
   providers: [AppService],
 })
