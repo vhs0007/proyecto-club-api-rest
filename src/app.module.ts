@@ -6,9 +6,10 @@ import { UsersModule } from './users/users.module';
 import { ActivitiesModule } from './activities/activities.module';
 import { FacilitiesModule } from './facilities/facilities.module';
 import { MembershipModule } from './membership/membership.module';
+import { ExpirationModule } from './expiration/expiration.module';
 
 @Module({
-  imports: [AuthModule,UsersModule,ActivitiesModule,FacilitiesModule,MembershipModule,],
+  imports: [AuthModule,UsersModule,ActivitiesModule,FacilitiesModule,MembershipModule,ExpirationModule,],
   controllers: [AppController],
   providers: [AppService],
 })
