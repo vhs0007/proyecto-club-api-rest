@@ -12,3 +12,145 @@ generator client {
 datasource db {
   provider = "postgresql"
 }
+
+model Membership {
+  /*
+      id: number;
+    type: MembershipType;
+    price: number;
+    */
+
+  id Int @id @default(autoincrement())
+  type MembershipType @relation(fields: [typeId], references: [id])
+  typeId Int @unique
+  price Decimal @db.Decimal(10, 2)
+  users users[]
+  expirations expirations[]
+}
+
+model MembershipType {
+  id         Int         @id @default(autoincrement())
+  name       String
+  membership Membership?
+}
+
+model facilities_membership {
+  id Int @id @default(autoincrement())
+  membershipId Int
+  facilityId Int
+}
+
+model facilities {
+  /*
+      id: number;
+    type: string;
+    availableHours: string;
+    capacity: number;
+    responsibleWorker: number;
+    assistantWorker: number | null;
+    isActive: boolean;
+  */
+  id Int @id @default(autoincrement())
+  type String
+  capacity Int
+  responsibleWorker Int
+  assistantWorker Int?
+  isActive Boolean
+  activities activity[]
+}
+
+model activity {
+  /*
+    id: number;
+  name: string;
+  type: string;
+  startAt: Date;
+  endAt: Date;
+  userId: number;
+  cost: number;
+  facility: Facility;
+  isActive: boolean;
+  */
+  id Int @id @default(autoincrement())
+  name String
+  type String
+  startAt DateTime
+  endAt DateTime
+  userId Int
+  cost Decimal @db.Decimal(10, 2)
+  facilityId Int
+  facility facilities @relation(fields: [facilityId], references: [id])
+  isActive Boolean
+}
+
+model users {
+  /*
+    name: string;
+  type: UserType;
+  email?: string;
+  password?: string;
+  createdAt?: Date;
+  deletedAt?: Date;
+  isActive?: boolean;
+  membership?: MembershipType;
+  role?: MemberRole | WorkerRole;
+  salary?: number;
+  hoursToWorkPerDay?: number;
+  startWorkAt?: Date;
+  endWorkAt?: Date;
+  weight?: number;
+  height?: number;
+  gender?: Gender;
+  birthDate?: Date;
+  diet?: string;
+  trainingPlan?: string;
+  medicalHistory?: string;
+  allergies?: string;
+  medications?: string;
+  medicalConditions?: string;
+  */
+  id Int @id @default(autoincrement())
+  name String
+  type user_type @relation(fields: [typeId], references: [id])
+  typeId Int
+  email String?
+  password String?
+  createdAt DateTime @default(now())
+  deletedAt DateTime?
+  isActive Boolean
+  membershipId Int?
+  membership Membership? @relation(fields: [membershipId], references: [id])
+  role user_role @relation(fields: [roleId], references: [id])
+  roleId Int
+  salary Decimal? @db.Decimal(10, 2)
+  hoursToWorkPerDay Int?
+  startWorkAt DateTime?
+  endWorkAt DateTime?
+  weight Decimal? @db.Decimal(10, 2)
+  height Decimal? @db.Decimal(10, 2)
+  gender String?
+  birthDate DateTime?
+  diet String?
+  expirations expirations[]
+}
+
+model user_type{
+  id Int @id @default(autoincrement())
+  name String
+  users users[]
+}
+
+model user_role{
+  id Int @id @default(autoincrement())
+  name String
+  users users[]
+}
+
+model expirations {
+  id             Int        @id @default(autoincrement())
+  memberId       Int
+  member         users      @relation(fields: [memberId], references: [id])
+  expirationDate DateTime
+  membershipId   Int
+  membership     Membership @relation(fields: [membershipId], references: [id])
+}

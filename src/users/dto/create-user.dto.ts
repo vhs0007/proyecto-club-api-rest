@@ -10,7 +10,6 @@ export interface CreateUserDto {
   email?: string;
   password?: string;
   createdAt?: Date;
-  updatedAt?: Date;
   deletedAt?: Date;
   isActive?: boolean;
   membership?: MembershipType;

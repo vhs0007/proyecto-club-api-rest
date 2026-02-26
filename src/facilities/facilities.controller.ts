@@ -3,7 +3,7 @@ import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { FacilitiesService } from './facilities.service';
 import type { CreateFacilityDto } from './dto/create-facility.dto';
 import type { UpdateFacilityDto } from './dto/update-facility.dto';
-import { AuthGuard } from '../auth/guards/jwt-auth/jwt-auth.guard';
+import { AuthGuard } from '../users/guards/jwt-auth/jwt-auth.guard';
 
 @ApiTags('Facilities')
 @ApiBearerAuth()

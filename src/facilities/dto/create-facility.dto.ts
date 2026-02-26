@@ -1,11 +1,11 @@
+import { Membership } from "src/membership/entities/membership.entity";
 
 export interface CreateFacilityDto {
-  tipo: string;
-  horarioDisponible: string;
-  aforo: number;
-  trabajadorEncargado: number;
-  trabajadorAyudante?: number;
+  type: string;
+  capacity: number;
+  responsibleWorker: number;
+  assistantWorker?: number;
   isActive?: boolean;
-  createdAt?: Date;
+  membership: Membership[];
 }
 

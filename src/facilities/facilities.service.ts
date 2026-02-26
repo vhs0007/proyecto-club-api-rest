@@ -3,7 +3,7 @@ import {
 } from '@nestjs/common';
 import { CreateFacilityDto } from './dto/create-facility.dto';
 import { UpdateFacilityDto } from './dto/update-facility.dto';
-import { Facilities } from './entities/facilities.entity';
+import { Facilities } from './entities/facility.entity';
 import { Facility } from './entities/facility.entity';
 
 @Injectable()

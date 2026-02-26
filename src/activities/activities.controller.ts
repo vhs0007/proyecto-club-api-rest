@@ -2,7 +2,7 @@ import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards } from '@n
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { ActivitiesService } from './activities.service';
 import type { CreateActivitiesDto } from './dto/create-activities.dto';
-import type { UpdateActivitiesDto } from './dto/update-user.dto';
+import type { UpdateActivitiesDto } from './dto/update-activities.dto';
 import { AuthGuard } from '../users/guards/jwt-auth/jwt-auth.guard';
 
 @ApiTags('Activities')

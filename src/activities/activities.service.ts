@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateActivitiesDto } from './dto/create-activities.dto';
-import { UpdateActivitiesDto } from './dto/update-user.dto';
+import { UpdateActivitiesDto } from './dto/update-activities.dto';
 import { Activity } from './entities/activity.entity';
 import { Facility } from '../facilities/entities/facility.entity';
 

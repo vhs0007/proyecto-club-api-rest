@@ -1,4 +1,4 @@
-import { Facility } from '../../facilities/entities/facility.entity';
+import { Facility } from 'src/facilities/entities/facility.entity';
 
 export class Activity {
   id: number;
@@ -9,9 +9,6 @@ export class Activity {
   userId: number;
   cost: number;
   facility: Facility;
-  createdAt: Date;
-  updatedAt: Date | null;
-  deletedAt: Date | null;
   isActive: boolean;
 
   constructor(data: Partial<Activity>) {

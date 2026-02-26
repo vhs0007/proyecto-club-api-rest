@@ -1,14 +1,13 @@
 import { CreateFacilityDto } from './create-facility.dto';
+import { Membership } from 'src/membership/entities/membership.entity';
 
 export interface UpdateFacilityDto extends Partial<CreateFacilityDto> {
   id: number;
   tipo?: string;
-  horarioDisponible?: string;
-  aforo?: number;
-  trabajadorEncargado?: number;
-  trabajadorAyudante?: number;
+  capacity?: number;
+  responsibleWorker?: number;
+  assistantWorker?: number;
   isActive?: boolean;
-  createdAt?: Date;
-  updatedAt?: Date;
+  membership?: Membership[];
 }
 
