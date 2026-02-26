@@ -8,6 +8,7 @@ export interface UpdateActivitiesDto extends Partial<CreateActivitiesDto> {
   endAt?: Date;
   userId?: number;
   cost?: number;
+  facility?: CreateActivitiesDto['facility'];
   isActive?: boolean;
   createdAt?: Date;
   updatedAt?: Date;

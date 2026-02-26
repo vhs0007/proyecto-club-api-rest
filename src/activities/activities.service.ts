@@ -1,9 +1,8 @@
-import {
-  BadRequestException, Injectable, NotFoundException,
-} from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateActivitiesDto } from './dto/create-activities.dto';
 import { UpdateActivitiesDto } from './dto/update-user.dto';
 import { Activity } from './entities/activity.entity';
+import { Facility } from '../facilities/entities/facility.entity';
 
 @Injectable()
 export class ActivitiesService {
@@ -16,6 +15,18 @@ export class ActivitiesService {
       endAt: new Date('2026-03-03T12:00:00'),
       userId: 1,
       cost: 100,
+      facility: new Facility({
+        id: 1,
+        tipo: 'cancha',
+        horarioDisponible: '08:00-22:00',
+        aforo: 100,
+        trabajadorEncargado: 1,
+        trabajadorAyudante: null,
+        createdAt: new Date(),
+        updatedAt: null,
+        deletedAt: null,
+        isActive: true,
+      }),
       createdAt: new Date(),
       updatedAt: null,
       deletedAt: null,
@@ -29,6 +40,18 @@ export class ActivitiesService {
       endAt: new Date('2026-03-04T16:00:00'),
       userId: 2,
       cost: 100,
+      facility: new Facility({
+        id: 2,
+        tipo: 'gimnasio',
+        horarioDisponible: '06:00-23:00',
+        aforo: 50,
+        trabajadorEncargado: 2,
+        trabajadorAyudante: 3,
+        createdAt: new Date(),
+        updatedAt: null,
+        deletedAt: null,
+        isActive: true,
+      }),
       createdAt: new Date(),
       updatedAt: null,
       deletedAt: null,
@@ -48,6 +71,7 @@ export class ActivitiesService {
     const activity = new Activity({
       ...createActivitiesDto,
       id,
+      facility: createActivitiesDto.facility,
       createdAt: createActivitiesDto.createdAt ?? now,
       updatedAt: null as Date | null,
       deletedAt: null as Date | null,
@@ -81,6 +105,7 @@ export class ActivitiesService {
     entity.endAt = updateActivitiesDto.endAt ?? entity.endAt;
     entity.userId = updateActivitiesDto.userId ?? entity.userId;
     entity.cost = updateActivitiesDto.cost ?? entity.cost;
+    entity.facility = updateActivitiesDto.facility ?? entity.facility;
     entity.isActive = updateActivitiesDto.isActive ?? entity.isActive;
     entity.updatedAt = new Date();
     return entity;
