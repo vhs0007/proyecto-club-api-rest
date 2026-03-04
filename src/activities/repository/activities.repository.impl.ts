@@ -1,18 +1,21 @@
 import { Injectable } from '@nestjs/common';
-import { PrismaService } from '../prisma/prisma.service';
+import { PrismaService } from '../../prisma/prisma.service';
+import type { IActivitiesRepository } from './activitities.repository';
+import { CreateActivityDto } from '../dto/create-activities.dto';
+import { UpdateActivityDto } from '../dto/update-activities.dto';
 
 @Injectable()
-export class ActivitiesRepository {
+export class ActivitiesRepository implements IActivitiesRepository {
   constructor(private readonly prisma: PrismaService) {}
 
-  create(data: any) {
+  create(createActivityDto: CreateActivityDto) {
     return this.prisma.activity.create({
-      data,
+      data: createActivityDto,
       include: { facility: true },
     });
   }
 
-  findMany() {
+  findAll() {
     return this.prisma.activity.findMany({
       include: { facility: true },
     });
@@ -25,15 +28,15 @@ export class ActivitiesRepository {
     });
   }
 
-  update(id: number, data: any) {
+  update(id: number, updateActivityDto: UpdateActivityDto) {
     return this.prisma.activity.update({
       where: { id },
-      data,
+      data: updateActivityDto,
       include: { facility: true },
     });
   }
 
-  remove(id: number) {
+  delete(id: number) {
     return this.prisma.activity.delete({ where: { id } });
   }
 }

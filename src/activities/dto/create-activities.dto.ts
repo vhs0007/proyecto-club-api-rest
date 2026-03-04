@@ -1,6 +1,6 @@
 import { Facility } from '../../facilities/entities/facility.entity';
 
-export interface CreateActivitiesDto {
+export interface CreateActivityDto {
   name: string;
   type: string;
   startAt: Date;
