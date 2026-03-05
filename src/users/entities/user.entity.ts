@@ -16,7 +16,7 @@ export abstract class User {
 }
 
 export enum UserType {
-  WORKER = 'worker',
-  ATHLETE = 'athlete',
-  MEMBER = 'member',
+  WORKER = 1,
+  ATHLETE = 2,
+  MEMBER = 3,
 }

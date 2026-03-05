@@ -100,27 +100,27 @@ export class UsersService {
       isActive: createUserDto.isActive ?? true,
     };
 
-    if (createUserDto.type === UserType.MEMBER) {
+    if (createUserDto.typeId === UserType.MEMBER) {
       const id = Math.max(0, ...this.members.map((m) => m.id)) + 1;
       const member = new Member({
         ...base,
         id,
-        role: (createUserDto.role as MemberRole) ?? null,   
+        role: createUserDto.roleId as MemberRole ?? null,   
         type: UserType.MEMBER,
       });
       this.members.push(member);
       return member;
     }
 
-    if (createUserDto.type === UserType.ATHLETE) {
+    if (createUserDto.typeId === UserType.ATHLETE) {
       const id = Math.max(0, ...this.members.map((m) => m.id)) + 1;
       const athlete = new Athlete({
         ...base,
         id,
-        role: (createUserDto.role as MemberRole) ?? MemberRole.Standard,
+        role: createUserDto.roleId as MemberRole ?? MemberRole.Standard,
         weight: createUserDto.weight ?? 0,
         height: createUserDto.height ?? 0,
-        gender: createUserDto.gender ?? Gender.MALE,
+        gender: createUserDto.gender as Gender ?? Gender.MALE,
         birthDate: createUserDto.birthDate ?? new Date(),
         diet: createUserDto.diet ?? '',
         trainingPlan: createUserDto.trainingPlan ?? '',
@@ -134,12 +134,12 @@ export class UsersService {
       return athlete;
     }
 
-    if (createUserDto.type === UserType.WORKER) {
+    if (createUserDto.typeId === UserType.WORKER) {
       const id = Math.max(0, ...this.workers.map((w) => w.id)) + 1;
       const worker = new Worker({
         ...base,
         id,
-        role: (createUserDto.role as WorkerRole) ?? WorkerRole.ADMIN,
+        role: createUserDto.roleId as WorkerRole ?? WorkerRole.ADMIN,
         salary: createUserDto.salary ?? 0,
         hoursToWorkPerDay: createUserDto.hoursToWorkPerDay ?? 0,
         startWorkAt: createUserDto.startWorkAt ?? new Date(),
@@ -178,7 +178,7 @@ export class UsersService {
       member.createdAt = updateUserDto.createdAt ?? member.createdAt;
       member.deletedAt = updateUserDto.deletedAt ?? member.deletedAt;
       member.isActive = updateUserDto.isActive ?? member.isActive;
-      member.role = (updateUserDto.role as MemberRole) ?? member.role;
+      member.role = updateUserDto.roleId as MemberRole ?? member.role;
       if (member.type === UserType.ATHLETE) {
         const athlete = member as Athlete;
         athlete.weight = updateUserDto.weight ?? athlete.weight;
@@ -204,7 +204,7 @@ export class UsersService {
     worker.createdAt = updateUserDto.createdAt ?? worker.createdAt;
     worker.deletedAt = updateUserDto.deletedAt ?? worker.deletedAt;
     worker.isActive = updateUserDto.isActive ?? worker.isActive;
-    worker.role = (updateUserDto.role as WorkerRole) ?? worker.role;
+    worker.role = updateUserDto.roleId as WorkerRole ?? worker.role;
     worker.salary = updateUserDto.salary ?? worker.salary;
     worker.hoursToWorkPerDay =
       updateUserDto.hoursToWorkPerDay ?? worker.hoursToWorkPerDay;

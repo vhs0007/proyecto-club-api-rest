@@ -11,7 +11,7 @@ export class Member extends User {
 }
 
 export enum MemberRole {
-    Standard = 'standard',
-    VIP = 'vip',
-    ATHLETE = 'athlete',
+    Standard = 1,
+    VIP = 2,
+    ATHLETE = 3,
 }
