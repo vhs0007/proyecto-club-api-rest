@@ -1,13 +1,11 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { CreateActivitiesDto } from './dto/create-activities.dto';
-import { UpdateActivitiesDto } from './dto/update-activities.dto';
-import { Activity } from './entities/activity.entity';
-import { Facility } from '../facilities/entities/facility.entity';
+import { CreateActivityDto } from './dto/create-activities.dto';
+import { UpdateActivityDto } from './dto/update-activities.dto';
 
 @Injectable()
 export class ActivitiesService {
-  activities: Activity[] = [
-    new Activity({
+  activities: CreateActivityDto[] = [
+    {
       id: 1,
       name: 'Soccer game',
       type: 'soccer,game,sport',
@@ -15,24 +13,9 @@ export class ActivitiesService {
       endAt: new Date('2026-03-03T12:00:00'),
       userId: 1,
       cost: 100,
-      facility: new Facility({
-        id: 1,
-        tipo: 'cancha',
-        horarioDisponible: '08:00-22:00',
-        aforo: 100,
-        trabajadorEncargado: 1,
-        trabajadorAyudante: null,
-        createdAt: new Date(),
-        updatedAt: null,
-        deletedAt: null,
-        isActive: true,
-      }),
-      createdAt: new Date(),
-      updatedAt: null,
-      deletedAt: null,
-      isActive: true,
-    }),
-    new Activity({
+      facilityId: 1,
+    },
+    {
       id: 2,
       name: 'Basketball game',
       type: 'basketball,game,sport',
@@ -40,43 +23,25 @@ export class ActivitiesService {
       endAt: new Date('2026-03-04T16:00:00'),
       userId: 2,
       cost: 100,
-      facility: new Facility({
-        id: 2,
-        tipo: 'gimnasio',
-        horarioDisponible: '06:00-23:00',
-        aforo: 50,
-        trabajadorEncargado: 2,
-        trabajadorAyudante: 3,
-        createdAt: new Date(),
-        updatedAt: null,
-        deletedAt: null,
-        isActive: true,
-      }),
-      createdAt: new Date(),
-      updatedAt: null,
-      deletedAt: null,
-      isActive: true,
-    }),
+      facilityId: 2,
+    },
   ];
 
-  private findById(id: number): Activity | null {
+  private findById(id: number): CreateActivityDto | null {
     const activity = this.activities.find((a) => a.id === id);
     if (activity) return activity;
     return null;
   }
 
-  create(createActivitiesDto: CreateActivitiesDto): Activity {
+  create(createActivityDto: CreateActivityDto): CreateActivityDto {
     const now = new Date();
-    const id = Math.max(0, ...this.activities.map((a) => a.id)) + 1;
-    const activity = new Activity({
-      ...createActivitiesDto,
+    const id = Math.max(0, ...this.activities.map((a) => a.id ?? 0)) + 1;
+    const activity = {
+      ...createActivityDto,
       id,
-      facility: createActivitiesDto.facility,
-      createdAt: createActivitiesDto.createdAt ?? now,
-      updatedAt: null as Date | null,
-      deletedAt: null as Date | null,
-      isActive: createActivitiesDto.isActive ?? true,
-    });
+      facilityId: createActivityDto.facilityId,
+      createdAt: createActivityDto.createdAt ?? now,
+    };
     this.activities.push(activity);
     return activity;
   }
@@ -93,21 +58,20 @@ export class ActivitiesService {
     return entity;
   }
 
-  update(id: number, updateActivitiesDto: UpdateActivitiesDto): Activity {
+  update(id: number, updateActivityDto: UpdateActivityDto): CreateActivityDto {
     const entity = this.findById(id);
     if (!entity) {
       throw new NotFoundException('Activity not found');
     }
     
-    entity.name = updateActivitiesDto.name ?? entity.name;
-    entity.type = updateActivitiesDto.type ?? entity.type;
-    entity.startAt = updateActivitiesDto.startAt ?? entity.startAt;
-    entity.endAt = updateActivitiesDto.endAt ?? entity.endAt;
-    entity.userId = updateActivitiesDto.userId ?? entity.userId;
-    entity.cost = updateActivitiesDto.cost ?? entity.cost;
-    entity.facility = updateActivitiesDto.facility ?? entity.facility;
-    entity.isActive = updateActivitiesDto.isActive ?? entity.isActive;
-    entity.updatedAt = new Date();
+    entity.name = updateActivityDto.name ?? entity.name;
+    entity.type = updateActivityDto.type ?? entity.type;
+    entity.startAt = updateActivityDto.startAt ?? entity.startAt;
+    entity.endAt = updateActivityDto.endAt ?? entity.endAt;
+    entity.userId = updateActivityDto.userId ?? entity.userId;
+    entity.cost = updateActivityDto.cost ?? entity.cost;
+    entity.facilityId = updateActivityDto.facilityId ?? entity.facilityId;
+    entity.isActive = updateActivityDto.isActive ?? entity.isActive;
     return entity;
   }
 

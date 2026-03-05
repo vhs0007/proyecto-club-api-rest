@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { FacilitiesService } from './facilities.service';
 import { FacilitiesController } from './facilities.controller';
-import { FacilitiesRepository } from './facilities.repository';
+import { FacilitiesRepository } from './repository/facilities.repository.impl';
 
 @Module({
   controllers: [FacilitiesController],

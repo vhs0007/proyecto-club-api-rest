@@ -5,15 +5,15 @@ import { Expiration } from './entities/expiration.entity';
 
 @Injectable()
 export class ExpirationService {
-  expirations: Expiration[] = [];
+  expirations: CreateExpirationDto[] = [];
 
   create(createExpirationDto: CreateExpirationDto) {
-    const id_expiration =
-      Math.max(0, ...this.expirations.map((e) => e.id_expiration)) + 1;
-    const expiration = new Expiration({
+    const id =
+      Math.max(0, ...this.expirations.map((e) => e.id)) + 1;
+    const expiration : CreateExpirationDto = {
       ...createExpirationDto,
-      id_expiration,
-    });
+      id: id,
+    };
     this.expirations.push(expiration);
     return expiration;
   }
@@ -23,11 +23,11 @@ export class ExpirationService {
   }
 
   findOne(id: number) {
-    return this.expirations.find((e) => e.id_expiration === id);
+    return this.expirations.find((e) => e.id === id);
   }
 
   update(id: number, updateExpirationDto: UpdateExpirationDto) {
-    const expiration = this.expirations.find((e) => e.id_expiration === id);
+    const expiration = this.expirations.find((e) => e.id === id);
     if (!expiration) {
       throw new NotFoundException('Expiration not found');
     }
@@ -36,11 +36,11 @@ export class ExpirationService {
   }
 
   remove(id: number) {
-    const expiration = this.expirations.find((e) => e.id_expiration === id);
+    const expiration = this.expirations.find((e) => e.id === id);
     if (!expiration) {
       throw new NotFoundException('Expiration not found');
     }
-    this.expirations = this.expirations.filter((e) => e.id_expiration !== id);
+    this.expirations = this.expirations.filter((e) => e.id !== id);
     return expiration;
   }
 }

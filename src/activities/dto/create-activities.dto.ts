@@ -1,5 +1,6 @@
 
 export interface CreateActivityDto {
+  id?: number;
   name: string;
   type: string;
   startAt: Date;

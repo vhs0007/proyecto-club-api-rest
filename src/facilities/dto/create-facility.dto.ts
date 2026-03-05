@@ -1,4 +1,5 @@
 export interface CreateFacilityDto {
+  id?: number;
   type: string;
   capacity: number;
   responsibleWorker: number;
