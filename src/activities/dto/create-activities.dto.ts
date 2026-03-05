@@ -1,4 +1,3 @@
-import { Facility } from '../../facilities/entities/facility.entity';
 
 export interface CreateActivityDto {
   name: string;
@@ -7,7 +6,7 @@ export interface CreateActivityDto {
   endAt: Date;
   userId: number;
   cost: number;
-  facility: Facility;
+  facilityId: number;
   isActive?: boolean;
   createdAt?: Date;
 }

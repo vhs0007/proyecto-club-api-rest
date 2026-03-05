@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
-import type { IFacilitiesRepository } from './facilities.repository';
+import type { IFacilitiesRepository, FacilityResponse } from './facilities.repository';
 import { CreateFacilityDto } from '../dto/create-facility.dto';
 import { UpdateFacilityDto } from '../dto/update-facility.dto';
 
@@ -8,27 +8,91 @@ import { UpdateFacilityDto } from '../dto/update-facility.dto';
 export class FacilitiesRepository implements IFacilitiesRepository {
   constructor(private readonly prisma: PrismaService) {}
 
-  create(createFacilityDto: CreateFacilityDto) {
-    return this.prisma.facility.create({ data: createFacilityDto });
-  }
-
-  findAll() {
-    return this.prisma.facility.findMany();
-  }
-
-  findById(id: number) {
-    return this.prisma.facility.findUnique({ where: { id } });
-  }
-
-  update(id: number, updateFacilityDto: UpdateFacilityDto) {
-    return this.prisma.facility.update({
-      where: { id },
-      data: updateFacilityDto,
+  async create(createFacilityDto: CreateFacilityDto): Promise<FacilityResponse> {
+    const { membershipIds, ...data } = createFacilityDto;
+    const created = await this.prisma.facilities.create({
+      data: {
+        ...data,
+        assistantWorker: data.assistantWorker ?? null,
+        isActive: data.isActive ?? true,
+      },
     });
+    if (membershipIds.length > 0) {
+      await this.prisma.facilities_membership.createMany({
+        data: membershipIds.map((membershipId) => ({
+          facilityId: created.id,
+          membershipId,
+        })),
+      });
+    }
+    return { ...created, membershipIds };
   }
 
-  delete(id: number) {
-    return this.prisma.facility.delete({ where: { id } });
+  async findAll(): Promise<FacilityResponse[]> {
+    const list = await this.prisma.facilities.findMany();
+    const ids = list.map((f) => f.id);
+    const links =
+      ids.length === 0
+        ? []
+        : await this.prisma.facilities_membership.findMany({
+            where: { facilityId: { in: ids } },
+          });
+    const membershipIdsByFacilityId = new Map<number, number[]>();
+    for (const link of links) {
+      const arr = membershipIdsByFacilityId.get(link.facilityId) ?? [];
+      arr.push(link.membershipId);
+      membershipIdsByFacilityId.set(link.facilityId, arr);
+    }
+    return list.map((row) => ({
+      ...row,
+      membershipIds: membershipIdsByFacilityId.get(row.id) ?? [],
+    }));
+  }
+
+  async findById(id: number): Promise<FacilityResponse | null> {
+    const facility = await this.prisma.facilities.findUnique({
+      where: { id },
+    });
+    if (!facility) return null;
+    const links = await this.prisma.facilities_membership.findMany({
+      where: { facilityId: id },
+    });
+    return {
+      ...facility,
+      membershipIds: links.map((l) => l.membershipId),
+    };
+  }
+
+  async update(id: number, updateFacilityDto: UpdateFacilityDto): Promise<FacilityResponse> {
+    const { membershipIds, ...rest } = updateFacilityDto;
+    const data: Record<string, unknown> = { ...rest };
+    if (membershipIds !== undefined) {
+      await this.prisma.facilities_membership.deleteMany({
+        where: { facilityId: id },
+      });
+      if (membershipIds.length > 0) {
+        await this.prisma.facilities_membership.createMany({
+          data: membershipIds.map((membershipId) => ({ facilityId: id, membershipId })),
+        });
+      }
+    }
+    const updated = await this.prisma.facilities.update({
+      where: { id },
+      data,
+    });
+    const links = await this.prisma.facilities_membership.findMany({
+      where: { facilityId: id },
+    });
+    return {
+      ...updated,
+      membershipIds: links.map((l) => l.membershipId),
+    };
+  }
+
+  async delete(id: number): Promise<void> {
+    await this.prisma.facilities_membership.deleteMany({
+      where: { facilityId: id },
+    });
+    await this.prisma.facilities.delete({ where: { id } });
   }
 }
-

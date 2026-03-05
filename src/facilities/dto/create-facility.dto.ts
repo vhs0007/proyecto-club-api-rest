@@ -1,11 +1,9 @@
-import { Membership } from "src/membership/entities/membership.entity";
-
 export interface CreateFacilityDto {
   type: string;
   capacity: number;
   responsibleWorker: number;
-  assistantWorker?: number;
+  assistantWorker?: number | null;
   isActive?: boolean;
-  membership: Membership[];
+  membershipIds: number[];
 }
 
