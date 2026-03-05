@@ -15,11 +15,11 @@ export class Worker extends User {
 }
 
 export enum WorkerRole {
-    ADMIN = 'admin',
-    COACH = 'coach',
-    NUTRITIONIST = 'nutritionist',
-    PSYCHOLOGIST = 'psychologist',
-    PHYSICAL_THERAPIST = 'physical_therapist',
-    ADMINISTRATIVE = 'administrative',
-    CLEANER = 'cleaner',
+    ADMIN = 1,
+    COACH = 2,
+    NUTRITIONIST = 3,
+    PSYCHOLOGIST = 4,
+    PHYSICAL_THERAPIST = 5,
+    ADMINISTRATIVE = 6,
+    CLEANER = 7,
 }
