@@ -21,19 +21,19 @@ export class ExpirationController {
 
   @ApiOperation({ summary: 'Crear expiración' })
   @Post()
-  create(@Body() createExpirationDto: CreateExpirationDto): Expiration {
+  create(@Body() createExpirationDto: CreateExpirationDto): CreateExpirationDto {
     return this.expirationService.create(createExpirationDto);
   }
 
   @ApiOperation({ summary: 'Obtener todas las expiraciones' })
   @Get()
-  findAll(): Expiration[] {
+  findAll(): CreateExpirationDto[] {
     return this.expirationService.findAll();
   }
 
   @ApiOperation({ summary: 'Obtener expiración por ID' })
   @Get(':id')
-  findOne(@Param('id') id: string): Expiration | undefined {
+  findOne(@Param('id') id: string): CreateExpirationDto | undefined {
     return this.expirationService.findOne(+id) ?? undefined;
   }
 
@@ -42,13 +42,13 @@ export class ExpirationController {
   update(
     @Param('id') id: string,
     @Body() updateExpirationDto: UpdateExpirationDto,
-  ): Expiration {
+  ): CreateExpirationDto {
     return this.expirationService.update(+id, updateExpirationDto);
   }
 
   @ApiOperation({ summary: 'Eliminar expiración' })
   @Delete(':id')
-  remove(@Param('id') id: string): Expiration {
+  remove(@Param('id') id: string): CreateExpirationDto {
     return this.expirationService.remove(+id);
   }
 }

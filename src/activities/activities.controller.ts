@@ -1,8 +1,8 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { ActivitiesService } from './activities.service';
-import type { CreateActivitiesDto } from './dto/create-activities.dto';
-import type { UpdateActivitiesDto } from './dto/update-activities.dto';
+import type { CreateActivityDto } from './dto/create-activities.dto';
+import type { UpdateActivityDto } from './dto/update-activities.dto';
 import { AuthGuard } from '../users/guards/jwt-auth/jwt-auth.guard';
 
 @ApiTags('Activities')
@@ -14,8 +14,8 @@ export class ActivitiesController {
 
   @Post()
   @ApiOperation({ summary: 'Crear actividad' })
-  create(@Body() createActivitiesDto: CreateActivitiesDto) {
-    return this.activitiesService.create(createActivitiesDto);
+  create(@Body() createActivityDto: CreateActivityDto) {
+    return this.activitiesService.create(createActivityDto);
   }
 
   @Get()
@@ -32,8 +32,8 @@ export class ActivitiesController {
 
   @Patch(':id')
   @ApiOperation({ summary: 'Actualizar actividad' })
-  update(@Param('id') id: string, @Body() updateActivitiesDto: UpdateActivitiesDto) {
-    return this.activitiesService.update(+id, updateActivitiesDto);
+  update(@Param('id') id: string, @Body() updateActivityDto: UpdateActivityDto) {
+    return this.activitiesService.update(+id, updateActivityDto);
   }
 
   @Delete(':id')

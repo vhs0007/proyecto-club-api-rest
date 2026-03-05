@@ -1,6 +1,6 @@
-import { CreateActivitiesDto } from './create-activities.dto';
+import { CreateActivityDto } from './create-activities.dto';
 
-export interface UpdateActivitiesDto extends Partial<CreateActivitiesDto> {
+export interface UpdateActivityDto extends Partial<CreateActivityDto> {
   type: string;
   id: number;
   name?: string;
@@ -8,7 +8,7 @@ export interface UpdateActivitiesDto extends Partial<CreateActivitiesDto> {
   endAt?: Date;
   userId?: number;
   cost?: number;
-  facility?: CreateActivitiesDto['facility'];
+  facilityId?: number;
   isActive?: boolean;
   createdAt?: Date;
   updatedAt?: Date;

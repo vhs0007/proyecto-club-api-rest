@@ -1,13 +1,13 @@
-import { Facility } from '../../facilities/entities/facility.entity';
 
-export interface CreateActivitiesDto {
+export interface CreateActivityDto {
+  id?: number;
   name: string;
   type: string;
   startAt: Date;
   endAt: Date;
   userId: number;
   cost: number;
-  facility: Facility;
+  facilityId: number;
   isActive?: boolean;
   createdAt?: Date;
 }
