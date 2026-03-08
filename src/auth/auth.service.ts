@@ -1,6 +1,6 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { LoginRequest } from './dto/login-request.dto';
+import { LoginRequestDto } from './dto/login-request.dto';
 import { LoginResponse } from './dto/login-response.dto';
 
 @Injectable()
@@ -16,7 +16,7 @@ export class AuthService {
 
   constructor(private readonly jwtService: JwtService) {}
 
-  authenticateUser(loginRequest: LoginRequest): LoginResponse {
+  authenticateUser(loginRequest: LoginRequestDto): LoginResponse {
     const user = this.users.find(
       (u) =>
         u.email === loginRequest.email && u.password === loginRequest.password,

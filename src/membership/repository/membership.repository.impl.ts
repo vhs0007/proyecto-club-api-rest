@@ -16,16 +16,16 @@ export class MembershipRepository implements IMembershipRepository {
     return this.prisma.membershipType;
   }
 
-  private async getTypeIdByName(name: string): Promise<number> {
+  private async getTypeIdById(id: number): Promise<number> {
     const row = await this.membershipType.findFirst({
-      where: { name },
+      where: { id },
     });
-    if (!row) throw new Error(`MembershipType not found: ${name}`);
+    if (!row) throw new Error(`MembershipType not found: ${id}`);
     return row.id;
   }
 
   async create(createMembershipDto: CreateMembershipDto): Promise<MembershipResponse> {
-    const typeId = await this.getTypeIdByName(createMembershipDto.type);
+    const typeId = await this.getTypeIdById(createMembershipDto.type);
     const created = await this.membership.create({
       data: {
         typeId,
@@ -36,7 +36,7 @@ export class MembershipRepository implements IMembershipRepository {
     const price = typeof created.price === 'object' && 'toNumber' in created.price
       ? (created.price as { toNumber(): number }).toNumber()
       : Number(created.price);
-    return { id: created.id, type: created.type.name as MembershipResponse['type'], price };
+    return { id: created.id, type: created.type.id as MembershipResponse['type'], price };
   }
 
   async findAll(): Promise<MembershipResponse[]> {
@@ -47,7 +47,7 @@ export class MembershipRepository implements IMembershipRepository {
       const price = typeof row.price === 'object' && 'toNumber' in row.price
         ? (row.price as { toNumber(): number }).toNumber()
         : Number(row.price);
-      return { id: row.id, type: row.type.name as MembershipResponse['type'], price };
+      return { id: row.id, type: row.type.id as MembershipResponse['type'], price };
     });
   }
 
@@ -60,13 +60,13 @@ export class MembershipRepository implements IMembershipRepository {
     const price = typeof row.price === 'object' && 'toNumber' in row.price
       ? (row.price as { toNumber(): number }).toNumber()
       : Number(row.price);
-    return { id: row.id, type: row.type.name as MembershipResponse['type'], price };
+    return { id: row.id, type: row.type.id as MembershipResponse['type'], price };
   }
 
   async update(id: number, updateMembershipDto: UpdateMembershipDto): Promise<MembershipResponse> {
     const data: { typeId?: number; price?: number } = {};
     if (updateMembershipDto.type != null) {
-      data.typeId = await this.getTypeIdByName(updateMembershipDto.type);
+      data.typeId = await this.getTypeIdById(updateMembershipDto.type);
     }
     if (updateMembershipDto.price != null) {
       data.price = updateMembershipDto.price;
@@ -79,7 +79,7 @@ export class MembershipRepository implements IMembershipRepository {
     const price = typeof updated.price === 'object' && 'toNumber' in updated.price
       ? (updated.price as { toNumber(): number }).toNumber()
       : Number(updated.price);
-    return { id: updated.id, type: updated.type.name as MembershipResponse['type'], price };
+    return { id: updated.id, type: updated.type.id as MembershipResponse['type'], price };
   }
 
   async delete(id: number): Promise<void> {
