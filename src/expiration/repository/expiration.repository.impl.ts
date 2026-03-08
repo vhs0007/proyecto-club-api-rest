@@ -9,7 +9,7 @@ export class ExpirationRepository implements IExpirationRepository {
   constructor(private readonly prisma: PrismaService) {}
 
   private get expirations() {
-    return (this.prisma as any).expirations;
+    return this.prisma.expirations;
   }
 
   async create(createExpirationDto: CreateExpirationDto): Promise<ExpirationResponse> {
