@@ -1,60 +1,40 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateMembershipDto } from './dto/create-membership.dto';
 import { UpdateMembershipDto } from './dto/update-membership.dto';
-import { Membership, MembershipType } from './entities/membership.entity';
+import { Membership } from './entities/membership.entity';
+import { MembershipRepository } from './repository/membership.repository.impl';
 
 @Injectable()
 export class MembershipService {
-  memberships: Membership[] = [
-    new Membership({
-      id: 1,
-      type: MembershipType.BASIC,
-      price: 100,
-      facilitiesIncluded: ['gym', 'pool', 'sauna'],
-    }),
-    new Membership({
-      id: 2,
-      type: MembershipType.VIP,
-      price: 200,
-      facilitiesIncluded: ['gym', 'pool', 'sauna', 'spa'],
-    }),
-    new Membership({
-      id: 3,
-      type: MembershipType.ATHLETE,
-      price: 300,
-      facilitiesIncluded: ['gym', 'pool', 'sauna', 'spa', 'tennis'],
-    }),
-  ];
+  constructor(private readonly membershipRepository: MembershipRepository) {}
 
-  create(createMembershipDto: CreateMembershipDto) {
-    const membership = new Membership(createMembershipDto);
-    this.memberships.push(membership);
-    return membership;
+  async create(createMembershipDto: CreateMembershipDto): Promise<Membership> {
+    const res = await this.membershipRepository.create(createMembershipDto);
+    return new Membership({ id: res.id, type: res.type, price: res.price });
   }
 
-  findAll() {
-    return this.memberships;
+  async findAll(): Promise<Membership[]> {
+    const list = await this.membershipRepository.findAll();
+    return list.map((r) => new Membership({ id: r.id, type: r.type, price: r.price }));
   }
 
-  findOne(id: number) {
-    return this.memberships.find(membership => membership.id === id);
+  async findOne(id: number): Promise<Membership | null> {
+    const row = await this.membershipRepository.findById(id);
+    if (!row) return null;
+    return new Membership({ id: row.id, type: row.type, price: row.price });
   }
 
-  update(id: number, updateMembershipDto: UpdateMembershipDto) {
-    const membership = this.memberships.find(membership => membership.id === id);
-    if (!membership) {
-      throw new NotFoundException('Membership not found');
-    }
-    Object.assign(membership, updateMembershipDto);
-    return membership;
+  async update(id: number, updateMembershipDto: UpdateMembershipDto): Promise<Membership> {
+    const row = await this.membershipRepository.findById(id);
+    if (!row) throw new NotFoundException('Membership not found');
+    const updated = await this.membershipRepository.update(id, updateMembershipDto);
+    return new Membership({ id: updated.id, type: updated.type, price: updated.price });
   }
 
-  remove(id: number) {
-    const membership = this.memberships.find(membership => membership.id === id);
-    if (!membership) {
-      throw new NotFoundException('Membership not found');
-    }
-    this.memberships = this.memberships.filter(membership => membership.id !== id);
-    return membership;
+  async remove(id: number): Promise<Membership> {
+    const row = await this.membershipRepository.findById(id);
+    if (!row) throw new NotFoundException('Membership not found');
+    await this.membershipRepository.delete(id);
+    return new Membership({ id: row.id, type: row.type, price: row.price });
   }
 }

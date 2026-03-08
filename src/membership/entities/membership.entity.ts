@@ -1,6 +1,6 @@
 export class Membership {
     id: number;
-    type: MembershipType;
+    type: number;
     price: number;
     facilitiesIncluded?: string[];
     
