@@ -9,11 +9,11 @@ export class MembershipRepository implements IMembershipRepository {
   constructor(private readonly prisma: PrismaService) {}
 
   private get membership() {
-    return (this.prisma as any).membership;
+    return this.prisma.membership;
   }
 
   private get membershipType() {
-    return (this.prisma as any).membershipType;
+    return this.prisma.membershipType;
   }
 
   private async getTypeIdByName(name: string): Promise<number> {
