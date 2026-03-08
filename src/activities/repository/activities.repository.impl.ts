@@ -13,7 +13,7 @@ export class ActivitiesRepository implements IActivitiesRepository {
 
   async create(createActivityDto: CreateActivityDto): Promise<CreateActivityDto> {
     const { facilityId, isActive, ...rest } = createActivityDto;
-    const created = await this.prisma.activity.create({
+    const created = await (this.prisma as any).activity.create({
       data: {
         ...rest,
         facilityId,
@@ -28,7 +28,7 @@ export class ActivitiesRepository implements IActivitiesRepository {
   }
 
   async findAll(): Promise<CreateActivityDto[]> {
-    const list = await this.prisma.activity.findMany({
+    const list = await (this.prisma as any).activity.findMany({
       include: { facility: true },
     });
     return list.map((row) => ({
@@ -39,7 +39,7 @@ export class ActivitiesRepository implements IActivitiesRepository {
   }
 
   async findById(id: number): Promise<CreateActivityDto | null> {
-    const row = await this.prisma.activity.findUnique({
+    const row = await (this.prisma as any).activity.findUnique({
       where: { id },
       include: { facility: true },
     });
@@ -52,7 +52,7 @@ export class ActivitiesRepository implements IActivitiesRepository {
 
   async update(id: number, updateActivityDto: UpdateActivityDto): Promise<UpdateActivityDto> {
     const { id: _id, facilityId, ...rest } = updateActivityDto;
-    const updated = await this.prisma.activity.update({
+    const updated = await (this.prisma as any).activity.update({
       where: { id },
       data: {
         ...rest,
@@ -67,6 +67,6 @@ export class ActivitiesRepository implements IActivitiesRepository {
   }
 
   async delete(id: number): Promise<void> {
-    await this.prisma.activity.delete({ where: { id } });
+    await (this.prisma as any).activity.delete({ where: { id } });
   }
 }

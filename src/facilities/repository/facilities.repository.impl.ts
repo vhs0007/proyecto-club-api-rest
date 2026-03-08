@@ -10,7 +10,7 @@ export class FacilitiesRepository implements IFacilitiesRepository {
 
   async create(createFacilityDto: CreateFacilityDto): Promise<FacilityResponse> {
     const { membershipIds, ...data } = createFacilityDto;
-    const created = await this.prisma.facilities.create({
+    const created = await (this.prisma as any).facilities.create({
       data: {
         ...data,
         assistantWorker: data.assistantWorker ?? null,
@@ -18,7 +18,7 @@ export class FacilitiesRepository implements IFacilitiesRepository {
       },
     });
     if (membershipIds.length > 0) {
-      await this.prisma.facilities_membership.createMany({
+      await (this.prisma as any).facilities_membership.createMany({
         data: membershipIds.map((membershipId) => ({
           facilityId: created.id,
           membershipId,
@@ -29,12 +29,12 @@ export class FacilitiesRepository implements IFacilitiesRepository {
   }
 
   async findAll(): Promise<FacilityResponse[]> {
-    const list = await this.prisma.facilities.findMany();
+    const list = await (this.prisma as any).facilities.findMany();
     const ids = list.map((f) => f.id);
     const links =
       ids.length === 0
         ? []
-        : await this.prisma.facilities_membership.findMany({
+        : await (this.prisma as any).facilities_membership.findMany({
             where: { facilityId: { in: ids } },
           });
     const membershipIdsByFacilityId = new Map<number, number[]>();
@@ -50,11 +50,11 @@ export class FacilitiesRepository implements IFacilitiesRepository {
   }
 
   async findById(id: number): Promise<FacilityResponse | null> {
-    const facility = await this.prisma.facilities.findUnique({
+    const facility = await (this.prisma as any).facilities.findUnique({
       where: { id },
     });
     if (!facility) return null;
-    const links = await this.prisma.facilities_membership.findMany({
+    const links = await (this.prisma as any).facilities_membership.findMany({
       where: { facilityId: id },
     });
     return {
@@ -67,20 +67,20 @@ export class FacilitiesRepository implements IFacilitiesRepository {
     const { membershipIds, ...rest } = updateFacilityDto;
     const data: Record<string, unknown> = { ...rest };
     if (membershipIds !== undefined) {
-      await this.prisma.facilities_membership.deleteMany({
+      await (this.prisma as any).facilities_membership.deleteMany({
         where: { facilityId: id },
       });
       if (membershipIds.length > 0) {
-        await this.prisma.facilities_membership.createMany({
+        await (this.prisma as any).facilities_membership.createMany({
           data: membershipIds.map((membershipId) => ({ facilityId: id, membershipId })),
         });
       }
     }
-    const updated = await this.prisma.facilities.update({
+    const updated = await (this.prisma as any).facilities.update({
       where: { id },
       data,
     });
-    const links = await this.prisma.facilities_membership.findMany({
+    const links = await (this.prisma as any).facilities_membership.findMany({
       where: { facilityId: id },
     });
     return {
@@ -90,9 +90,9 @@ export class FacilitiesRepository implements IFacilitiesRepository {
   }
 
   async delete(id: number): Promise<void> {
-    await this.prisma.facilities_membership.deleteMany({
+    await (this.prisma as any).facilities_membership.deleteMany({
       where: { facilityId: id },
     });
-    await this.prisma.facilities.delete({ where: { id } });
+    await (this.prisma as any).facilities.delete({ where: { id } });
   }
 }

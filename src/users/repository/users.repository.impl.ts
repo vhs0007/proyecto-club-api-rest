@@ -10,7 +10,7 @@ export class UsersRepository implements IUsersRepository {
   constructor(private readonly prisma: PrismaService) {}
 
   async create(createUserDto: CreateUserDto): Promise<CreateUserDto> {
-    const created = await this.prisma.users.create({ data: createUserDto });
+    const created = await (this.prisma as any).users.create({ data: createUserDto });
     return {
       ...createUserDto,
       ...(created.id && { id: created.id }),
@@ -18,7 +18,7 @@ export class UsersRepository implements IUsersRepository {
   }
 
   async findAll(): Promise<CreateUserDto[]> {
-    return this.prisma.users.findMany().then((users) => users.map((user) => ({
+    return (this.prisma as any).users.findMany().then((users) => users.map((user) => ({
       ...user,
       salary: user.salary?.toNumber() ?? null,
       weight: user.weight?.toNumber() ?? null,
@@ -27,7 +27,7 @@ export class UsersRepository implements IUsersRepository {
   }
 
   async findById(id: number): Promise<CreateUserDto | null> {
-    const user = await this.prisma.users.findUnique({ where: { id } });
+    const user = await (this.prisma as any).users.findUnique({ where: { id } });
     if (!user) {
       return null;
     }
@@ -40,7 +40,7 @@ export class UsersRepository implements IUsersRepository {
   }
 
   async update(id: number, updateUserDto: UpdateUserDto): Promise<CreateUserDto> {
-    const updated = await this.prisma.users.update({
+    const updated = await (this.prisma as any).users.update({
       where: { id },
       data: updateUserDto,
     });
@@ -53,7 +53,7 @@ export class UsersRepository implements IUsersRepository {
   }
 
   async delete(id: number): Promise<void> {
-    await this.prisma.users.delete({ where: { id } });
+    await (this.prisma as any).users.delete({ where: { id } });
   }
 }
 
