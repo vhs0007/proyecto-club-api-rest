@@ -1,5 +1,5 @@
-
 export interface CreateUserDto {
+  id?: number;
   name: string;
   typeId: number;
   email?: string | null;
@@ -18,9 +18,9 @@ export interface CreateUserDto {
   gender?: string | null;
   birthDate?: Date | null;
   diet?: string | null;
-  trainingPlan?: string;
-  medicalHistory?: string;
-  allergies?: string;
-  medications?: string;
-  medicalConditions?: string;
+  trainingPlan?: string | null;
+  medicalHistory?: string | null;
+  allergies?: string | null;
+  medications?: string | null;
+  medicalConditions?: string | null;
 }

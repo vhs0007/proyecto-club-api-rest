@@ -13,7 +13,10 @@ export class UsersRepository implements IUsersRepository {
     const created = await this.prisma.users.create({ data: createUserDto });
     return {
       ...createUserDto,
-      ...(created.id && { id: created.id }),
+      id: created.id,
+      salary: created.salary?.toNumber() ?? null,
+      weight: created.weight?.toNumber() ?? null,
+      height: created.height?.toNumber() ?? null,
     };
   }
 
