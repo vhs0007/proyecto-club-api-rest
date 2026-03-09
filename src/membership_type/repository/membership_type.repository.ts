@@ -1,10 +1,11 @@
-import { CreateMembershipTypeDto } from "../dto/create-membership_type.dto";
-import { MembershipType } from "../entities/membership_type.entity";
+export interface MembershipTypeResponse {
+  id: number;
+  name: string;
+}
 
 export interface IMembershipTypeRepository {
-  //create(createMembershipTypeDto: CreateMembershipTypeDto): Promise<MembershipType>;
-  findAll(): Promise<MembershipType[]>;
-  findById(id: number): Promise<MembershipType | null>;
-  update(id: number, updateMembershipTypeDto: MembershipType): Promise<MembershipType>;
-  delete(id: number): Promise<void>;
+  findAll(): Promise<MembershipTypeResponse[]>;
+  findById(id: number): Promise<MembershipTypeResponse | null>;
+  // update(id: number, updateMembershipTypeDto: MembershipType): Promise<MembershipType>;
+  // delete(id: number): Promise<void>;
 }

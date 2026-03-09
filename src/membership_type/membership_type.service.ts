@@ -1,29 +1,35 @@
-import { Injectable } from '@nestjs/common';
-import { UpdateMembershipTypeDto } from './dto/update-membership_type.dto';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { MembershipTypeRepository } from './repository/membership_type.repository.impl';
 import { MembershipType } from './entities/membership_type.entity';
+import type { MembershipTypeResponse } from './repository/membership_type.repository';
 
 @Injectable()
 export class MembershipTypeService {
   constructor(private readonly membershipTypeRepository: MembershipTypeRepository) {}
 
-  /*create(createMembershipTypeDto: CreateMembershipTypeDto) {
-    return 'This action adds a new membershipType';
-  }*/
-
-  findAll() {
-    return this.membershipTypeRepository.findAll();
+  private mapResponseToMembershipType(res: MembershipTypeResponse): MembershipType {
+    const m = new MembershipType();
+    m.id = res.id;
+    m.name = res.name;
+    return m;
   }
 
-  findOne(id: number) {
-    return this.membershipTypeRepository.findById(id);
+  async findAll(): Promise<MembershipType[]> {
+    const list = await this.membershipTypeRepository.findAll();
+    return list.map((r) => this.mapResponseToMembershipType(r));
   }
 
-  update(id: number, updateMembershipTypeDto: MembershipType) {
-    return this.membershipTypeRepository.update(id, updateMembershipTypeDto);
+  async findOne(id: number): Promise<MembershipType> {
+    const row = await this.membershipTypeRepository.findById(id);
+    if (!row) throw new NotFoundException('Membership type not found');
+    return this.mapResponseToMembershipType(row);
   }
 
-  remove(id: number) {
-    return this.membershipTypeRepository.delete(id);
-  }
+  // update(id: number, updateMembershipTypeDto: MembershipType) {
+  //   return this.membershipTypeRepository.update(id, updateMembershipTypeDto);
+  // }
+
+  // remove(id: number) {
+  //   return this.membershipTypeRepository.delete(id);
+  // }
 }
