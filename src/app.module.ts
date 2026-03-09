@@ -8,6 +8,7 @@ import { FacilitiesModule } from './facilities/facilities.module';
 import { MembershipModule } from './membership/membership.module';
 import { ExpirationModule } from './expiration/expiration.module';
 import { PrismaModule } from './prisma/prisma.module';
+import { MembershipTypeModule } from './membership_type/membership_type.module';
 
 @Module({
   imports: [
@@ -18,6 +19,7 @@ import { PrismaModule } from './prisma/prisma.module';
     FacilitiesModule,
     MembershipModule,
     ExpirationModule,
+    MembershipTypeModule,
   ],
   controllers: [AppController],
   providers: [AppService],
