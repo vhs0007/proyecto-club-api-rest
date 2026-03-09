@@ -1,7 +1,7 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
 import { MembershipService } from './membership.service';
 import{ CreateMembershipDto } from './dto/create-membership.dto';
-import type { UpdateMembershipDto } from './dto/update-membership.dto';
+import { UpdateMembershipDto } from './dto/update-membership.dto';
 import { Membership } from './entities/membership.entity';
 import { ApiBearerAuth, ApiOperation, ApiBody} from '@nestjs/swagger';
 import { ApiTags } from '@nestjs/swagger';
@@ -33,6 +33,7 @@ export class MembershipController {
 
   @ApiOperation({ summary: 'Actualizar membresía' })
   @Patch(':id')
+  @ApiBody({ type: UpdateMembershipDto })
   update(@Param('id') id: string, @Body() updateMembershipDto: UpdateMembershipDto): Promise<Membership> {
     return this.membershipService.update(+id, updateMembershipDto);
   }

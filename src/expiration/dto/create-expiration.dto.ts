@@ -1,9 +1,12 @@
-import { Member } from '../../users/entities/member.entity';
-import { Membership } from '../../membership/entities/membership.entity';
+import { ApiProperty } from '@nestjs/swagger';
 
-export interface CreateExpirationDto {
-  id: number;
-  socio: Member;
-  exp_date: Date;
-  membership: Membership;
+export class CreateExpirationDto {
+  @ApiProperty({ example: 1, description: 'Id del socio (member)' })
+  memberId: number;
+
+  @ApiProperty({ example: '2026-12-31T23:59:59.000Z', description: 'Fecha de expiración' })
+  expirationDate: Date;
+
+  @ApiProperty({ example: 1, description: 'Id de la membresía' })
+  membershipId: number;
 }

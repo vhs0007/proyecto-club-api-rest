@@ -1,62 +1,93 @@
 import { Injectable } from '@nestjs/common';
+import { Prisma } from '@prisma/client';
 import { PrismaService } from '../../prisma/prisma.service';
-import type { IUsersRepository } from './users.repository';
-import { User } from '../entities/user.entity';
+import type { IUsersRepository, UserResponse } from './users.repository';
 import { UpdateUserDto } from '../dto/update-user.dto';
 import { CreateUserDto } from '../dto/create-user.dto';
+
+function mapRow(row: {
+  id: number;
+  name: string;
+  typeId: number;
+  email: string | null;
+  password: string | null;
+  createdAt: Date;
+  deletedAt: Date | null;
+  isActive: boolean;
+  membershipId: number | null;
+  roleId: number;
+  salary?: { toNumber(): number } | null;
+  hoursToWorkPerDay: number | null;
+  startWorkAt: Date | null;
+  endWorkAt: Date | null;
+  weight?: { toNumber(): number } | null;
+  height?: { toNumber(): number } | null;
+  gender: string | null;
+  birthDate: Date | null;
+  diet: string | null;
+  trainingPlan: string | null;
+  medicalHistory: string | null;
+  allergies: string | null;
+  medications: string | null;
+  medicalConditions: string | null;
+}): UserResponse {
+  return {
+    id: row.id,
+    name: row.name,
+    typeId: row.typeId,
+    email: row.email,
+    password: row.password,
+    createdAt: row.createdAt,
+    deletedAt: row.deletedAt,
+    isActive: row.isActive,
+    membershipId: row.membershipId,
+    roleId: row.roleId,
+    salary: row.salary?.toNumber() ?? null,
+    hoursToWorkPerDay: row.hoursToWorkPerDay,
+    startWorkAt: row.startWorkAt,
+    endWorkAt: row.endWorkAt,
+    weight: row.weight?.toNumber() ?? null,
+    height: row.height?.toNumber() ?? null,
+    gender: row.gender,
+    birthDate: row.birthDate,
+    diet: row.diet,
+    trainingPlan: row.trainingPlan,
+    medicalHistory: row.medicalHistory,
+    allergies: row.allergies,
+    medications: row.medications,
+    medicalConditions: row.medicalConditions,
+  };
+}
 
 @Injectable()
 export class UsersRepository implements IUsersRepository {
   constructor(private readonly prisma: PrismaService) {}
 
-  async create(createUserDto: CreateUserDto): Promise<CreateUserDto> {
-    const created = await this.prisma.users.create({ data: createUserDto });
-    return {
-      ...createUserDto,
-      id: created.id,
-      salary: created.salary?.toNumber() ?? null,
-      weight: created.weight?.toNumber() ?? null,
-      height: created.height?.toNumber() ?? null,
-    };
+  async create(createUserDto: CreateUserDto): Promise<UserResponse> {
+    const created = await this.prisma.users.create({ data: createUserDto as Prisma.usersUncheckedCreateInput });
+    return mapRow(created);
   }
 
-  async findAll(): Promise<CreateUserDto[]> {
-    return this.prisma.users.findMany().then((users) => users.map((user) => ({
-      ...user,
-      salary: user.salary?.toNumber() ?? null,
-      weight: user.weight?.toNumber() ?? null,
-      height: user.height?.toNumber() ?? null,
-    })));
+  async findAll(): Promise<UserResponse[]> {
+    const users = await this.prisma.users.findMany();
+    return users.map(mapRow);
   }
 
-  async findById(id: number): Promise<CreateUserDto | null> {
+  async findById(id: number): Promise<UserResponse | null> {
     const user = await this.prisma.users.findUnique({ where: { id } });
-    if (!user) {
-      return null;
-    }
-    return {
-      ...user,
-      salary: user?.salary?.toNumber() ?? null,
-      weight: user?.weight?.toNumber() ?? null,
-      height: user?.height?.toNumber() ?? null,
-    }
+    if (!user) return null;
+    return mapRow(user);
   }
 
-  async update(id: number, updateUserDto: UpdateUserDto): Promise<CreateUserDto> {
+  async update(id: number, updateUserDto: UpdateUserDto): Promise<UserResponse> {
     const updated = await this.prisma.users.update({
       where: { id },
-      data: updateUserDto,
+      data: updateUserDto as Prisma.usersUncheckedUpdateInput,
     });
-    return {
-      ...updated,
-      salary: updated.salary?.toNumber() ?? null,
-      weight: updated.weight?.toNumber() ?? null,
-      height: updated.height?.toNumber() ?? null,
-    } as CreateUserDto;
+    return mapRow(updated);
   }
 
   async delete(id: number): Promise<void> {
     await this.prisma.users.delete({ where: { id } });
   }
 }
-

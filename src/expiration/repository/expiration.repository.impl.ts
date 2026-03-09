@@ -15,62 +15,58 @@ export class ExpirationRepository implements IExpirationRepository {
   async create(createExpirationDto: CreateExpirationDto): Promise<ExpirationResponse> {
     const created = await this.expirations.create({
       data: {
-        memberId: createExpirationDto.socio.id,
-        expirationDate: createExpirationDto.exp_date,
-        membershipId: createExpirationDto.membership.id,
+        memberId: createExpirationDto.memberId,
+        expirationDate: createExpirationDto.expirationDate,
+        membershipId: createExpirationDto.membershipId,
       },
-      include: { member: true, membership: true },
     });
+    const id = Number(created.id);
     return {
-      id: created.id,
-      socio: created.member as unknown as ExpirationResponse['socio'],
-      exp_date: created.expirationDate,
-      membership: created.membership as unknown as ExpirationResponse['membership'],
+      id,
+      memberId: created.memberId,
+      expirationDate: created.expirationDate,
+      membershipId: created.membershipId,
     };
   }
 
   async findAll(): Promise<ExpirationResponse[]> {
-    const list = await this.expirations.findMany({
-      include: { member: true, membership: true },
-    });
+    const list = await this.expirations.findMany();
     return list.map((row) => ({
       id: row.id,
-      socio: row.member as unknown as ExpirationResponse['socio'],
-      exp_date: row.expirationDate,
-      membership: row.membership as unknown as ExpirationResponse['membership'],
+      memberId: row.memberId,
+      expirationDate: row.expirationDate,
+      membershipId: row.membershipId,
     }));
   }
 
   async findById(id: number): Promise<ExpirationResponse | null> {
     const row = await this.expirations.findUnique({
       where: { id },
-      include: { member: true, membership: true },
     });
     if (!row) return null;
     return {
       id: row.id,
-      socio: row.member as unknown as ExpirationResponse['socio'],
-      exp_date: row.expirationDate,
-      membership: row.membership as unknown as ExpirationResponse['membership'],
+      memberId: row.memberId,
+      expirationDate: row.expirationDate,
+      membershipId: row.membershipId,
     };
   }
 
   async update(id: number, updateExpirationDto: UpdateExpirationDto): Promise<ExpirationResponse> {
     const data: { memberId?: number; expirationDate?: Date; membershipId?: number } = {};
-    if (updateExpirationDto.socio?.id != null) data.memberId = updateExpirationDto.socio.id;
-    if (updateExpirationDto.exp_date != null) data.expirationDate = updateExpirationDto.exp_date;
-    if (updateExpirationDto.membership?.id != null) data.membershipId = updateExpirationDto.membership.id;
+    if (updateExpirationDto.memberId !== undefined) data.memberId = updateExpirationDto.memberId;
+    if (updateExpirationDto.expirationDate !== undefined) data.expirationDate = updateExpirationDto.expirationDate;
+    if (updateExpirationDto.membershipId !== undefined) data.membershipId = updateExpirationDto.membershipId;
 
     const updated = await this.expirations.update({
       where: { id },
       data,
-      include: { member: true, membership: true },
     });
     return {
       id: updated.id,
-      socio: updated.member as unknown as ExpirationResponse['socio'],
-      exp_date: updated.expirationDate,
-      membership: updated.membership as unknown as ExpirationResponse['membership'],
+      memberId: updated.memberId,
+      expirationDate: updated.expirationDate,
+      membershipId: updated.membershipId,
     };
   }
 

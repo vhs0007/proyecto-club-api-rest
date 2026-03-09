@@ -1,7 +1,12 @@
 import { CreateExpirationDto } from '../dto/create-expiration.dto';
 import { UpdateExpirationDto } from '../dto/update-expiration.dto';
 
-export type ExpirationResponse = CreateExpirationDto & { id: number };
+export type ExpirationResponse = {
+  id: number;
+  memberId: number;
+  expirationDate: Date;
+  membershipId: number;
+};
 
 export interface IExpirationRepository {
   create(createExpirationDto: CreateExpirationDto): Promise<ExpirationResponse>;
