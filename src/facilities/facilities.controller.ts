@@ -3,13 +3,10 @@ import { ApiTags, ApiOperation, ApiBearerAuth, ApiOkResponse, ApiCreatedResponse
 import { FacilitiesService } from './facilities.service';
 import { CreateFacilityDto } from './dto/create-facility.dto';
 import { UpdateFacilityDto } from './dto/update-facility.dto';
-// import { AuthGuard } from '../users/guards/jwt-auth/jwt-auth.guard';
 import { Facility } from './entities/facility.entity';
 
 @ApiTags('Facilities')
-@ApiBearerAuth()
 @Controller('facilities')
-// @UseGuards(AuthGuard)
 export class FacilitiesController {
   constructor(private readonly facilitiesService: FacilitiesService) {}
 
