@@ -2,45 +2,49 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateExpirationDto } from './dto/create-expiration.dto';
 import { UpdateExpirationDto } from './dto/update-expiration.dto';
 import { Expiration } from './entities/expiration.entity';
+import { ExpirationRepository } from './repository/expiration.repository.impl';
+import type { ExpirationResponse } from './repository/expiration.repository';
 
 @Injectable()
 export class ExpirationService {
-  expirations: CreateExpirationDto[] = [];
+  constructor(private readonly expirationRepository: ExpirationRepository) {}
 
-  create(createExpirationDto: CreateExpirationDto) {
-    const id =
-      Math.max(0, ...this.expirations.map((e) => e.id)) + 1;
-    const expiration : CreateExpirationDto = {
-      ...createExpirationDto,
-      id: id,
-    };
-    this.expirations.push(expiration);
-    return expiration;
+  private mapResponseToExpiration(res: ExpirationResponse): Expiration {
+    return new Expiration({
+      id: res.id,
+      expirationDate: res.expirationDate,
+      member: { id: res.memberId } as Expiration['member'],
+      membership: { id: res.membershipId } as Expiration['membership'],
+    });
   }
 
-  findAll() {
-    return this.expirations;
+  async create(createExpirationDto: CreateExpirationDto): Promise<Expiration> {
+    const res = await this.expirationRepository.create(createExpirationDto);
+    return this.mapResponseToExpiration(res);
   }
 
-  findOne(id: number) {
-    return this.expirations.find((e) => e.id === id);
+  async findAll(): Promise<Expiration[]> {
+    const list = await this.expirationRepository.findAll();
+    return list.map((r) => this.mapResponseToExpiration(r));
   }
 
-  update(id: number, updateExpirationDto: UpdateExpirationDto) {
-    const expiration = this.expirations.find((e) => e.id === id);
-    if (!expiration) {
-      throw new NotFoundException('Expiration not found');
-    }
-    Object.assign(expiration, updateExpirationDto);
-    return expiration;
+  async findOne(id: number): Promise<Expiration> {
+    const row = await this.expirationRepository.findById(id);
+    if (!row) throw new NotFoundException('Expiration not found');
+    return this.mapResponseToExpiration(row);
   }
 
-  remove(id: number) {
-    const expiration = this.expirations.find((e) => e.id === id);
-    if (!expiration) {
-      throw new NotFoundException('Expiration not found');
-    }
-    this.expirations = this.expirations.filter((e) => e.id !== id);
-    return expiration;
+  async update(id: number, updateExpirationDto: UpdateExpirationDto): Promise<Expiration> {
+    const row = await this.expirationRepository.findById(id);
+    if (!row) throw new NotFoundException('Expiration not found');
+    const updated = await this.expirationRepository.update(id, updateExpirationDto);
+    return this.mapResponseToExpiration(updated);
+  }
+
+  async remove(id: number): Promise<Expiration> {
+    const row = await this.expirationRepository.findById(id);
+    if (!row) throw new NotFoundException('Expiration not found');
+    await this.expirationRepository.delete(id);
+    return this.mapResponseToExpiration(row);
   }
 }

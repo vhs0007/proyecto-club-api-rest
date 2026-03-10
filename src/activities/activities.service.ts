@@ -1,88 +1,56 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateActivityDto } from './dto/create-activities.dto';
 import { UpdateActivityDto } from './dto/update-activities.dto';
+import { Activity } from './entities/activity.entity';
+import { Facility } from '../facilities/entities/facility.entity';
+import { ActivitiesRepository } from './repository/activities.repository.impl';
+import type { ActivityResponse } from './repository/activitities.repository';
 
 @Injectable()
 export class ActivitiesService {
-  activities: CreateActivityDto[] = [
-    {
-      id: 1,
-      name: 'Soccer game',
-      type: 'soccer,game,sport',
-      startAt: new Date('2026-03-03T10:00:00'),
-      endAt: new Date('2026-03-03T12:00:00'),
-      userId: 1,
-      cost: 100,
-      facilityId: 1,
-    },
-    {
-      id: 2,
-      name: 'Basketball game',
-      type: 'basketball,game,sport',
-      startAt: new Date('2026-03-04T14:00:00'),
-      endAt: new Date('2026-03-04T16:00:00'),
-      userId: 2,
-      cost: 100,
-      facilityId: 2,
-    },
-  ];
+  constructor(private readonly activitiesRepository: ActivitiesRepository) {}
 
-  private findById(id: number): CreateActivityDto | null {
-    const activity = this.activities.find((a) => a.id === id);
-    if (activity) return activity;
-    return null;
+  private mapResponseToActivity(res: ActivityResponse): Activity {
+    return new Activity({
+      id: res.id,
+      name: res.name,
+      type: res.type,
+      startAt: res.startAt,
+      endAt: res.endAt,
+      userId: res.userId,
+      cost: res.cost,
+      facility: new Facility({ id: res.facilityId }),
+      isActive: res.isActive,
+    });
   }
 
-  create(createActivityDto: CreateActivityDto): CreateActivityDto {
-    const now = new Date();
-    const id = Math.max(0, ...this.activities.map((a) => a.id ?? 0)) + 1;
-    const activity = {
-      ...createActivityDto,
-      id,
-      facilityId: createActivityDto.facilityId,
-      createdAt: createActivityDto.createdAt ?? now,
-    };
-    this.activities.push(activity);
-    return activity;
+  async create(createActivityDto: CreateActivityDto): Promise<Activity> {
+    const res = await this.activitiesRepository.create(createActivityDto);
+    return this.mapResponseToActivity(res);
   }
 
-  findAll() {
-    return this.activities;
+  async findAll(): Promise<Activity[]> {
+    const list = await this.activitiesRepository.findAll();
+    return list.map((r) => this.mapResponseToActivity(r));
   }
 
-  findOne(id: number) {
-    const entity = this.findById(id);
-    if (!entity) {
-      throw new NotFoundException('Activity not found');
-    }
-    return entity;
+  async findOne(id: number): Promise<Activity> {
+    const row = await this.activitiesRepository.findById(id);
+    if (!row) throw new NotFoundException('Activity not found');
+    return this.mapResponseToActivity(row);
   }
 
-  update(id: number, updateActivityDto: UpdateActivityDto): CreateActivityDto {
-    const entity = this.findById(id);
-    if (!entity) {
-      throw new NotFoundException('Activity not found');
-    }
-    
-    entity.name = updateActivityDto.name ?? entity.name;
-    entity.type = updateActivityDto.type ?? entity.type;
-    entity.startAt = updateActivityDto.startAt ?? entity.startAt;
-    entity.endAt = updateActivityDto.endAt ?? entity.endAt;
-    entity.userId = updateActivityDto.userId ?? entity.userId;
-    entity.cost = updateActivityDto.cost ?? entity.cost;
-    entity.facilityId = updateActivityDto.facilityId ?? entity.facilityId;
-    entity.isActive = updateActivityDto.isActive ?? entity.isActive;
-    return entity;
+  async update(id: number, updateActivityDto: UpdateActivityDto): Promise<Activity> {
+    const row = await this.activitiesRepository.findById(id);
+    if (!row) throw new NotFoundException('Activity not found');
+    const updated = await this.activitiesRepository.update(id, updateActivityDto);
+    return this.mapResponseToActivity(updated);
   }
 
-  remove(id: number) {
-    const entity = this.findById(id);
-    if (!entity) {
-      throw new NotFoundException('Activity not found');
-    }
-
-    this.activities = this.activities.filter((a) => a.id !== id);
-    return entity;
+  async remove(id: number): Promise<Activity> {
+    const row = await this.activitiesRepository.findById(id);
+    if (!row) throw new NotFoundException('Activity not found');
+    await this.activitiesRepository.delete(id);
+    return this.mapResponseToActivity(row);
   }
 }
-
