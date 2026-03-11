@@ -14,7 +14,6 @@ function mapRow(row: {
   createdAt: Date;
   deletedAt: Date | null;
   isActive: boolean;
-  membershipId: number | null;
   roleId: number;
   salary?: { toNumber(): number } | null;
   hoursToWorkPerDay: number | null;
@@ -40,7 +39,6 @@ function mapRow(row: {
     createdAt: row.createdAt,
     deletedAt: row.deletedAt,
     isActive: row.isActive,
-    membershipId: row.membershipId,
     roleId: row.roleId,
     salary: row.salary?.toNumber() ?? null,
     hoursToWorkPerDay: row.hoursToWorkPerDay,

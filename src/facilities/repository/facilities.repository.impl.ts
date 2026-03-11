@@ -9,7 +9,7 @@ export class FacilitiesRepository implements IFacilitiesRepository {
   constructor(private readonly prisma: PrismaService) {}
 
   async create(createFacilityDto: CreateFacilityDto): Promise<FacilityResponse> {
-    const { membershipIds, ...data } = createFacilityDto;
+    const { membershipTypeIds, ...data } = createFacilityDto;
     const created = await this.prisma.facilities.create({
       data: {
         ...data,
@@ -17,15 +17,15 @@ export class FacilitiesRepository implements IFacilitiesRepository {
         isActive: data.isActive ?? true,
       },
     });
-    if (membershipIds.length > 0) {
+    if (membershipTypeIds.length > 0) {
       await this.prisma.facilities_membership.createMany({
-        data: membershipIds.map((membershipId) => ({
+        data: membershipTypeIds.map((membershipTypeId) => ({
           facilityId: created.id,
-          membershipId,
+          membershipTypeId,
         })),
       });
     }
-    return { ...created, membershipIds };
+    return { ...created, membershipTypeIds };
   }
 
   async findAll(): Promise<FacilityResponse[]> {
@@ -37,15 +37,15 @@ export class FacilitiesRepository implements IFacilitiesRepository {
         : await this.prisma.facilities_membership.findMany({
             where: { facilityId: { in: ids } },
           });
-    const membershipIdsByFacilityId = new Map<number, number[]>();
+    const membershipTypeIdsByFacilityId = new Map<number, number[]>();
     for (const link of links) {
-      const arr = membershipIdsByFacilityId.get(link.facilityId) ?? [];
-      arr.push(link.membershipId);
-      membershipIdsByFacilityId.set(link.facilityId, arr);
+      const arr = membershipTypeIdsByFacilityId.get(link.facilityId) ?? [];
+      arr.push(link.membershipTypeId);
+      membershipTypeIdsByFacilityId.set(link.facilityId, arr);
     }
     return list.map((row) => ({
       ...row,
-      membershipIds: membershipIdsByFacilityId.get(row.id) ?? [],
+      membershipTypeIds: membershipTypeIdsByFacilityId.get(row.id) ?? [],
     }));
   }
 
@@ -59,20 +59,20 @@ export class FacilitiesRepository implements IFacilitiesRepository {
     });
     return {
       ...facility,
-      membershipIds: links.map((l) => l.membershipId),
+      membershipTypeIds: links.map((l) => l.membershipTypeId),
     };
   }
 
   async update(id: number, updateFacilityDto: UpdateFacilityDto): Promise<FacilityResponse> {
-    const { membershipIds, ...rest } = updateFacilityDto;
+    const { membershipTypeIds, ...rest } = updateFacilityDto;
     const data: Record<string, unknown> = { ...rest };
-    if (membershipIds !== undefined) {
+    if (membershipTypeIds !== undefined) {
       await this.prisma.facilities_membership.deleteMany({
         where: { facilityId: id },
       });
-      if (membershipIds.length > 0) {
+      if (membershipTypeIds.length > 0) {
         await this.prisma.facilities_membership.createMany({
-          data: membershipIds.map((membershipId) => ({ facilityId: id, membershipId })),
+          data: membershipTypeIds.map((membershipTypeId) => ({ facilityId: id, membershipTypeId })),
         });
       }
     }
@@ -85,7 +85,7 @@ export class FacilitiesRepository implements IFacilitiesRepository {
     });
     return {
       ...updated,
-      membershipIds: links.map((l) => l.membershipId),
+      membershipTypeIds: links.map((l) => l.membershipTypeId),
     };
   }
 

@@ -1,11 +1,14 @@
-import { MembershipType } from "../entities/membership.entity";
-import {ApiProperty} from '@nestjs/swagger';
+import { ApiProperty } from '@nestjs/swagger';
+import { IsNumber, Min } from 'class-validator';
 
 export class CreateMembershipDto {
-    @ApiProperty({ example: '1', description: 'Id tipo membrecia' })
-    type: number;
-    @ApiProperty({ example: '200', description: 'Precio' })
-    price: number;
-    @ApiProperty({ example: 'Gym', description: 'Sala: ' })
-    facilitiesIncluded?: string[];
+  @ApiProperty({ example: 1, description: 'Id tipo membresía' })
+  @IsNumber({}, { message: 'type debe ser un número' })
+  @Min(1, { message: 'type debe ser al menos 1' })
+  type: number;
+
+  @ApiProperty({ example: 1, description: 'Id del usuario' })
+  @IsNumber({}, { message: 'userId debe ser un número' })
+  @Min(1, { message: 'userId debe ser al menos 1' })
+  userId: number;
 }

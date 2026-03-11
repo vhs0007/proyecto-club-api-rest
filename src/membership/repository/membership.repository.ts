@@ -3,8 +3,7 @@ import { UpdateMembershipDto } from '../dto/update-membership.dto';
 
 export type MembershipResponse = {
   id: number;
-  type: CreateMembershipDto['type'];
-  price: number;
+  type: number;
 };
 
 export interface IMembershipRepository {

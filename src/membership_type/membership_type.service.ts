@@ -11,6 +11,7 @@ export class MembershipTypeService {
     const m = new MembershipType();
     m.id = res.id;
     m.name = res.name;
+    m.price = res.price;
     return m;
   }
 

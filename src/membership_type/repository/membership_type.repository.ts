@@ -1,6 +1,7 @@
 export interface MembershipTypeResponse {
   id: number;
   name: string;
+  price: number;
 }
 
 export interface IMembershipTypeRepository {
