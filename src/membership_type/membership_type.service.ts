@@ -8,10 +8,7 @@ export class MembershipTypeService {
   constructor(private readonly membershipTypeRepository: MembershipTypeRepository) {}
 
   private mapResponseToMembershipType(res: MembershipTypeResponse): MembershipType {
-    const m = new MembershipType();
-    m.id = res.id;
-    m.name = res.name;
-    m.price = res.price;
+    const m = new MembershipType({id: res.id, name: res.name, price: res.price});
     return m;
   }
 
