@@ -5,5 +5,5 @@ export interface FacilityResponseDto {
   responsibleWorker: number;
   assistantWorker: number | null;
   isActive: boolean;
-  membershipIds: number[];
+  membershipTypeIds: number[];
 }

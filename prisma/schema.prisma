@@ -13,49 +13,39 @@ datasource db {
 }
 
 model Membership {
-  /*
-      id: number;
-    type: MembershipType;
-    price: number;
-    */
-
-  id Int @id @default(autoincrement())
-  type MembershipType @relation(fields: [typeId], references: [id])
-  typeId Int @unique
-  price Decimal @db.Decimal(10, 2)
-  users users[]
+  id       Int            @id @default(autoincrement())
+  type     MembershipType @relation(fields: [typeId], references: [id])
+  typeId   Int
+  userId   Int
+  user     users          @relation(fields: [userId], references: [id])
   expirations expirations[]
 }
 
 model MembershipType {
-  id         Int         @id @default(autoincrement())
-  name       String
-  membership Membership?
+  id                    Int                    @id @default(autoincrement())
+  name                  String
+  price                 Decimal                @db.Decimal(10, 2) @default(0)
+  memberships           Membership[]
+  facilities_membership facilities_membership[]
 }
 
 model facilities_membership {
-  id Int @id @default(autoincrement())
-  membershipId Int
-  facilityId Int
+  id                Int           @id @default(autoincrement())
+  facilityId        Int
+  membershipTypeId  Int
+  facility          facilities   @relation(fields: [facilityId], references: [id])
+  type              MembershipType @relation(fields: [membershipTypeId], references: [id])
 }
 
 model facilities {
-  /*
-      id: number;
-    type: string;
-    availableHours: string;
-    capacity: number;
-    responsibleWorker: number;
-    assistantWorker: number | null;
-    isActive: boolean;
-  */
-  id Int @id @default(autoincrement())
-  type String
-  capacity Int
-  responsibleWorker Int
-  assistantWorker Int?
-  isActive Boolean
-  activities activity[]
+  id                   Int                    @id @default(autoincrement())
+  type                 String
+  capacity              Int
+  responsibleWorker     Int
+  assistantWorker       Int?
+  isActive              Boolean
+  activities            activity[]
+  facilities_membership facilities_membership[]
 }
 
 model activity {
@@ -118,10 +108,9 @@ model users {
   createdAt DateTime @default(now())
   deletedAt DateTime?
   isActive Boolean
-  membershipId Int?
-  membership Membership? @relation(fields: [membershipId], references: [id])
-  role user_role @relation(fields: [roleId], references: [id])
   roleId Int
+  role user_role @relation(fields: [roleId], references: [id])
+  memberships Membership[]
   salary Decimal? @db.Decimal(10, 2)
   hoursToWorkPerDay Int?
   startWorkAt DateTime?
@@ -136,7 +125,6 @@ model users {
   allergies String?
   medications String?
   medicalConditions String?
-  expirations expirations[]
 }
 
 model user_type{
@@ -153,8 +141,6 @@ model user_role{
 
 model expirations {
   id             Int        @id @default(autoincrement())
-  memberId       Int
-  member         users      @relation(fields: [memberId], references: [id])
   expirationDate DateTime
   membershipId   Int
   membership     Membership @relation(fields: [membershipId], references: [id])

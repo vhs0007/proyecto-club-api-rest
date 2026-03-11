@@ -1,12 +1,13 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { IsNumber, IsDateString, Min } from 'class-validator';
 
 export class CreateExpirationDto {
-  @ApiProperty({ example: 1, description: 'Id del socio (member)' })
-  memberId: number;
-
   @ApiProperty({ example: '2026-12-31T23:59:59.000Z', description: 'Fecha de expiración' })
+  @IsDateString({}, { message: 'expirationDate debe ser una fecha válida en formato ISO' })
   expirationDate: Date;
 
   @ApiProperty({ example: 1, description: 'Id de la membresía' })
+  @IsNumber({}, { message: 'membershipId debe ser un número' })
+  @Min(1, { message: 'membershipId debe ser al menos 1' })
   membershipId: number;
 }

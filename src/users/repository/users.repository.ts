@@ -10,7 +10,6 @@ export interface UserResponse {
   createdAt: Date;
   deletedAt: Date | null;
   isActive: boolean;
-  membershipId: number | null;
   roleId: number;
   salary: number | null;
   hoursToWorkPerDay: number | null;

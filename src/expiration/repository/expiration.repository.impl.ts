@@ -15,25 +15,26 @@ export class ExpirationRepository implements IExpirationRepository {
   async create(createExpirationDto: CreateExpirationDto): Promise<ExpirationResponse> {
     const created = await this.expirations.create({
       data: {
-        memberId: createExpirationDto.memberId,
         expirationDate: createExpirationDto.expirationDate,
         membershipId: createExpirationDto.membershipId,
       },
+      include: { membership: true },
     });
-    const id = Number(created.id);
     return {
-      id,
-      memberId: created.memberId,
+      id: Number(created.id),
+      memberId: created.membership.userId,
       expirationDate: created.expirationDate,
       membershipId: created.membershipId,
     };
   }
 
   async findAll(): Promise<ExpirationResponse[]> {
-    const list = await this.expirations.findMany();
+    const list = await this.expirations.findMany({
+      include: { membership: true },
+    });
     return list.map((row) => ({
       id: row.id,
-      memberId: row.memberId,
+      memberId: row.membership.userId,
       expirationDate: row.expirationDate,
       membershipId: row.membershipId,
     }));
@@ -42,29 +43,30 @@ export class ExpirationRepository implements IExpirationRepository {
   async findById(id: number): Promise<ExpirationResponse | null> {
     const row = await this.expirations.findUnique({
       where: { id },
+      include: { membership: true },
     });
     if (!row) return null;
     return {
       id: row.id,
-      memberId: row.memberId,
+      memberId: row.membership.userId,
       expirationDate: row.expirationDate,
       membershipId: row.membershipId,
     };
   }
 
   async update(id: number, updateExpirationDto: UpdateExpirationDto): Promise<ExpirationResponse> {
-    const data: { memberId?: number; expirationDate?: Date; membershipId?: number } = {};
-    if (updateExpirationDto.memberId !== undefined) data.memberId = updateExpirationDto.memberId;
+    const data: { expirationDate?: Date; membershipId?: number } = {};
     if (updateExpirationDto.expirationDate !== undefined) data.expirationDate = updateExpirationDto.expirationDate;
     if (updateExpirationDto.membershipId !== undefined) data.membershipId = updateExpirationDto.membershipId;
 
     const updated = await this.expirations.update({
       where: { id },
       data,
+      include: { membership: true },
     });
     return {
       id: updated.id,
-      memberId: updated.memberId,
+      memberId: updated.membership.userId,
       expirationDate: updated.expirationDate,
       membershipId: updated.membershipId,
     };
