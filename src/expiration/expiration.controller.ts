@@ -6,16 +6,19 @@ import {
   Patch,
   Param,
   Delete,
+  UseGuards,
 } from '@nestjs/common';
 import { ExpirationService } from './expiration.service';
 import { CreateExpirationDto } from './dto/create-expiration.dto';
 import { UpdateExpirationDto } from './dto/update-expiration.dto';
 import { Expiration } from './entities/expiration.entity';
 import { ApiBearerAuth, ApiOperation, ApiTags, ApiBody } from '@nestjs/swagger';
+import { AuthGuard } from '../auth/guards/jwt-auth.guard';
 
 @ApiTags('Expiración')
 @ApiBearerAuth()
 @Controller('expiration')
+@UseGuards(AuthGuard)
 export class ExpirationController {
   constructor(private readonly expirationService: ExpirationService) {}
 

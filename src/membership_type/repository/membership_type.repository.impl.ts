@@ -1,6 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
-import type { IMembershipTypeRepository, MembershipTypeResponse } from './membership_type.repository';
+import type {
+  IMembershipTypeRepository,
+  MembershipTypeResponse,
+  UpdateMembershipTypeData,
+} from './membership_type.repository';
 
 @Injectable()
 export class MembershipTypeRepository implements IMembershipTypeRepository {
@@ -32,8 +36,24 @@ export class MembershipTypeRepository implements IMembershipTypeRepository {
     };
   }
 
-  // async update(id: number, updateMembershipTypeDto: MembershipType): Promise<MembershipType> {
-  //   return this.prisma.membershipType.update({ where: { id }, data: updateMembershipTypeDto });
+  // async create(data: { name: string; price: number }): Promise<MembershipTypeResponse> {
+  //   const row = await this.prisma.membershipType.create({ data: { name: data.name, price: data.price } });
+  //   return { id: row.id, name: row.name, price: this.toNumber(row.price) };
+  // }
+
+  // async update(id: number, data: UpdateMembershipTypeData): Promise<MembershipTypeResponse> {
+  //   const updateData: { name?: string; price?: number } = {};
+  //   if (data.name !== undefined) updateData.name = data.name;
+  //   if (data.price !== undefined) updateData.price = data.price;
+  //   const row = await this.prisma.membershipType.update({
+  //     where: { id },
+  //     data: updateData,
+  //   });
+  //   return {
+  //     id: row.id,
+  //     name: row.name,
+  //     price: this.toNumber(row.price),
+  //   };
   // }
 
   // async delete(id: number): Promise<void> {

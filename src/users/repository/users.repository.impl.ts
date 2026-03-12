@@ -77,6 +77,22 @@ export class UsersRepository implements IUsersRepository {
     return mapRow(user);
   }
 
+  async findByEmail(email: string): Promise<UserResponse | null> {
+    const user = await this.prisma.users.findFirst({ where: { email } });
+    if (!user) return null;
+    return mapRow(user);
+  }
+
+  async existsTypeId(typeId: number): Promise<boolean> {
+    const row = await this.prisma.user_type.findUnique({ where: { id: typeId } });
+    return row != null;
+  }
+
+  async existsRoleId(roleId: number): Promise<boolean> {
+    const row = await this.prisma.user_role.findUnique({ where: { id: roleId } });
+    return row != null;
+  }
+
   async update(id: number, updateUserDto: UpdateUserDto): Promise<UserResponse> {
     const updated = await this.prisma.users.update({
       where: { id },

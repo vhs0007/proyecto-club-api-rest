@@ -4,9 +4,15 @@ export interface MembershipTypeResponse {
   price: number;
 }
 
+export interface UpdateMembershipTypeData {
+  name?: string;
+  price?: number;
+}
+
 export interface IMembershipTypeRepository {
   findAll(): Promise<MembershipTypeResponse[]>;
   findById(id: number): Promise<MembershipTypeResponse | null>;
-  // update(id: number, updateMembershipTypeDto: MembershipType): Promise<MembershipType>;
+  // create(data: { name: string; price: number }): Promise<MembershipTypeResponse>;
+  // update(id: number, data: UpdateMembershipTypeData): Promise<MembershipTypeResponse>;
   // delete(id: number): Promise<void>;
 }

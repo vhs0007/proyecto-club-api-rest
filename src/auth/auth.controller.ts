@@ -12,7 +12,7 @@ export class AuthController {
   @Post('login')
   @ApiOperation({ summary: 'Iniciar sesión' })
   @ApiBody({ type: LoginRequestDto })
-  login(@Body() loginRequest: LoginRequestDto): LoginResponse {
+  login(@Body() loginRequest: LoginRequestDto): Promise<LoginResponse> {
     return this.authService.authenticateUser(loginRequest);
   }
 }

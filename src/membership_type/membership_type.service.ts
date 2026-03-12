@@ -8,10 +8,7 @@ export class MembershipTypeService {
   constructor(private readonly membershipTypeRepository: MembershipTypeRepository) {}
 
   private mapResponseToMembershipType(res: MembershipTypeResponse): MembershipType {
-    const m = new MembershipType();
-    m.id = res.id;
-    m.name = res.name;
-    m.price = res.price;
+    const m = new MembershipType({id: res.id, name: res.name, price: res.price});
     return m;
   }
 
@@ -26,11 +23,17 @@ export class MembershipTypeService {
     return this.mapResponseToMembershipType(row);
   }
 
-  // update(id: number, updateMembershipTypeDto: MembershipType) {
-  //   return this.membershipTypeRepository.update(id, updateMembershipTypeDto);
+  // async create(dto: { name: string; price: number }): Promise<MembershipType> {
+  //   const res = await this.membershipTypeRepository.create(dto);
+  //   return this.mapResponseToMembershipType(res);
   // }
 
-  // remove(id: number) {
-  //   return this.membershipTypeRepository.delete(id);
+  // async update(id: number, updateMembershipTypeDto: UpdateMembershipTypeDto): Promise<MembershipType> {
+  //   const res = await this.membershipTypeRepository.update(id, updateMembershipTypeDto);
+  //   return this.mapResponseToMembershipType(res);
+  // }
+
+  // async remove(id: number): Promise<void> {
+  //   await this.membershipTypeRepository.delete(id);
   // }
 }

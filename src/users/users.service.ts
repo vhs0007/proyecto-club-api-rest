@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { Athlete, Gender } from './entities/athlete.entity';
@@ -65,6 +65,27 @@ export class UsersService {
   constructor(private readonly usersRepository: UsersRepository) {}
 
   async create(createUserDto: CreateUserDto): Promise<UserEntity> {
+    if (createUserDto.email != null && createUserDto.email.trim() !== '') {
+      const existingByEmail = await this.usersRepository.findByEmail(createUserDto.email);
+      if (existingByEmail) throw new ConflictException('Email already in use');
+    }
+    const typeExists = await this.usersRepository.existsTypeId(createUserDto.typeId);
+    if (!typeExists) throw new BadRequestException('Invalid typeId');
+    const roleExists = await this.usersRepository.existsRoleId(createUserDto.roleId);
+    if (!roleExists) throw new BadRequestException('Invalid roleId');
+    if (createUserDto.typeId === UserType.ATHLETE) {
+      if (createUserDto.gender != null && createUserDto.gender.trim() !== '') {
+        const g = createUserDto.gender.toLowerCase();
+        if (g !== 'male' && g !== 'female') throw new BadRequestException('gender must be male or female');
+      }
+      if (createUserDto.birthDate != null) {
+        if (new Date(createUserDto.birthDate) > new Date()) throw new BadRequestException('birthDate cannot be in the future');
+      }
+    }
+    if (createUserDto.typeId === UserType.WORKER && createUserDto.startWorkAt != null && createUserDto.endWorkAt != null) {
+      if (new Date(createUserDto.startWorkAt) >= new Date(createUserDto.endWorkAt))
+        throw new BadRequestException('startWorkAt must be before endWorkAt');
+    }
     const res = await this.usersRepository.create(createUserDto);
     return mapResponseToUser(res);
   }
@@ -83,6 +104,10 @@ export class UsersService {
   async update(id: number, updateUserDto: UpdateUserDto): Promise<UserEntity> {
     const existing = await this.usersRepository.findById(id);
     if (!existing) throw new NotFoundException('User not found');
+    if (updateUserDto.email != null && updateUserDto.email.trim() !== '') {
+      const byEmail = await this.usersRepository.findByEmail(updateUserDto.email);
+      if (byEmail != null && byEmail.id !== id) throw new ConflictException('Email already in use');
+    }
     const updated = await this.usersRepository.update(id, updateUserDto);
     return mapResponseToUser(updated);
   }
