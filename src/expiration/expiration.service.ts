@@ -1,13 +1,17 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { CreateExpirationDto } from './dto/create-expiration.dto';
 import { UpdateExpirationDto } from './dto/update-expiration.dto';
 import { Expiration } from './entities/expiration.entity';
 import { ExpirationRepository } from './repository/expiration.repository.impl';
 import type { ExpirationResponse } from './repository/expiration.repository';
+import { PrismaService } from '../prisma/prisma.service';
 
 @Injectable()
 export class ExpirationService {
-  constructor(private readonly expirationRepository: ExpirationRepository) {}
+  constructor(
+    private readonly expirationRepository: ExpirationRepository,
+    private readonly prisma: PrismaService,
+  ) {}
 
   private mapResponseToExpiration(res: ExpirationResponse): Expiration {
     return new Expiration({
@@ -19,6 +23,8 @@ export class ExpirationService {
   }
 
   async create(createExpirationDto: CreateExpirationDto): Promise<Expiration> {
+    const membership = await this.prisma.membership.findUnique({ where: { id: createExpirationDto.membershipId } });
+    if (!membership) throw new BadRequestException('Membership not found');
     const res = await this.expirationRepository.create(createExpirationDto);
     return this.mapResponseToExpiration(res);
   }
@@ -37,6 +43,10 @@ export class ExpirationService {
   async update(id: number, updateExpirationDto: UpdateExpirationDto): Promise<Expiration> {
     const row = await this.expirationRepository.findById(id);
     if (!row) throw new NotFoundException('Expiration not found');
+    if (updateExpirationDto.membershipId !== undefined) {
+      const membership = await this.prisma.membership.findUnique({ where: { id: updateExpirationDto.membershipId } });
+      if (!membership) throw new BadRequestException('Membership not found');
+    }
     const updated = await this.expirationRepository.update(id, updateExpirationDto);
     return this.mapResponseToExpiration(updated);
   }

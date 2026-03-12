@@ -23,11 +23,17 @@ export class MembershipTypeService {
     return this.mapResponseToMembershipType(row);
   }
 
-  // update(id: number, updateMembershipTypeDto: MembershipType) {
-  //   return this.membershipTypeRepository.update(id, updateMembershipTypeDto);
+  // async create(dto: { name: string; price: number }): Promise<MembershipType> {
+  //   const res = await this.membershipTypeRepository.create(dto);
+  //   return this.mapResponseToMembershipType(res);
   // }
 
-  // remove(id: number) {
-  //   return this.membershipTypeRepository.delete(id);
+  // async update(id: number, updateMembershipTypeDto: UpdateMembershipTypeDto): Promise<MembershipType> {
+  //   const res = await this.membershipTypeRepository.update(id, updateMembershipTypeDto);
+  //   return this.mapResponseToMembershipType(res);
+  // }
+
+  // async remove(id: number): Promise<void> {
+  //   await this.membershipTypeRepository.delete(id);
   // }
 }

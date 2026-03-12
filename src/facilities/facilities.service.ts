@@ -1,15 +1,19 @@
-import {
-  Injectable, NotFoundException,
-} from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { CreateFacilityDto } from './dto/create-facility.dto';
 import { UpdateFacilityDto } from './dto/update-facility.dto';
 import { Facility } from './entities/facility.entity';
 import { FacilitiesRepository } from './repository/facilities.repository.impl';
 import type { FacilityResponse } from './repository/facilities.repository';
+import { PrismaService } from '../prisma/prisma.service';
+
+const WORKER_TYPE_ID = 1;
 
 @Injectable()
 export class FacilitiesService {
-  constructor(private readonly facilitiesRepository: FacilitiesRepository) {}
+  constructor(
+    private readonly facilitiesRepository: FacilitiesRepository,
+    private readonly prisma: PrismaService,
+  ) {}
 
   private mapResponseToFacility(res: FacilityResponse): Facility {
     return new Facility({
@@ -23,7 +27,17 @@ export class FacilitiesService {
     });
   }
 
+  private async ensureWorker(userId: number, field: string): Promise<void> {
+    const user = await this.prisma.users.findUnique({ where: { id: userId } });
+    if (!user) throw new BadRequestException(`${field} not found`);
+    if (user.typeId !== WORKER_TYPE_ID) throw new BadRequestException(`${field} must be a Worker user`);
+  }
+
   async create(createFacilityDto: CreateFacilityDto): Promise<Facility> {
+    await this.ensureWorker(createFacilityDto.responsibleWorker, 'Responsible worker');
+    if (createFacilityDto.assistantWorker != null) {
+      await this.ensureWorker(createFacilityDto.assistantWorker, 'Assistant worker');
+    }
     const res = await this.facilitiesRepository.create(createFacilityDto);
     return this.mapResponseToFacility(res);
   }
@@ -42,6 +56,12 @@ export class FacilitiesService {
   async update(id: number, updateFacilityDto: UpdateFacilityDto): Promise<Facility> {
     const row = await this.facilitiesRepository.findById(id);
     if (!row) throw new NotFoundException('Facility not found');
+    if (updateFacilityDto.responsibleWorker !== undefined) {
+      await this.ensureWorker(updateFacilityDto.responsibleWorker, 'Responsible worker');
+    }
+    if (updateFacilityDto.assistantWorker !== undefined && updateFacilityDto.assistantWorker != null) {
+      await this.ensureWorker(updateFacilityDto.assistantWorker, 'Assistant worker');
+    }
     const updated = await this.facilitiesRepository.update(id, updateFacilityDto);
     return this.mapResponseToFacility(updated);
   }

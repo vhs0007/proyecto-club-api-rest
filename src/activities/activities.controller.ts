@@ -1,12 +1,15 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth, ApiBody } from '@nestjs/swagger';
 import { ActivitiesService } from './activities.service';
 import { CreateActivityDto } from './dto/create-activities.dto';
 import { UpdateActivityDto } from './dto/update-activities.dto';
 import { Activity } from './entities/activity.entity';
+import { AuthGuard } from '../auth/guards/jwt-auth.guard';
 
 @ApiTags('Activities')
+@ApiBearerAuth()
 @Controller('activities')
+@UseGuards(AuthGuard)
 export class ActivitiesController {
   constructor(private readonly activitiesService: ActivitiesService) {}
 

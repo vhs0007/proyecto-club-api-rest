@@ -1,14 +1,15 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards } from '@nestjs/common';
 import { MembershipService } from './membership.service';
-import{ CreateMembershipDto } from './dto/create-membership.dto';
+import { CreateMembershipDto } from './dto/create-membership.dto';
 import { UpdateMembershipDto } from './dto/update-membership.dto';
 import { Membership } from './entities/membership.entity';
-import { ApiBearerAuth, ApiOperation, ApiBody} from '@nestjs/swagger';
-import { ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOperation, ApiBody, ApiTags } from '@nestjs/swagger';
+import { AuthGuard } from '../auth/guards/jwt-auth.guard';
 
 @ApiTags('Membresías')
 @ApiBearerAuth()
 @Controller('membership')
+@UseGuards(AuthGuard)
 export class MembershipController {
   constructor(private readonly membershipService: MembershipService) {}
 
@@ -27,8 +28,8 @@ export class MembershipController {
 
   @ApiOperation({ summary: 'Obtener membresía por ID' })
   @Get(':id')
-  findOne(@Param('id') id: string): Promise<Membership | undefined> {
-    return this.membershipService.findOne(+id).then((m) => m ?? undefined);
+  findOne(@Param('id') id: string): Promise<Membership> {
+    return this.membershipService.findOne(+id);
   }
 
   @ApiOperation({ summary: 'Actualizar membresía' })
