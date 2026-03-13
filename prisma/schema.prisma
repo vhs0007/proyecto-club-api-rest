@@ -12,20 +12,20 @@ datasource db {
   provider = "postgresql"
 }
 
-model Membership {
+model membership {
   id       Int            @id @default(autoincrement())
-  type     MembershipType @relation(fields: [typeId], references: [id])
+  type     membership_type @relation(fields: [typeId], references: [id])
   typeId   Int
   userId   Int
   user     users          @relation(fields: [userId], references: [id])
   expirations expirations[]
 }
 
-model MembershipType {
+model membership_type {
   id                    Int                    @id @default(autoincrement())
   name                  String
   price                 Decimal                @db.Decimal(10, 2) @default(0)
-  memberships           Membership[]
+  memberships           membership[]
   facilities_membership facilities_membership[]
 }
 
@@ -34,7 +34,7 @@ model facilities_membership {
   facilityId        Int
   membershipTypeId  Int
   facility          facilities   @relation(fields: [facilityId], references: [id])
-  type              MembershipType @relation(fields: [membershipTypeId], references: [id])
+  type              membership_type @relation(fields: [membershipTypeId], references: [id])
 }
 
 model facilities {
@@ -101,7 +101,6 @@ model users {
   
   id Int @id @default(autoincrement())
   name String
-  type user_type @relation(fields: [typeId], references: [id])
   typeId Int
   email String?
   password String?
@@ -110,7 +109,7 @@ model users {
   isActive Boolean
   roleId Int
   role user_role @relation(fields: [roleId], references: [id])
-  memberships Membership[]
+  memberships membership[]
   salary Decimal? @db.Decimal(10, 2)
   hoursToWorkPerDay Int?
   startWorkAt DateTime?
@@ -127,12 +126,6 @@ model users {
   medicalConditions String?
 }
 
-model user_type{
-  id Int @id @default(autoincrement())
-  name String
-  users users[]
-}
-
 model user_role{
   id Int @id @default(autoincrement())
   name String
@@ -143,5 +136,5 @@ model expirations {
   id             Int        @id @default(autoincrement())
   expirationDate DateTime
   membershipId   Int
-  membership     Membership @relation(fields: [membershipId], references: [id])
+  membership     membership @relation(fields: [membershipId], references: [id])
 }
