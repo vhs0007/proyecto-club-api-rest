@@ -12,11 +12,11 @@ export class CreateActivityDto {
 
   @ApiProperty({ example: '2026-03-03T10:00:00.000Z', description: 'Fecha y hora de inicio' })
   @IsDateString({}, { message: 'startAt debe ser una fecha válida en formato ISO' })
-  startAt: Date;
+  startAt: string;
 
   @ApiProperty({ example: '2026-03-03T12:00:00.000Z', description: 'Fecha y hora de fin' })
   @IsDateString({}, { message: 'endAt debe ser una fecha válida en formato ISO' })
-  endAt: Date;
+  endAt: string;
 
   @ApiProperty({ example: 1, description: 'Id del usuario' })
   @IsNumber({}, { message: 'userId debe ser un número' })

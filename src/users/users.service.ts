@@ -1,4 +1,5 @@
 import { BadRequestException, ConflictException, Injectable, NotFoundException } from '@nestjs/common';
+import * as bcrypt from 'bcrypt';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { Athlete, Gender } from './entities/athlete.entity';
@@ -7,6 +8,12 @@ import { Worker, WorkerRole } from './entities/worker.entity';
 import { UserType } from './entities/user.entity';
 import type { UserResponse } from './repository/users.repository';
 import { UsersRepository } from './repository/users.repository.impl';
+
+const SALT_ROUNDS = 10;
+
+async function hashPassword(plainPassword: string): Promise<string> {
+  return bcrypt.hash(plainPassword, SALT_ROUNDS);
+}
 
 export type UserEntity = Member | Athlete | Worker;
 
@@ -86,7 +93,11 @@ export class UsersService {
       if (new Date(createUserDto.startWorkAt) >= new Date(createUserDto.endWorkAt))
         throw new BadRequestException('startWorkAt must be before endWorkAt');
     }
-    const res = await this.usersRepository.create(createUserDto);
+    const dataToCreate = { ...createUserDto };
+    if (dataToCreate.password != null && dataToCreate.password.trim() !== '') {
+      dataToCreate.password = await hashPassword(dataToCreate.password);
+    }
+    const res = await this.usersRepository.create(dataToCreate);
     return mapResponseToUser(res);
   }
 
@@ -108,7 +119,13 @@ export class UsersService {
       const byEmail = await this.usersRepository.findByEmail(updateUserDto.email);
       if (byEmail != null && byEmail.id !== id) throw new ConflictException('Email already in use');
     }
-    const updated = await this.usersRepository.update(id, updateUserDto);
+    const updateData = { ...updateUserDto };
+    if (updateData.password != null && updateData.password.trim() !== '') {
+      updateData.password = await hashPassword(updateData.password);
+    } else {
+      delete updateData.password;
+    }
+    const updated = await this.usersRepository.update(id, updateData);
     return mapResponseToUser(updated);
   }
 
