@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsString, IsNumber, IsOptional, IsBoolean, IsDateString, Min } from 'class-validator';
+import { IsString, IsNumber, IsOptional, IsBoolean, Min } from 'class-validator';
 
 export class UpdateActivityDto {
   @ApiProperty({ example: 'Partido de fútbol', required: false })
@@ -14,13 +14,11 @@ export class UpdateActivityDto {
 
   @ApiProperty({ example: '2026-03-03T10:00:00.000Z', required: false })
   @IsOptional()
-  @IsDateString({}, { message: 'startAt debe ser una fecha válida en formato ISO' })
-  startAt?: Date;
+  startAt?: string;
 
   @ApiProperty({ example: '2026-03-03T12:00:00.000Z', required: false })
   @IsOptional()
-  @IsDateString({}, { message: 'endAt debe ser una fecha válida en formato ISO' })
-  endAt?: Date;
+  endAt?: string;
 
   @ApiProperty({ example: 1, required: false })
   @IsOptional()
