@@ -10,7 +10,7 @@ import { AuthGuard } from './guards/jwt-auth.guard';
     PrismaModule,
     JwtModule.register({
       secret: '22012005',
-      signOptions: { expiresIn: '1h' },
+      signOptions: { expiresIn: '24h' },
     }),
   ],
   controllers: [AuthController],

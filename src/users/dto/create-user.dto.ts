@@ -4,6 +4,7 @@ import {
   IsNumber,
   IsOptional,
   IsBoolean,
+  IsDate,
   IsDateString,
   Min,
 } from 'class-validator';
@@ -61,12 +62,12 @@ export class CreateUserDto {
 
   @ApiProperty({ required: false })
   @IsOptional()
-  @IsDateString({}, { message: 'startWorkAt debe ser una fecha válida en formato ISO' })
+  @IsDate({ message: 'startWorkAt debe ser una fecha válida' })
   startWorkAt?: Date | null;
 
   @ApiProperty({ required: false })
   @IsOptional()
-  @IsDateString({}, { message: 'endWorkAt debe ser una fecha válida en formato ISO' })
+  @IsDate({ message: 'endWorkAt debe ser una fecha válida' })
   endWorkAt?: Date | null;
 
   @ApiProperty({ required: false })
@@ -88,7 +89,7 @@ export class CreateUserDto {
 
   @ApiProperty({ required: false })
   @IsOptional()
-  @IsDateString({}, { message: 'birthDate debe ser una fecha válida en formato ISO' })
+  @IsDate({ message: 'birthDate debe ser una fecha válida' })
   birthDate?: Date | null;
 
   @ApiProperty({ required: false })
