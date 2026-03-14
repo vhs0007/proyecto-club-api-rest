@@ -19,6 +19,12 @@ export class CreateUserDto {
   @Min(1, { message: 'typeId debe ser mayor 1' })
   typeId: number;
 
+  @ApiProperty({ required: false, example: 1, description: 'ID del rol (por defecto 1)' })
+  @IsOptional()
+  @IsNumber({}, { message: 'roleId debe ser un número' })
+  @Min(1, { message: 'roleId debe ser al menos 1' })
+  roleId?: number;
+
   @ApiProperty({ required: false })
   @IsOptional()
   @IsString({ message: 'email debe ser un texto' })

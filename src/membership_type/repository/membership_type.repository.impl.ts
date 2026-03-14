@@ -18,7 +18,7 @@ export class MembershipTypeRepository implements IMembershipTypeRepository {
   }
 
   async findAll(): Promise<MembershipTypeResponse[]> {
-    const list = await this.prisma.membership_type.findMany();
+    const list = await this.prisma.membershipType.findMany();
     return list.map((row) => ({
       id: row.id,
       name: row.name,
@@ -27,7 +27,7 @@ export class MembershipTypeRepository implements IMembershipTypeRepository {
   }
 
   async findById(id: number): Promise<MembershipTypeResponse | null> {
-    const row = await this.prisma.membership_type.findUnique({ where: { id } });
+    const row = await this.prisma.membershipType.findUnique({ where: { id } });
     if (!row) return null;
     return {
       id: row.id,
@@ -37,7 +37,7 @@ export class MembershipTypeRepository implements IMembershipTypeRepository {
   }
 
   // async create(data: { name: string; price: number }): Promise<MembershipTypeResponse> {
-  //   const row = await this.prisma.membership_type.create({ data: { name: data.name, price: data.price } });
+  //   const row = await this.prisma.membershipType.create({ data: { name: data.name, price: data.price } });
   //   return { id: row.id, name: row.name, price: this.toNumber(row.price) };
   // }
 
@@ -45,7 +45,7 @@ export class MembershipTypeRepository implements IMembershipTypeRepository {
   //   const updateData: { name?: string; price?: number } = {};
   //   if (data.name !== undefined) updateData.name = data.name;
   //   if (data.price !== undefined) updateData.price = data.price;
-  //   const row = await this.prisma.membership_type.update({
+  //   const row = await this.prisma.membershipType.update({
   //     where: { id },
   //     data: updateData,
   //   });
@@ -57,6 +57,6 @@ export class MembershipTypeRepository implements IMembershipTypeRepository {
   // }
 
   // async delete(id: number): Promise<void> {
-  //   await this.prisma.membership_type.delete({ where: { id } });
+  //   await this.prisma.membershipType.delete({ where: { id } });
   // }
 }
