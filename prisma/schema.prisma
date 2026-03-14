@@ -72,6 +72,12 @@ model activity {
   isActive Boolean
 }
 
+model user_type {
+  id    Int     @id @default(autoincrement())
+  name  String
+  users users[]
+}
+
 model users {
   /*
     name: string;
@@ -98,17 +104,17 @@ model users {
   medications?: string;
   medicalConditions?: string;
   */
+
   
   id Int @id @default(autoincrement())
   name String
   typeId Int
+  type user_type @relation(fields: [typeId], references: [id])
   email String?
   password String?
   createdAt DateTime @default(now())
   deletedAt DateTime?
   isActive Boolean
-  roleId Int
-  role user_role @relation(fields: [roleId], references: [id])
   memberships membership[]
   salary Decimal? @db.Decimal(10, 2)
   hoursToWorkPerDay Int?
@@ -126,11 +132,6 @@ model users {
   medicalConditions String?
 }
 
-model user_role{
-  id Int @id @default(autoincrement())
-  name String
-  users users[]
-}
 
 model expirations {
   id             Int        @id @default(autoincrement())

@@ -10,7 +10,6 @@ export interface UserResponse {
   createdAt: Date;
   deletedAt: Date | null;
   isActive: boolean;
-  roleId: number;
   salary: number | null;
   hoursToWorkPerDay: number | null;
   startWorkAt: Date | null;
@@ -33,7 +32,6 @@ export interface IUsersRepository {
   findById(id: number): Promise<UserResponse | null>;
   findByEmail(email: string): Promise<UserResponse | null>;
   existsTypeId(typeId: number): Promise<boolean>;
-  existsRoleId(roleId: number): Promise<boolean>;
   update(id: number, updateUserDto: UpdateUserDto): Promise<UserResponse>;
   delete(id: number): Promise<void>;
 }

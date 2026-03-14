@@ -14,7 +14,6 @@ function mapRow(row: {
   createdAt: Date;
   deletedAt: Date | null;
   isActive: boolean;
-  roleId: number;
   salary?: { toNumber(): number } | null;
   hoursToWorkPerDay: number | null;
   startWorkAt: Date | null;
@@ -39,7 +38,6 @@ function mapRow(row: {
     createdAt: row.createdAt,
     deletedAt: row.deletedAt,
     isActive: row.isActive,
-    roleId: row.roleId,
     salary: row.salary?.toNumber() ?? null,
     hoursToWorkPerDay: row.hoursToWorkPerDay,
     startWorkAt: row.startWorkAt,
@@ -85,11 +83,6 @@ export class UsersRepository implements IUsersRepository {
 
   async existsTypeId(typeId: number): Promise<boolean> {
     const row = await this.prisma.user_type.findUnique({ where: { id: typeId } });
-    return row != null;
-  }
-
-  async existsRoleId(roleId: number): Promise<boolean> {
-    const row = await this.prisma.user_role.findUnique({ where: { id: roleId } });
     return row != null;
   }
 

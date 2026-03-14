@@ -28,13 +28,12 @@ function mapResponseToUser(res: UserResponse): UserEntity {
     deletedAt: res.deletedAt,
     isActive: res.isActive,
   };
-  const role = res.roleId as MemberRole | WorkerRole;
 
   if (res.typeId === UserType.WORKER) {
     return new Worker({
       ...base,
       type: UserType.WORKER,
-      role: role as WorkerRole,
+      role: WorkerRole.ADMINISTRATIVE,
       salary: res.salary ?? 0,
       hoursToWorkPerDay: res.hoursToWorkPerDay,
       startWorkAt: res.startWorkAt ?? new Date(),
@@ -46,7 +45,7 @@ function mapResponseToUser(res: UserResponse): UserEntity {
     return new Athlete({
       ...base,
       type: UserType.ATHLETE,
-      role: role as MemberRole,
+      role: MemberRole.ATHLETE,
       weight: res.weight ?? 0,
       height: res.height ?? 0,
       gender: (res.gender as Gender) ?? Gender.MALE,
@@ -63,7 +62,7 @@ function mapResponseToUser(res: UserResponse): UserEntity {
   return new Member({
     ...base,
     type: UserType.MEMBER,
-    role: role as MemberRole,
+    role: MemberRole.Standard,
   });
 }
 
@@ -78,8 +77,6 @@ export class UsersService {
     }
     const typeExists = await this.usersRepository.existsTypeId(createUserDto.typeId);
     if (!typeExists) throw new BadRequestException('Invalid typeId');
-    const roleExists = await this.usersRepository.existsRoleId(createUserDto.roleId);
-    if (!roleExists) throw new BadRequestException('Invalid roleId');
     if (createUserDto.typeId === UserType.ATHLETE) {
       if (createUserDto.gender != null && createUserDto.gender.trim() !== '') {
         const g = createUserDto.gender.toLowerCase();

@@ -15,7 +15,7 @@ export class MembershipService {
   async create(createMembershipDto: CreateMembershipDto): Promise<Membership> {
     const user = await this.prisma.users.findUnique({ where: { id: createMembershipDto.userId } });
     if (!user) throw new BadRequestException('User not found');
-    const membershipType = await this.prisma.membershipType.findUnique({ where: { id: createMembershipDto.type } });
+    const membershipType = await this.prisma.membership_type.findUnique({ where: { id: createMembershipDto.type } });
     if (!membershipType) throw new BadRequestException('Membership type not found');
     const res = await this.membershipRepository.create(createMembershipDto);
     return new Membership({ id: res.id, type: res.type });
@@ -40,7 +40,7 @@ export class MembershipService {
       if (!user) throw new BadRequestException('User not found');
     }
     if (updateMembershipDto.type !== undefined) {
-      const membershipType = await this.prisma.membershipType.findUnique({ where: { id: updateMembershipDto.type } });
+      const membershipType = await this.prisma.membership_type.findUnique({ where: { id: updateMembershipDto.type } });
       if (!membershipType) throw new BadRequestException('Membership type not found');
     }
     const updated = await this.membershipRepository.update(id, updateMembershipDto);

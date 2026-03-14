@@ -20,7 +20,7 @@ export class AuthService {
     }
     const user = await this.prisma.users.findFirst({
       where: { email: loginRequest.email },
-      include: { role: true },
+      include: { type: true },
     });
     if (!user) {
       throw new HttpException('Invalid credentials', HttpStatus.UNAUTHORIZED);
@@ -34,7 +34,7 @@ export class AuthService {
     if (user.deletedAt != null) {
       throw new HttpException('Account is disabled', HttpStatus.UNAUTHORIZED);
     }
-    const roleName = user.role?.name ?? String(user.roleId);
+    const roleName = user.type?.name ?? 'user';
     const payload = { sub: user.id, email: user.email, role: roleName };
     const accessToken = this.jwtService.sign(payload);
     return {

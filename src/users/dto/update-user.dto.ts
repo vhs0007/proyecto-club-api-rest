@@ -118,11 +118,4 @@ export class UpdateUserDto {
   @IsNumber({}, { message: 'typeId debe ser un número' })
   @Min(1, { message: 'typeId debe ser 1, 2 o 3' })
   typeId?: number;
-
-  @ApiProperty({ required: false })
-  @IsOptional()
-  @IsNumber({}, { message: 'roleId debe ser un número' })
-  @Min(1, { message: 'roleId debe ser al menos 1' })
-  roleId?: number;
-
 }

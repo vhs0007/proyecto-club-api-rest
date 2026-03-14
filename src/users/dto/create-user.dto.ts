@@ -42,11 +42,6 @@ export class CreateUserDto {
   @IsBoolean({ message: 'isActive debe ser true o false' })
   isActive: boolean;
 
-  @ApiProperty({ example: 1 })
-  @IsNumber({}, { message: 'roleId debe ser un número' })
-  @Min(1, { message: 'roleId debe ser al menos 1' })
-  roleId: number;
-
   @ApiProperty({ required: false })
   @IsOptional()
   @IsNumber({}, { message: 'salary debe ser un número' })
