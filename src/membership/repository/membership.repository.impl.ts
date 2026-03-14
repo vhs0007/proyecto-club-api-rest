@@ -13,7 +13,7 @@ export class MembershipRepository implements IMembershipRepository {
   }
 
   private get membershipType() {
-    return this.prisma.membershipType;
+    return this.prisma.membership_type;
   }
 
   private async getTypeIdById(id: number): Promise<number> {

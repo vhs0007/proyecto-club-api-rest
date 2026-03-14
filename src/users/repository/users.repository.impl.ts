@@ -63,7 +63,6 @@ export class UsersRepository implements IUsersRepository {
     const data: Prisma.usersUncheckedCreateInput = {
       name: createUserDto.name,
       typeId: createUserDto.typeId,
-      roleId: createUserDto.roleId ?? 1,
       isActive: createUserDto.isActive,
     };
     if (createUserDto.email != null) data.email = createUserDto.email;
