@@ -3,7 +3,7 @@ import { ApiTags, ApiOperation, ApiBearerAuth, ApiBody } from '@nestjs/swagger';
 import { ActivitiesService } from './activities.service';
 import { CreateActivityDto } from './dto/create-activities.dto';
 import { UpdateActivityDto } from './dto/update-activities.dto';
-import { Activity } from './entities/activity.entity';
+import { ActivityResponseDto } from './dto/activity-response.dto';
 import { AuthGuard } from '../auth/guards/jwt-auth.guard';
 
 @ApiTags('Activities')
@@ -16,32 +16,32 @@ export class ActivitiesController {
   @Post()
   @ApiOperation({ summary: 'Crear actividad' })
   @ApiBody({ type: CreateActivityDto })
-  create(@Body() createActivityDto: CreateActivityDto): Promise<Activity> {
+  create(@Body() createActivityDto: CreateActivityDto): Promise<ActivityResponseDto> {
     return this.activitiesService.create(createActivityDto);
   }
 
   @Get()
   @ApiOperation({ summary: 'Obtener todas las actividades' })
-  findAll(): Promise<Activity[]> {
+  findAll(): Promise<ActivityResponseDto[]> {
     return this.activitiesService.findAll();
   }
 
   @Get(':id')
   @ApiOperation({ summary: 'Obtener actividad por ID' })
-  findOne(@Param('id') id: string): Promise<Activity> {
+  findOne(@Param('id') id: string): Promise<ActivityResponseDto> {
     return this.activitiesService.findOne(+id);
   }
 
   @Patch(':id')
   @ApiOperation({ summary: 'Actualizar actividad' })
   @ApiBody({ type: UpdateActivityDto })
-  update(@Param('id') id: string, @Body() updateActivityDto: UpdateActivityDto): Promise<Activity> {
+  update(@Param('id') id: string, @Body() updateActivityDto: UpdateActivityDto): Promise<ActivityResponseDto> {
     return this.activitiesService.update(+id, updateActivityDto);
   }
 
   @Delete(':id')
   @ApiOperation({ summary: 'Eliminar actividad' })
-  remove(@Param('id') id: string): Promise<Activity> {
+  remove(@Param('id') id: string): Promise<ActivityResponseDto> {
     return this.activitiesService.remove(+id);
   }
 }

@@ -60,7 +60,28 @@ export class UsersRepository implements IUsersRepository {
   constructor(private readonly prisma: PrismaService) {}
 
   async create(createUserDto: CreateUserDto): Promise<UserResponse> {
-    const created = await this.prisma.users.create({ data: createUserDto as Prisma.usersUncheckedCreateInput });
+    const data: Prisma.usersUncheckedCreateInput = {
+      name: createUserDto.name,
+      typeId: createUserDto.typeId,
+      isActive: createUserDto.isActive,
+    };
+    if (createUserDto.email != null) data.email = createUserDto.email;
+    if (createUserDto.password != null) data.password = createUserDto.password;
+    if (createUserDto.salary != null) data.salary = createUserDto.salary;
+    if (createUserDto.hoursToWorkPerDay != null) data.hoursToWorkPerDay = createUserDto.hoursToWorkPerDay;
+    if (createUserDto.startWorkAt != null) data.startWorkAt = createUserDto.startWorkAt;
+    if (createUserDto.endWorkAt != null) data.endWorkAt = createUserDto.endWorkAt;
+    if (createUserDto.weight != null) data.weight = createUserDto.weight;
+    if (createUserDto.height != null) data.height = createUserDto.height;
+    if (createUserDto.gender != null) data.gender = createUserDto.gender;
+    if (createUserDto.birthDate != null) data.birthDate = createUserDto.birthDate;
+    if (createUserDto.diet != null) data.diet = createUserDto.diet;
+    if (createUserDto.trainingPlan != null) data.trainingPlan = createUserDto.trainingPlan;
+    if (createUserDto.medicalHistory != null) data.medicalHistory = createUserDto.medicalHistory;
+    if (createUserDto.allergies != null) data.allergies = createUserDto.allergies;
+    if (createUserDto.medications != null) data.medications = createUserDto.medications;
+    if (createUserDto.medicalConditions != null) data.medicalConditions = createUserDto.medicalConditions;
+    const created = await this.prisma.users.create({ data });
     return mapRow(created);
   }
 

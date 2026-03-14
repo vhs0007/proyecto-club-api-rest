@@ -11,7 +11,7 @@ import {
 import { ExpirationService } from './expiration.service';
 import { CreateExpirationDto } from './dto/create-expiration.dto';
 import { UpdateExpirationDto } from './dto/update-expiration.dto';
-import { Expiration } from './entities/expiration.entity';
+import { ExpirationResponseDto } from './dto/expiration-response.dto';
 import { ApiBearerAuth, ApiOperation, ApiTags, ApiBody } from '@nestjs/swagger';
 import { AuthGuard } from '../auth/guards/jwt-auth.guard';
 
@@ -25,25 +25,19 @@ export class ExpirationController {
   @ApiOperation({ summary: 'Crear expiración' })
   @Post()
   @ApiBody({ type: CreateExpirationDto })
-  async create(@Body() createExpirationDto: CreateExpirationDto): Promise<{ id: number; expirationDate: Date; memberId: number; membershipId: number }> {
-    const expiration = await this.expirationService.create(createExpirationDto);
-    return {
-      id: expiration.id,
-      expirationDate: expiration.expirationDate,
-      memberId: (expiration.member as { id: number }).id,
-      membershipId: (expiration.membership as { id: number }).id,
-    };
+  create(@Body() createExpirationDto: CreateExpirationDto): Promise<ExpirationResponseDto> {
+    return this.expirationService.create(createExpirationDto);
   }
 
   @ApiOperation({ summary: 'Obtener todas las expiraciones' })
   @Get()
-  findAll(): Promise<Expiration[]> {
+  findAll(): Promise<ExpirationResponseDto[]> {
     return this.expirationService.findAll();
   }
 
   @ApiOperation({ summary: 'Obtener expiración por ID' })
   @Get(':id')
-  findOne(@Param('id') id: string): Promise<Expiration> {
+  findOne(@Param('id') id: string): Promise<ExpirationResponseDto> {
     return this.expirationService.findOne(+id);
   }
 
@@ -53,13 +47,13 @@ export class ExpirationController {
   update(
     @Param('id') id: string,
     @Body() updateExpirationDto: UpdateExpirationDto,
-  ): Promise<Expiration> {
+  ): Promise<ExpirationResponseDto> {
     return this.expirationService.update(+id, updateExpirationDto);
   }
 
   @ApiOperation({ summary: 'Eliminar expiración' })
   @Delete(':id')
-  remove(@Param('id') id: string): Promise<Expiration> {
+  remove(@Param('id') id: string): Promise<ExpirationResponseDto> {
     return this.expirationService.remove(+id);
   }
 }
