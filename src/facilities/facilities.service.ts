@@ -1,98 +1,75 @@
-import {
-  Injectable, NotFoundException,
-} from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { CreateFacilityDto } from './dto/create-facility.dto';
 import { UpdateFacilityDto } from './dto/update-facility.dto';
-import { Facilities } from './entities/facilities.entity';
 import { Facility } from './entities/facility.entity';
+import { FacilitiesRepository } from './repository/facilities.repository.impl';
+import type { FacilityResponse } from './repository/facilities.repository';
+import { PrismaService } from '../prisma/prisma.service';
+
+const WORKER_TYPE_ID = 1;
 
 @Injectable()
 export class FacilitiesService {
-  facilities: Facilities[] = [
-    new Facility({
-      id: 1,
-      tipo: 'cancha',
-      horarioDisponible: '08:00-22:00',
-      aforo: 100,
-      trabajadorEncargado: 1,
-      trabajadorAyudante: null,
-      createdAt: new Date(),
-      updatedAt: null,
-      deletedAt: null,
-      isActive: true,
-    }),
-    new Facility({
-      id: 2,
-      tipo: 'gimnasio',
-      horarioDisponible: '06:00-23:00',
-      aforo: 50,
-      trabajadorEncargado: 2,
-      trabajadorAyudante: 3,
-      createdAt: new Date(),
-      updatedAt: null,
-      deletedAt: null,
-      isActive: true,
-    }),
-  ];
+  constructor(
+    private readonly facilitiesRepository: FacilitiesRepository,
+    private readonly prisma: PrismaService,
+  ) {}
 
-  private findById(id: number): Facilities | null {
-    const facility = this.facilities.find((f) => f.id === id);
-    if (facility) return facility;
-    return null;
-  }
-
-  create(createFacilityDto: CreateFacilityDto): Facilities {
-    const now = new Date();
-    const id = Math.max(0, ...this.facilities.map((f) => f.id)) + 1;
-    const facility = new Facility({
-      ...createFacilityDto,
-      id,
-      createdAt: createFacilityDto.createdAt ?? now,
-      updatedAt: null as Date | null,
-      deletedAt: null as Date | null,
-      isActive: createFacilityDto.isActive ?? true,
-      trabajadorAyudante: createFacilityDto.trabajadorAyudante ?? null,
+  private mapResponseToFacility(res: FacilityResponse): Facility {
+    return new Facility({
+      id: res.id,
+      type: res.type,
+      capacity: res.capacity,
+      responsibleWorker: res.responsibleWorker,
+      assistantWorker: res.assistantWorker ?? null,
+      isActive: res.isActive ?? true,
+      membership: [],
     });
-    this.facilities.push(facility);
-    return facility;
   }
 
-  findAll() {
-    return this.facilities;
+  private async ensureWorker(userId: number, field: string): Promise<void> {
+    const user = await this.prisma.users.findUnique({ where: { id: userId } });
+    if (!user) throw new BadRequestException(`${field} not found`);
+    if (user.typeId !== WORKER_TYPE_ID) throw new BadRequestException(`${field} must be a Worker user`);
   }
 
-  findOne(id: number) {
-    const entity = this.findById(id);
-    if (!entity) {
-      throw new NotFoundException('Facility not found');
+  async create(createFacilityDto: CreateFacilityDto): Promise<Facility> {
+    await this.ensureWorker(createFacilityDto.responsibleWorker, 'Responsible worker');
+    if (createFacilityDto.assistantWorker != null) {
+      await this.ensureWorker(createFacilityDto.assistantWorker, 'Assistant worker');
     }
-    return entity;
+    const res = await this.facilitiesRepository.create(createFacilityDto);
+    return this.mapResponseToFacility(res);
   }
 
-  update(id: number, updateFacilityDto: UpdateFacilityDto): Facilities {
-    const entity = this.findById(id);
-    if (!entity) {
-      throw new NotFoundException('Facility not found');
-    }
-    
-    entity.tipo = updateFacilityDto.tipo ?? entity.tipo;
-    entity.horarioDisponible = updateFacilityDto.horarioDisponible ?? entity.horarioDisponible;
-    entity.aforo = updateFacilityDto.aforo ?? entity.aforo;
-    entity.trabajadorEncargado = updateFacilityDto.trabajadorEncargado ?? entity.trabajadorEncargado;
-    entity.trabajadorAyudante = updateFacilityDto.trabajadorAyudante ?? entity.trabajadorAyudante;
-    entity.isActive = updateFacilityDto.isActive ?? entity.isActive;
-    entity.updatedAt = new Date();
-    return entity;
+  async findAll(): Promise<Facility[]> {
+    const list = await this.facilitiesRepository.findAll();
+    return list.map((r) => this.mapResponseToFacility(r));
   }
 
-  remove(id: number) {
-    const entity = this.findById(id);
-    if (!entity) {
-      throw new NotFoundException('Facility not found');
-    }
+  async findOne(id: number): Promise<Facility> {
+    const row = await this.facilitiesRepository.findById(id);
+    if (!row) throw new NotFoundException('Facility not found');
+    return this.mapResponseToFacility(row);
+  }
 
-    this.facilities = this.facilities.filter((f) => f.id !== id);
-    return entity;
+  async update(id: number, updateFacilityDto: UpdateFacilityDto): Promise<Facility> {
+    const row = await this.facilitiesRepository.findById(id);
+    if (!row) throw new NotFoundException('Facility not found');
+    if (updateFacilityDto.responsibleWorker !== undefined) {
+      await this.ensureWorker(updateFacilityDto.responsibleWorker, 'Responsible worker');
+    }
+    if (updateFacilityDto.assistantWorker !== undefined && updateFacilityDto.assistantWorker != null) {
+      await this.ensureWorker(updateFacilityDto.assistantWorker, 'Assistant worker');
+    }
+    const updated = await this.facilitiesRepository.update(id, updateFacilityDto);
+    return this.mapResponseToFacility(updated);
+  }
+
+  async remove(id: number): Promise<Facility> {
+    const row = await this.facilitiesRepository.findById(id);
+    if (!row) throw new NotFoundException('Facility not found');
+    await this.facilitiesRepository.delete(id);
+    return this.mapResponseToFacility(row);
   }
 }
-

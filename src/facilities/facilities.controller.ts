@@ -1,44 +1,52 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiBearerAuth, ApiOkResponse, ApiCreatedResponse, ApiBody } from '@nestjs/swagger';
 import { FacilitiesService } from './facilities.service';
-import type { CreateFacilityDto } from './dto/create-facility.dto';
-import type { UpdateFacilityDto } from './dto/update-facility.dto';
-import { AuthGuard } from '../auth/guards/jwt-auth/jwt-auth.guard';
+import { CreateFacilityDto } from './dto/create-facility.dto';
+import { UpdateFacilityDto } from './dto/update-facility.dto';
+import { Facility } from './entities/facility.entity';
+import { AuthGuard } from '../auth/guards/jwt-auth.guard';
 
 @ApiTags('Facilities')
 @ApiBearerAuth()
 @Controller('facilities')
-@UseGuards(AuthGuard) 
+@UseGuards(AuthGuard)
 export class FacilitiesController {
   constructor(private readonly facilitiesService: FacilitiesService) {}
 
   @Post()
   @ApiOperation({ summary: 'Crear instalación' })
-  create(@Body() createFacilityDto: CreateFacilityDto) {
+  @ApiBody({ type: CreateFacilityDto })
+  @ApiCreatedResponse({ description: 'Instalación creada' })
+  create(@Body() createFacilityDto: CreateFacilityDto): Promise<Facility> {
     return this.facilitiesService.create(createFacilityDto);
   }
 
   @Get()
   @ApiOperation({ summary: 'Obtener todas las instalaciones' })
-  findAll() {
+  @ApiOkResponse({ description: 'Lista de instalaciones' })
+  findAll(): Promise<Facility[]> {
     return this.facilitiesService.findAll();
   }
 
   @Get(':id')
   @ApiOperation({ summary: 'Obtener instalación por ID' })
-  findOne(@Param('id') id: string) {
+  @ApiOkResponse({ description: 'Instalación encontrada' })
+  findOne(@Param('id') id: string): Promise<Facility> {
     return this.facilitiesService.findOne(+id);
   }
 
   @Patch(':id')
   @ApiOperation({ summary: 'Actualizar instalación' })
-  update(@Param('id') id: string, @Body() updateFacilityDto: UpdateFacilityDto) {
+  @ApiBody({ type: UpdateFacilityDto })
+  @ApiOkResponse({ description: 'Instalación actualizada' })
+  update(@Param('id') id: string, @Body() updateFacilityDto: UpdateFacilityDto): Promise<Facility> {
     return this.facilitiesService.update(+id, updateFacilityDto);
   }
 
   @Delete(':id')
   @ApiOperation({ summary: 'Eliminar instalación' })
-  remove(@Param('id') id: string) {
+  @ApiOkResponse({ description: 'Instalación eliminada' })
+  remove(@Param('id') id: string): Promise<Facility> {
     return this.facilitiesService.remove(+id);
   }
 }

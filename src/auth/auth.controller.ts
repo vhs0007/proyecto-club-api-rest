@@ -1,7 +1,7 @@
 import { Body, Controller, Post } from '@nestjs/common';
-import { ApiTags, ApiOperation } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiBody } from '@nestjs/swagger';
 import { AuthService } from './auth.service';
-import type { LoginRequest } from './dto/login-request.dto';
+import { LoginRequestDto } from './dto/login-request.dto';
 import type { LoginResponse } from './dto/login-response.dto';
 
 @ApiTags('Auth')
@@ -11,7 +11,8 @@ export class AuthController {
 
   @Post('login')
   @ApiOperation({ summary: 'Iniciar sesión' })
-  login(@Body() loginRequest: LoginRequest): LoginResponse {
+  @ApiBody({ type: LoginRequestDto })
+  login(@Body() loginRequest: LoginRequestDto): Promise<LoginResponse> {
     return this.authService.authenticateUser(loginRequest);
   }
 }

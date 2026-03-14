@@ -1,44 +1,47 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiBearerAuth, ApiBody } from '@nestjs/swagger';
 import { ActivitiesService } from './activities.service';
-import type { CreateActivitiesDto } from './dto/create-activities.dto';
-import type { UpdateActivitiesDto } from './dto/update-user.dto';
-import { AuthGuard } from '../users/guards/jwt-auth/jwt-auth.guard';
+import { CreateActivityDto } from './dto/create-activities.dto';
+import { UpdateActivityDto } from './dto/update-activities.dto';
+import { ActivityResponseDto } from './dto/activity-response.dto';
+import { AuthGuard } from '../auth/guards/jwt-auth.guard';
 
 @ApiTags('Activities')
 @ApiBearerAuth()
 @Controller('activities')
-@UseGuards(AuthGuard) 
+@UseGuards(AuthGuard)
 export class ActivitiesController {
   constructor(private readonly activitiesService: ActivitiesService) {}
 
   @Post()
   @ApiOperation({ summary: 'Crear actividad' })
-  create(@Body() createActivitiesDto: CreateActivitiesDto) {
-    return this.activitiesService.create(createActivitiesDto);
+  @ApiBody({ type: CreateActivityDto })
+  create(@Body() createActivityDto: CreateActivityDto): Promise<ActivityResponseDto> {
+    return this.activitiesService.create(createActivityDto);
   }
 
   @Get()
   @ApiOperation({ summary: 'Obtener todas las actividades' })
-  findAll() {
+  findAll(): Promise<ActivityResponseDto[]> {
     return this.activitiesService.findAll();
   }
 
   @Get(':id')
   @ApiOperation({ summary: 'Obtener actividad por ID' })
-  findOne(@Param('id') id: string) {
+  findOne(@Param('id') id: string): Promise<ActivityResponseDto> {
     return this.activitiesService.findOne(+id);
   }
 
   @Patch(':id')
   @ApiOperation({ summary: 'Actualizar actividad' })
-  update(@Param('id') id: string, @Body() updateActivitiesDto: UpdateActivitiesDto) {
-    return this.activitiesService.update(+id, updateActivitiesDto);
+  @ApiBody({ type: UpdateActivityDto })
+  update(@Param('id') id: string, @Body() updateActivityDto: UpdateActivityDto): Promise<ActivityResponseDto> {
+    return this.activitiesService.update(+id, updateActivityDto);
   }
 
   @Delete(':id')
   @ApiOperation({ summary: 'Eliminar actividad' })
-  remove(@Param('id') id: string) {
+  remove(@Param('id') id: string): Promise<ActivityResponseDto> {
     return this.activitiesService.remove(+id);
   }
 }

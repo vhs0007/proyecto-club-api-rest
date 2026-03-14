@@ -1,99 +1,59 @@
-import {
-  BadRequestException, Injectable, NotFoundException,
-} from '@nestjs/common';
-import { CreateActivitiesDto } from './dto/create-activities.dto';
-import { UpdateActivitiesDto } from './dto/update-user.dto';
-import { Activity } from './entities/activity.entity';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import { CreateActivityDto } from './dto/create-activities.dto';
+import { UpdateActivityDto } from './dto/update-activities.dto';
+import type { ActivityResponseDto } from './dto/activity-response.dto';
+import { ActivitiesRepository } from './repository/activities.repository.impl';
+import { PrismaService } from '../prisma/prisma.service';
 
 @Injectable()
 export class ActivitiesService {
-  activities: Activity[] = [
-    new Activity({
-      id: 1,
-      name: 'Soccer game',
-      type: 'soccer,game,sport',
-      startAt: new Date('2026-03-03T10:00:00'),
-      endAt: new Date('2026-03-03T12:00:00'),
-      userId: 1,
-      cost: 100,
-      createdAt: new Date(),
-      updatedAt: null,
-      deletedAt: null,
-      isActive: true,
-    }),
-    new Activity({
-      id: 2,
-      name: 'Basketball game',
-      type: 'basketball,game,sport',
-      startAt: new Date('2026-03-04T14:00:00'),
-      endAt: new Date('2026-03-04T16:00:00'),
-      userId: 2,
-      cost: 100,
-      createdAt: new Date(),
-      updatedAt: null,
-      deletedAt: null,
-      isActive: true,
-    }),
-  ];
+  constructor(
+    private readonly activitiesRepository: ActivitiesRepository,
+    private readonly prisma: PrismaService,
+  ) {}
 
-  private findById(id: number): Activity | null {
-    const activity = this.activities.find((a) => a.id === id);
-    if (activity) return activity;
-    return null;
-  }
-
-  create(createActivitiesDto: CreateActivitiesDto): Activity {
-    const now = new Date();
-    const id = Math.max(0, ...this.activities.map((a) => a.id)) + 1;
-    const activity = new Activity({
-      ...createActivitiesDto,
-      id,
-      createdAt: createActivitiesDto.createdAt ?? now,
-      updatedAt: null as Date | null,
-      deletedAt: null as Date | null,
-      isActive: createActivitiesDto.isActive ?? true,
-    });
-    this.activities.push(activity);
-    return activity;
-  }
-
-  findAll() {
-    return this.activities;
-  }
-
-  findOne(id: number) {
-    const entity = this.findById(id);
-    if (!entity) {
-      throw new NotFoundException('Activity not found');
+  async create(createActivityDto: CreateActivityDto): Promise<ActivityResponseDto> {
+    const user = await this.prisma.users.findUnique({ where: { id: createActivityDto.userId } });
+    if (!user) throw new BadRequestException('User not found');
+    const facility = await this.prisma.facilities.findUnique({ where: { id: createActivityDto.facilityId } });
+    if (!facility) throw new BadRequestException('Facility not found');
+    if (new Date(createActivityDto.startAt) >= new Date(createActivityDto.endAt)) {
+      throw new BadRequestException('startAt must be before endAt');
     }
-    return entity;
+    return this.activitiesRepository.create(createActivityDto);
   }
 
-  update(id: number, updateActivitiesDto: UpdateActivitiesDto): Activity {
-    const entity = this.findById(id);
-    if (!entity) {
-      throw new NotFoundException('Activity not found');
-    }
-    
-    entity.name = updateActivitiesDto.name ?? entity.name;
-    entity.type = updateActivitiesDto.type ?? entity.type;
-    entity.startAt = updateActivitiesDto.startAt ?? entity.startAt;
-    entity.endAt = updateActivitiesDto.endAt ?? entity.endAt;
-    entity.userId = updateActivitiesDto.userId ?? entity.userId;
-    entity.cost = updateActivitiesDto.cost ?? entity.cost;
-    entity.isActive = updateActivitiesDto.isActive ?? entity.isActive;
-    entity.updatedAt = new Date();
-    return entity;
+  async findAll(): Promise<ActivityResponseDto[]> {
+    return this.activitiesRepository.findAll();
   }
 
-  remove(id: number) {
-    const entity = this.findById(id);
-    if (!entity) {
-      throw new NotFoundException('Activity not found');
-    }
+  async findOne(id: number): Promise<ActivityResponseDto> {
+    const row = await this.activitiesRepository.findById(id);
+    if (!row) throw new NotFoundException('Activity not found');
+    return row;
+  }
 
-    this.activities = this.activities.filter((a) => a.id !== id);
-    return entity;
+  async update(id: number, updateActivityDto: UpdateActivityDto): Promise<ActivityResponseDto> {
+    const row = await this.activitiesRepository.findById(id);
+    if (!row) throw new NotFoundException('Activity not found');
+    if (updateActivityDto.userId !== undefined) {
+      const user = await this.prisma.users.findUnique({ where: { id: updateActivityDto.userId } });
+      if (!user) throw new BadRequestException('User not found');
+    }
+    if (updateActivityDto.facilityId !== undefined) {
+      const facility = await this.prisma.facilities.findUnique({ where: { id: updateActivityDto.facilityId } });
+      if (!facility) throw new BadRequestException('Facility not found');
+    }
+    const startAt = updateActivityDto.startAt !== undefined ? new Date(updateActivityDto.startAt) : new Date(row.startAt);
+    const endAt = updateActivityDto.endAt !== undefined ? new Date(updateActivityDto.endAt) : new Date(row.endAt);
+    if (startAt >= endAt) throw new BadRequestException('startAt must be before endAt');
+    return this.activitiesRepository.update(id, updateActivityDto);
+  }
+
+  async remove(id: number): Promise<ActivityResponseDto> {
+    const row = await this.activitiesRepository.findById(id);
+    if (!row) throw new NotFoundException('Activity not found');
+    await this.activitiesRepository.delete(id);
+    return row;
   }
 }
-
