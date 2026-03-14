@@ -1,7 +1,7 @@
 import { Controller, Get, Param, UseGuards } from '@nestjs/common';
 import { UserTypeService } from './user_type.service';
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
-import { UserTypeResponseDto } from './dto/user-type-response.dto';
+import { UserTypeResponseDto } from './dto/response/user-type-response.dto';
 import { AuthGuard } from '../auth/guards/jwt-auth.guard';
 
 @ApiTags('User Type')
@@ -17,18 +17,18 @@ export class UserTypeController {
     return this.userTypeService.findAll();
   }
 
+  // @Post()
+  // @ApiOperation({ summary: 'Crear tipo de usuario' })
+  // @ApiBody({ type: CreateUserTypeDto })
+  // create(@Body() dto: CreateUserTypeDto): Promise<UserTypeResponseDto> {
+  //   return this.userTypeService.create(dto);
+  // }
+
   @ApiOperation({ summary: 'Obtener tipo de usuario por ID' })
   @Get(':id')
   findOne(@Param('id') id: string): Promise<UserTypeResponseDto> {
     return this.userTypeService.findOne(+id);
   }
-
-  // @Post()
-  // @ApiOperation({ summary: 'Crear tipo de usuario' })
-  // @ApiBody({ type: CreateUserTypeDto })
-  // create(@Body() dto: CreateUserTypeDto): Promise<UserType> {
-  //   return this.userTypeService.create(dto);
-  // }
 
   // @Patch(':id')
   // @ApiOperation({ summary: 'Actualizar tipo de usuario' })

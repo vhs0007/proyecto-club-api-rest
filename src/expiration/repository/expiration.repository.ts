@@ -1,11 +1,29 @@
-import { CreateExpirationDto } from '../dto/create-expiration.dto';
-import { UpdateExpirationDto } from '../dto/update-expiration.dto';
+import { CreateExpirationDto } from '../dto/request/create-expiration.dto';
+import { UpdateExpirationDto } from '../dto/request/update-expiration.dto';
 
+export interface UserNavigation {
+  id: number;
+  name: string;
+  typeId: number;
+  email: string | null;
+  password: string | null;
+  createdAt: Date;
+  deletedAt: Date | null;
+  isActive: boolean;
+}
+
+export interface MembershipNavigation {
+  id: number;
+  typeId: number;
+  userId: number;
+}
+
+/** Datos planos que devuelve el repo (member y membership mapeados) */
 export type ExpirationResponse = {
   id: number;
-  memberId: number;
   expirationDate: Date;
-  membershipId: number;
+  member: UserNavigation;
+  membership: MembershipNavigation;
 };
 
 export interface IExpirationRepository {

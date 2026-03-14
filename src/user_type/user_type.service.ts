@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { UserTypeRepository } from './repository/user_type.repository.impl';
-import type { UserTypeResponseDto } from './dto/user-type-response.dto';
+import type { UserTypeResponseDto } from './dto/response/user-type-response.dto';
 
 @Injectable()
 export class UserTypeService {
@@ -10,16 +10,15 @@ export class UserTypeService {
     return this.userTypeRepository.findAll();
   }
 
+  // async create(createUserTypeDto: CreateUserTypeDto): Promise<UserTypeResponseDto> {
+  //   return this.userTypeRepository.create({ name: createUserTypeDto.name });
+  // }
+
   async findOne(id: number): Promise<UserTypeResponseDto> {
     const row = await this.userTypeRepository.findById(id);
     if (!row) throw new NotFoundException('User type not found');
     return row;
   }
-
-  // async create(createUserTypeDto: CreateUserTypeDto): Promise<UserTypeResponseDto> {
-  //   const res = await this.userTypeRepository.create({ name: createUserTypeDto.name });
-  //   return res;
-  // }
 
   // async update(id: number, updateUserTypeDto: UpdateUserTypeDto): Promise<UserTypeResponseDto> {
   //   const res = await this.userTypeRepository.update(id, updateUserTypeDto);
