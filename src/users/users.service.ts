@@ -1,13 +1,41 @@
 import { BadRequestException, ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
-import { CreateUserDto } from './dto/create-user.dto';
-import { UpdateUserDto } from './dto/update-user.dto';
+import { UserResponseDto } from './dto/response/user.response.dto';
+import { CreateUserDto } from './dto/request/create-user.request.dto';
+import { UpdateUserDto } from './dto/request/update-user.request.dto';
 import { Athlete, Gender } from './entities/athlete.entity';
 import { Member, MemberRole } from './entities/member.entity';
 import { Worker, WorkerRole } from './entities/worker.entity';
 import { UserType } from './entities/user.entity';
 import type { UserResponse } from './repository/users.repository';
 import { UsersRepository } from './repository/users.repository.impl';
+
+function mapToUserResponseDto(res: UserResponse): UserResponseDto {
+  const dto = new UserResponseDto();
+  dto.id = res.id;
+  dto.name = res.name;
+  dto.typeId = res.typeId;
+  dto.type = res.type;
+  dto.email = res.email;
+  dto.createdAt = res.createdAt;
+  dto.deletedAt = res.deletedAt;
+  dto.isActive = res.isActive;
+  dto.salary = res.salary;
+  dto.hoursToWorkPerDay = res.hoursToWorkPerDay;
+  dto.startWorkAt = res.startWorkAt;
+  dto.endWorkAt = res.endWorkAt;
+  dto.weight = res.weight;
+  dto.height = res.height;
+  dto.gender = res.gender;
+  dto.birthDate = res.birthDate;
+  dto.diet = res.diet;
+  dto.trainingPlan = res.trainingPlan;
+  dto.medicalHistory = res.medicalHistory;
+  dto.allergies = res.allergies;
+  dto.medications = res.medications;
+  dto.medicalConditions = res.medicalConditions;
+  return dto;
+}
 
 const SALT_ROUNDS = 10;
 
@@ -70,7 +98,7 @@ function mapResponseToUser(res: UserResponse): UserEntity {
 export class UsersService {
   constructor(private readonly usersRepository: UsersRepository) {}
 
-  async create(createUserDto: CreateUserDto): Promise<UserEntity> {
+  async create(createUserDto: CreateUserDto): Promise<UserResponseDto> {
     if (createUserDto.email != null && createUserDto.email.trim() !== '') {
       const existingByEmail = await this.usersRepository.findByEmail(createUserDto.email);
       if (existingByEmail) throw new ConflictException('Email already in use');
@@ -95,21 +123,21 @@ export class UsersService {
       dataToCreate.password = await hashPassword(dataToCreate.password);
     }
     const res = await this.usersRepository.create(dataToCreate);
-    return mapResponseToUser(res);
+    return mapToUserResponseDto(res);
   }
 
-  async findAll(): Promise<UserEntity[]> {
+  async findAll(): Promise<UserResponseDto[]> {
     const list = await this.usersRepository.findAll();
-    return list.map(mapResponseToUser);
+    return list.map(mapToUserResponseDto);
   }
 
-  async findOne(id: number): Promise<UserEntity> {
+  async findOne(id: number): Promise<UserResponseDto> {
     const row = await this.usersRepository.findById(id);
     if (!row) throw new NotFoundException('User not found');
-    return mapResponseToUser(row);
+    return mapToUserResponseDto(row);
   }
 
-  async update(id: number, updateUserDto: UpdateUserDto): Promise<UserEntity> {
+  async update(id: number, updateUserDto: UpdateUserDto): Promise<UserResponseDto> {
     const existing = await this.usersRepository.findById(id);
     if (!existing) throw new NotFoundException('User not found');
     if (updateUserDto.email != null && updateUserDto.email.trim() !== '') {
@@ -123,13 +151,13 @@ export class UsersService {
       delete updateData.password;
     }
     const updated = await this.usersRepository.update(id, updateData);
-    return mapResponseToUser(updated);
+    return mapToUserResponseDto(updated);
   }
 
-  async remove(id: number): Promise<UserEntity> {
+  async remove(id: number): Promise<UserResponseDto> {
     const row = await this.usersRepository.findById(id);
     if (!row) throw new NotFoundException('User not found');
     await this.usersRepository.delete(id);
-    return mapResponseToUser(row);
+    return mapToUserResponseDto(row);
   }
 }

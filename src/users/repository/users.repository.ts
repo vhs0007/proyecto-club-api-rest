@@ -1,10 +1,12 @@
-import { CreateUserDto } from '../dto/create-user.dto';
-import { UpdateUserDto } from '../dto/update-user.dto';
+import { CreateUserDto } from '../dto/request/create-user.request.dto';
+import { UpdateUserDto } from '../dto/request/update-user.request.dto';
+import { UserTypeResponseDto } from '../../user_type/dto/user-type-response.dto';
 
 export interface UserResponse {
   id: number;
   name: string;
   typeId: number;
+  type?: UserTypeResponseDto;
   email: string | null;
   password: string | null;
   createdAt: Date;
