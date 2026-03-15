@@ -66,6 +66,7 @@ model activity {
   startAt DateTime
   endAt DateTime
   userId Int
+  user     users     @relation(fields: [userId], references: [id])
   cost Decimal @db.Decimal(10, 2)
   facilityId Int
   facility facilities @relation(fields: [facilityId], references: [id])
@@ -116,6 +117,7 @@ model users {
   deletedAt DateTime?
   isActive Boolean
   memberships membership[]
+  activities   activity[]
   salary Decimal? @db.Decimal(10, 2)
   hoursToWorkPerDay Int?
   startWorkAt DateTime?

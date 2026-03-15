@@ -1,28 +1,86 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
-import type { IActivitiesRepository, ActivityResponse } from './activitities.repository';
-import { CreateActivityDto } from '../dto/create-activities.dto';
-import { UpdateActivityDto } from '../dto/update-activities.dto';
+import type { IActivitiesRepository, ActivityResponse, UserNavigation, FacilityNavigation } from './activitities.repository';
+import { CreateActivityDto } from '../dto/request/create-activities.dto';
+import { UpdateActivityDto } from '../dto/request/update-activities.dto';
+
+type UserFromPrisma = {
+  id: number;
+  name: string;
+  typeId: number;
+  email: string | null;
+  password: string | null;
+  createdAt: Date;
+  deletedAt: Date | null;
+  isActive: boolean;
+};
+
+type FacilityFromPrisma = {
+  id: number;
+  type: string;
+  capacity: number;
+  responsibleWorker: number;
+  assistantWorker: number | null;
+  isActive: boolean;
+};
+
+type ActivityWithRelations = {
+  id: number;
+  name: string;
+  type: string;
+  startAt: Date;
+  endAt: Date;
+  userId: number;
+  cost: unknown;
+  facilityId: number;
+  isActive: boolean;
+  user: UserFromPrisma;
+  facility: FacilityFromPrisma;
+};
 
 @Injectable()
 export class ActivitiesRepository implements IActivitiesRepository {
   constructor(private readonly prisma: PrismaService) {}
 
-  private mapRow(row: { id: number; name: string; type: string; startAt: Date; endAt: Date; userId: number; cost: unknown; facilityId: number; isActive: boolean }): ActivityResponse {
+  private userPrismaToInterface(user: UserFromPrisma): UserNavigation {
+    return {
+      id: user.id,
+      name: user.name,
+      typeId: user.typeId,
+      email: user.email,
+      password: user.password,
+      createdAt: user.createdAt,
+      deletedAt: user.deletedAt,
+      isActive: user.isActive,
+    };
+  }
+
+  private facilityPrismaToInterface(facility: FacilityFromPrisma): FacilityNavigation {
+    return {
+      id: facility.id,
+      name: facility.type,
+      address: '',
+      city: '',
+      state: '',
+    };
+  }
+
+  private mapRow(row: ActivityWithRelations): ActivityResponse {
     const cost = typeof row.cost === 'object' && row.cost !== null && 'toNumber' in row.cost
       ? (row.cost as { toNumber(): number }).toNumber()
       : Number(row.cost);
-    return {
+    const response: ActivityResponse = {
       id: row.id,
       name: row.name,
       type: row.type,
       startAt: row.startAt,
       endAt: row.endAt,
-      userId: row.userId,
+      user: this.userPrismaToInterface(row.user),
       cost,
-      facilityId: row.facilityId,
+      facility: this.facilityPrismaToInterface(row.facility),
       isActive: row.isActive,
     };
+    return response;
   }
 
   async create(createActivityDto: CreateActivityDto): Promise<ActivityResponse> {
@@ -33,24 +91,24 @@ export class ActivitiesRepository implements IActivitiesRepository {
         facilityId,
         isActive: isActive ?? true,
       },
-      include: { facility: true },
+      include: { facility: true, user: true } as { facility: true },
     });
-    return this.mapRow(created);
+    return this.mapRow(created as ActivityWithRelations);
   }
 
   async findAll(): Promise<ActivityResponse[]> {
     const list = await this.prisma.activity.findMany({
-      include: { facility: true },
+      include: { facility: true, user: true } as { facility: true },
     });
-    return list.map((row) => this.mapRow(row));
+    return list.map((row) => this.mapRow(row as ActivityWithRelations));
   }
 
   async findById(id: number): Promise<ActivityResponse | null> {
     const row = await this.prisma.activity.findUnique({
       where: { id },
-      include: { facility: true },
+      include: { facility: true, user: true } as { facility: true },
     });
-    return row ? this.mapRow(row) : null;
+    return row ? this.mapRow(row as ActivityWithRelations) : null;
   }
 
   async update(id: number, updateActivityDto: UpdateActivityDto): Promise<ActivityResponse> {
@@ -66,9 +124,9 @@ export class ActivitiesRepository implements IActivitiesRepository {
     const updated = await this.prisma.activity.update({
       where: { id },
       data,
-      include: { facility: true },
+      include: { facility: true, user: true } as { facility: true },
     });
-    return this.mapRow(updated);
+    return this.mapRow(updated as ActivityWithRelations);
   }
 
   async delete(id: number): Promise<void> {

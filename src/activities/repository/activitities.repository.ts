@@ -1,5 +1,24 @@
-import { CreateActivityDto } from '../dto/create-activities.dto';
-import { UpdateActivityDto } from '../dto/update-activities.dto';
+import { CreateActivityDto } from '../dto/request/create-activities.dto';
+import { UpdateActivityDto } from '../dto/request/update-activities.dto';
+
+export interface UserNavigation {
+  id: number;
+  name: string;
+  typeId: number;
+  email: string | null;
+  password: string | null;
+  createdAt: Date;
+  deletedAt: Date | null;
+  isActive: boolean;
+}
+
+export interface FacilityNavigation {
+  id: number;
+  name: string;
+  address: string;
+  city: string;
+  state: string;
+}
 
 export type ActivityResponse = {
   id: number;
@@ -7,9 +26,9 @@ export type ActivityResponse = {
   type: string;
   startAt: Date;
   endAt: Date;
-  userId: number;
+  user: UserNavigation;
   cost: number;
-  facilityId: number;
+  facility: FacilityNavigation;
   isActive: boolean;
 };
 

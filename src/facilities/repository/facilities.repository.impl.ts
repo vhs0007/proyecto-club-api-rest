@@ -9,10 +9,12 @@ export class FacilitiesRepository implements IFacilitiesRepository {
   constructor(private readonly prisma: PrismaService) {}
 
   async create(createFacilityDto: CreateFacilityDto): Promise<FacilityResponse> {
-    const { membershipTypeIds, ...data } = createFacilityDto;
+    const { membershipTypeIds, id: _id, ...data } = createFacilityDto;
     const created = await this.prisma.facilities.create({
       data: {
-        ...data,
+        type: data.type,
+        capacity: data.capacity,
+        responsibleWorker: data.responsibleWorker,
         assistantWorker: data.assistantWorker ?? null,
         isActive: data.isActive ?? true,
       },
