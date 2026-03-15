@@ -4,7 +4,7 @@ import { PrismaService } from '../../prisma/prisma.service';
 import type { IUsersRepository, UserResponse } from './users.repository';
 import { UpdateUserDto } from '../dto/request/update-user.request.dto';
 import { CreateUserDto } from '../dto/request/create-user.request.dto';
-import { UserTypeResponseDto } from '../../user_type/dto/user-type-response.dto';
+import { UserTypeResponseDto } from  "../../user_type/dto/response/user-type-response.dto";
 
 
 interface UserRow {

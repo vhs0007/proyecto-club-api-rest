@@ -8,7 +8,7 @@ import {
   IsDateString,
   Min,
 } from 'class-validator';
-import { UserTypeResponseDto } from '../../../user_type/dto/user-type-response.dto';
+import { UserTypeResponseDto } from '../../../user_type/dto/response/user-type-response.dto';
 
 export class UserResponseDto {
   @ApiProperty({ example: 1, description: 'ID del usuario' })

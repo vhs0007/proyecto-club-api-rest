@@ -1,9 +1,11 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
-import { CreateMembershipDto } from './dto/create-membership.dto';
-import { UpdateMembershipDto } from './dto/update-membership.dto';
-import { Membership } from './entities/membership.entity';
+import { CreateMembershipDto } from './dto/request/create-membership.dto';
+import { UpdateMembershipDto } from './dto/request/update-membership.dto';
 import { MembershipRepository } from './repository/membership.repository.impl';
 import { PrismaService } from '../prisma/prisma.service';
+import { MembershipResponseDto } from './dto/response/membership-response.dto';
+import { MembershipResponse } from './repository/membership.repository';
+
 
 @Injectable()
 export class MembershipService {
@@ -12,27 +14,35 @@ export class MembershipService {
     private readonly prisma: PrismaService,
   ) {}
 
-  async create(createMembershipDto: CreateMembershipDto): Promise<Membership> {
+  private fromPrismaToResponse(row: MembershipResponse): MembershipResponseDto {
+    return {
+      id: row.id,
+      user: row.user,
+      membershipType: row.type,
+    }
+  }
+
+  async create(createMembershipDto: CreateMembershipDto): Promise<MembershipResponseDto> {
     const user = await this.prisma.users.findUnique({ where: { id: createMembershipDto.userId } });
     if (!user) throw new BadRequestException('User not found');
     const membershipType = await this.prisma.membership_type.findUnique({ where: { id: createMembershipDto.type } });
     if (!membershipType) throw new BadRequestException('Membership type not found');
     const res = await this.membershipRepository.create(createMembershipDto);
-    return new Membership({ id: res.id, type: res.type });
+    return this.fromPrismaToResponse(res);
   }
 
-  async findAll(): Promise<Membership[]> {
+  async findAll(): Promise<MembershipResponseDto[]> {
     const list = await this.membershipRepository.findAll();
-    return list.map((r) => new Membership({ id: r.id, type: r.type }));
+    return list.map((r) => this.fromPrismaToResponse(r));
   }
 
-  async findOne(id: number): Promise<Membership> {
+  async findOne(id: number): Promise<MembershipResponseDto> {
     const row = await this.membershipRepository.findById(id);
     if (!row) throw new NotFoundException('Membership not found');
-    return new Membership({ id: row.id, type: row.type });
+    return this.fromPrismaToResponse(row);
   }
 
-  async update(id: number, updateMembershipDto: UpdateMembershipDto): Promise<Membership> {
+  async update(id: number, updateMembershipDto: UpdateMembershipDto): Promise<MembershipResponseDto> {
     const row = await this.membershipRepository.findById(id);
     if (!row) throw new NotFoundException('Membership not found');
     if (updateMembershipDto.userId !== undefined) {
@@ -44,13 +54,13 @@ export class MembershipService {
       if (!membershipType) throw new BadRequestException('Membership type not found');
     }
     const updated = await this.membershipRepository.update(id, updateMembershipDto);
-    return new Membership({ id: updated.id, type: updated.type });
+    return this.fromPrismaToResponse(updated);
   }
 
-  async remove(id: number): Promise<Membership> {
+  async remove(id: number): Promise<MembershipResponseDto> {
     const row = await this.membershipRepository.findById(id);
     if (!row) throw new NotFoundException('Membership not found');
     await this.membershipRepository.delete(id);
-    return new Membership({ id: row.id, type: row.type });
+    return this.fromPrismaToResponse(row);
   }
 }
