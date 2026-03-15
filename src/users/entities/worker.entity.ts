@@ -56,6 +56,9 @@ export class Worker extends User {
   }
 }
 
+// Comentadisimo tu enum 😛
+// mentira sabes que te iba a poner esto como string y despues dije NO QUE PAJA y no lo hice 
+
 export enum WorkerRole {
   ADMIN = 1,
   COACH = 2,

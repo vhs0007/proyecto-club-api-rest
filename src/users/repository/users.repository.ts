@@ -1,6 +1,6 @@
 import { CreateUserDto } from '../dto/request/create-user.request.dto';
 import { UpdateUserDto } from '../dto/request/update-user.request.dto';
-import { UserTypeResponseDto } from '../../user_type/dto/user-type-response.dto';
+import { UserTypeResponseDto } from '../../user_type/dto/response/user-type-response.dto';
 
 export interface UserResponse {
   id: number;
