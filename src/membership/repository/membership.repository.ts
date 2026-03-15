@@ -1,10 +1,25 @@
-import { CreateMembershipDto } from '../dto/create-membership.dto';
-import { UpdateMembershipDto } from '../dto/update-membership.dto';
+import { CreateMembershipDto } from '../dto/request/create-membership.dto';
+import { UpdateMembershipDto } from '../dto/request/update-membership.dto';
 
 export type MembershipResponse = {
   id: number;
-  type: number;
+  type: membershipTypeNavigation;
+  user: userNavigation;
 };
+
+export interface userNavigation{
+  id: number;
+  name: string;
+  email: string;
+  createdAt: Date;
+  isActive: boolean;
+  type: {id: number; name: string;};
+}
+
+export interface membershipTypeNavigation{
+  id: number;
+  name: string;
+}
 
 export interface IMembershipRepository {
   create(createMembershipDto: CreateMembershipDto): Promise<MembershipResponse>;
