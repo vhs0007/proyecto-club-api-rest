@@ -1,7 +1,7 @@
 import { Controller, Get, Param, UseGuards } from '@nestjs/common';
 import { MembershipTypeService } from './membership_type.service';
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
-import { MembershipType } from './entities/membership_type.entity';
+import { MembershipTypeResponseDto } from './dto/response/membership_type-response.dto';
 import { AuthGuard } from '../auth/guards/jwt-auth.guard';
 
 @ApiTags('Membership Type')
@@ -13,20 +13,20 @@ export class MembershipTypeController {
 
   @ApiOperation({ summary: 'Obtener todos los tipos de membresía' })
   @Get()
-  findAll(): Promise<MembershipType[]> {
+  findAll(): Promise<MembershipTypeResponseDto[]> {
     return this.membershipTypeService.findAll();
   }
 
   // @Post()
   // @ApiOperation({ summary: 'Crear tipo de membresía' })
   // @ApiBody({ type: CreateMembershipTypeDto })
-  // create(@Body() dto: CreateMembershipTypeDto): Promise<MembershipType> {
+  // create(@Body() dto: CreateMembershipTypeDto): Promise<MembershipTypeResponseDto> {
   //   return this.membershipTypeService.create(dto);
   // }
 
   @ApiOperation({ summary: 'Obtener tipo de membresía por ID' })
   @Get(':id')
-  findOne(@Param('id') id: string): Promise<MembershipType> {
+  findOne(@Param('id') id: string): Promise<MembershipTypeResponseDto> {
     return this.membershipTypeService.findOne(+id);
   }
 

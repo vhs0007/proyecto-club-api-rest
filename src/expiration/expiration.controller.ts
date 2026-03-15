@@ -9,9 +9,9 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { ExpirationService } from './expiration.service';
-import { CreateExpirationDto } from './dto/create-expiration.dto';
-import { UpdateExpirationDto } from './dto/update-expiration.dto';
-import { ExpirationResponseDto } from './dto/expiration-response.dto';
+import { CreateExpirationDto } from './dto/request/create-expiration.dto';
+import { UpdateExpirationDto } from './dto/request/update-expiration.dto';
+import { ExpirationResponseDto } from './dto/response/expiration-response.dto';
 import { ApiBearerAuth, ApiOperation, ApiTags, ApiBody } from '@nestjs/swagger';
 import { AuthGuard } from '../auth/guards/jwt-auth.guard';
 

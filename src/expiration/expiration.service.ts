@@ -1,7 +1,7 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
-import { CreateExpirationDto } from './dto/create-expiration.dto';
-import { UpdateExpirationDto } from './dto/update-expiration.dto';
-import type { ExpirationResponseDto } from './dto/expiration-response.dto';
+import { CreateExpirationDto } from './dto/request/create-expiration.dto';
+import { UpdateExpirationDto } from './dto/request/update-expiration.dto';
+import type { ExpirationResponseDto } from './dto/response/expiration-response.dto';
 import { ExpirationRepository } from './repository/expiration.repository.impl';
 import { PrismaService } from '../prisma/prisma.service';
 
