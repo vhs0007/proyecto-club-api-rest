@@ -3,6 +3,7 @@ import { PrismaService } from '../../prisma/prisma.service';
 import type { IActivitiesRepository, ActivityResponse, UserNavigation, FacilityNavigation } from './activitities.repository';
 import { CreateActivityDto } from '../dto/request/create-activities.dto';
 import { UpdateActivityDto } from '../dto/request/update-activities.dto';
+import { Prisma } from '@prisma/client';
 
 type UserFromPrisma = {
   id: number;
@@ -22,6 +23,8 @@ type FacilityFromPrisma = {
   responsibleWorker: number;
   assistantWorker: number | null;
   isActive: boolean;
+  responsibleWorkerUser: UserFromPrisma | null;
+  assistantWorkerUser: UserFromPrisma | null;
 };
 
 type ActivityWithRelations = {
@@ -31,12 +34,22 @@ type ActivityWithRelations = {
   startAt: Date;
   endAt: Date;
   userId: number;
-  cost: unknown;
+  cost: Prisma.Decimal;
   facilityId: number;
   isActive: boolean;
   user: UserFromPrisma;
   facility: FacilityFromPrisma;
 };
+
+const ACTIVITY_INCLUDE = {
+  user: true,
+  facility: {
+    include: {
+      responsibleWorkerUser: true,
+      assistantWorkerUser: true,
+    },
+  },
+} as const;
 
 @Injectable()
 export class ActivitiesRepository implements IActivitiesRepository {
@@ -48,7 +61,6 @@ export class ActivitiesRepository implements IActivitiesRepository {
       name: user.name,
       typeId: user.typeId,
       email: user.email,
-      password: user.password,
       createdAt: user.createdAt,
       deletedAt: user.deletedAt,
       isActive: user.isActive,
@@ -56,20 +68,35 @@ export class ActivitiesRepository implements IActivitiesRepository {
   }
 
   private facilityPrismaToInterface(facility: FacilityFromPrisma): FacilityNavigation {
+    const stubUser = (id: number): UserNavigation => ({
+      id,
+      name: '',
+      typeId: 0,
+      email: null,
+      createdAt: new Date(0),
+      deletedAt: null,
+      isActive: true,
+    });
     return {
       id: facility.id,
       name: facility.type,
-      address: '',
-      city: '',
-      state: '',
+      capacity: facility.capacity,
+      responsibleWorker: facility.responsibleWorkerUser
+        ? this.userPrismaToInterface(facility.responsibleWorkerUser)
+        : stubUser(facility.responsibleWorker),
+      assistantWorker:
+        facility.assistantWorkerUser && facility.assistantWorker != null
+          ? this.userPrismaToInterface(facility.assistantWorkerUser)
+          : facility.assistantWorker != null
+            ? stubUser(facility.assistantWorker)
+            : null,
+      isActive: facility.isActive,
     };
   }
 
   private mapRow(row: ActivityWithRelations): ActivityResponse {
-    const cost = typeof row.cost === 'object' && row.cost !== null && 'toNumber' in row.cost
-      ? (row.cost as { toNumber(): number }).toNumber()
-      : Number(row.cost);
-    const response: ActivityResponse = {
+    const cost = row.cost.toNumber();
+    return {
       id: row.id,
       name: row.name,
       type: row.type,
@@ -80,7 +107,6 @@ export class ActivitiesRepository implements IActivitiesRepository {
       facility: this.facilityPrismaToInterface(row.facility),
       isActive: row.isActive,
     };
-    return response;
   }
 
   async create(createActivityDto: CreateActivityDto): Promise<ActivityResponse> {
@@ -91,14 +117,14 @@ export class ActivitiesRepository implements IActivitiesRepository {
         facilityId,
         isActive: isActive ?? true,
       },
-      include: { facility: true, user: true } as { facility: true },
+      include: ACTIVITY_INCLUDE as { user: true; facility: { include: { responsibleWorkerUser: true; assistantWorkerUser: true } } },
     });
     return this.mapRow(created as ActivityWithRelations);
   }
 
   async findAll(): Promise<ActivityResponse[]> {
     const list = await this.prisma.activity.findMany({
-      include: { facility: true, user: true } as { facility: true },
+      include: ACTIVITY_INCLUDE as { user: true; facility: { include: { responsibleWorkerUser: true; assistantWorkerUser: true } } },
     });
     return list.map((row) => this.mapRow(row as ActivityWithRelations));
   }
@@ -106,7 +132,7 @@ export class ActivitiesRepository implements IActivitiesRepository {
   async findById(id: number): Promise<ActivityResponse | null> {
     const row = await this.prisma.activity.findUnique({
       where: { id },
-      include: { facility: true, user: true } as { facility: true },
+      include: ACTIVITY_INCLUDE as { user: true; facility: { include: { responsibleWorkerUser: true; assistantWorkerUser: true } } },
     });
     return row ? this.mapRow(row as ActivityWithRelations) : null;
   }
@@ -124,7 +150,7 @@ export class ActivitiesRepository implements IActivitiesRepository {
     const updated = await this.prisma.activity.update({
       where: { id },
       data,
-      include: { facility: true, user: true } as { facility: true },
+      include: ACTIVITY_INCLUDE as { user: true; facility: { include: { responsibleWorkerUser: true; assistantWorkerUser: true } } },
     });
     return this.mapRow(updated as ActivityWithRelations);
   }

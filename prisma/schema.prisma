@@ -38,14 +38,16 @@ model facilities_membership {
 }
 
 model facilities {
-  id                   Int                    @id @default(autoincrement())
-  type                 String
-  capacity              Int
-  responsibleWorker     Int
-  assistantWorker       Int?
-  isActive              Boolean
-  activities            activity[]
-  facilities_membership facilities_membership[]
+  id                     Int                    @id @default(autoincrement())
+  type                   String
+  capacity               Int
+  responsibleWorker      Int
+  responsibleWorkerUser  users?                 @relation("FacilityResponsible", fields: [responsibleWorker], references: [id])
+  assistantWorker        Int?
+  assistantWorkerUser    users?                 @relation("FacilityAssistant", fields: [assistantWorker], references: [id])
+  isActive               Boolean
+  activities             activity[]
+  facilities_membership  facilities_membership[]
 }
 
 model activity {
@@ -116,8 +118,10 @@ model users {
   createdAt DateTime @default(now())
   deletedAt DateTime?
   isActive Boolean
-  memberships membership[]
-  activities   activity[]
+  memberships              membership[]
+  activities               activity[]
+  facilitiesAsResponsible  facilities[] @relation("FacilityResponsible")
+  facilitiesAsAssistant    facilities[] @relation("FacilityAssistant")
   salary Decimal? @db.Decimal(10, 2)
   hoursToWorkPerDay Int?
   startWorkAt DateTime?

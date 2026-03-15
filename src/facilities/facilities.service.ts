@@ -1,12 +1,10 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
-import { CreateFacilityDto } from './dto/create-facility.dto';
-import { UpdateFacilityDto } from './dto/update-facility.dto';
+import { CreateFacilityDto } from './dto/request/create-facility.dto';
+import { UpdateFacilityDto } from './dto/request/update-facility.dto';
 import { Facility } from './entities/facility.entity';
 import { FacilitiesRepository } from './repository/facilities.repository.impl';
 import type { FacilityResponse } from './repository/facilities.repository';
 import { PrismaService } from '../prisma/prisma.service';
-
-const WORKER_TYPE_ID = 1;
 
 @Injectable()
 export class FacilitiesService {
@@ -20,8 +18,8 @@ export class FacilitiesService {
       id: res.id,
       type: res.type,
       capacity: res.capacity,
-      responsibleWorker: res.responsibleWorker,
-      assistantWorker: res.assistantWorker ?? null,
+      responsibleWorker: res.responsibleWorker.id,
+      assistantWorker: res.assistantWorker?.id ?? null,
       isActive: res.isActive ?? true,
       membership: [],
     });
@@ -30,7 +28,9 @@ export class FacilitiesService {
   private async ensureWorker(userId: number, field: string): Promise<void> {
     const user = await this.prisma.users.findUnique({ where: { id: userId } });
     if (!user) throw new BadRequestException(`${field} not found`);
-    if (user.typeId !== WORKER_TYPE_ID) throw new BadRequestException(`${field} must be a Worker user`);
+    const workerType = await this.prisma.user_type.findFirst({ where: { name: 'Worker' } });
+    if (!workerType) throw new BadRequestException('Worker user type is not configured in the database');
+    if (user.typeId !== workerType.id) throw new BadRequestException(`${field} must be a Worker user`);
   }
 
   async create(createFacilityDto: CreateFacilityDto): Promise<Facility> {

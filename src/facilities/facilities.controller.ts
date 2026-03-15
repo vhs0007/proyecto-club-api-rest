@@ -1,8 +1,8 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth, ApiOkResponse, ApiCreatedResponse, ApiBody } from '@nestjs/swagger';
 import { FacilitiesService } from './facilities.service';
-import { CreateFacilityDto } from './dto/create-facility.dto';
-import { UpdateFacilityDto } from './dto/update-facility.dto';
+import { CreateFacilityDto } from './dto/request/create-facility.dto';
+import { UpdateFacilityDto } from './dto/request/update-facility.dto';
 import { Facility } from './entities/facility.entity';
 import { AuthGuard } from '../auth/guards/jwt-auth.guard';
 
