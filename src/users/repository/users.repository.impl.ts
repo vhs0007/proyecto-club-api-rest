@@ -2,13 +2,16 @@ import { Injectable } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { PrismaService } from '../../prisma/prisma.service';
 import type { IUsersRepository, UserResponse } from './users.repository';
-import { UpdateUserDto } from '../dto/update-user.dto';
-import { CreateUserDto } from '../dto/create-user.dto';
+import { UpdateUserDto } from '../dto/request/update-user.request.dto';
+import { CreateUserDto } from '../dto/request/create-user.request.dto';
+import { UserTypeResponseDto } from '../../user_type/dto/user-type-response.dto';
 
-function mapRow(row: {
+
+interface UserRow {
   id: number;
   name: string;
   typeId: number;
+  type?: UserTypeResponseDto;
   email: string | null;
   password: string | null;
   createdAt: Date;
@@ -28,11 +31,19 @@ function mapRow(row: {
   allergies: string | null;
   medications: string | null;
   medicalConditions: string | null;
-}): UserResponse {
+}
+
+function mapRow(row: UserRow): UserResponse {
+  const type = row.type ? new UserTypeResponseDto() : undefined;
+  if (type) {
+    type.id = row.type?.id ?? 0;
+    type.name = row.type?.name ?? '';
+  }
   return {
     id: row.id,
     name: row.name,
     typeId: row.typeId,
+    type: type,
     email: row.email,
     password: row.password,
     createdAt: row.createdAt,
@@ -81,17 +92,17 @@ export class UsersRepository implements IUsersRepository {
     if (createUserDto.allergies != null) data.allergies = createUserDto.allergies;
     if (createUserDto.medications != null) data.medications = createUserDto.medications;
     if (createUserDto.medicalConditions != null) data.medicalConditions = createUserDto.medicalConditions;
-    const created = await this.prisma.users.create({ data });
+    const created = await this.prisma.users.create({ data, include: { type: true } });
     return mapRow(created);
   }
 
   async findAll(): Promise<UserResponse[]> {
-    const users = await this.prisma.users.findMany();
+    const users = await this.prisma.users.findMany({ include: { type: true } });
     return users.map(mapRow);
   }
 
   async findById(id: number): Promise<UserResponse | null> {
-    const user = await this.prisma.users.findUnique({ where: { id } });
+    const user = await this.prisma.users.findUnique({ where: { id }, include: { type: true } });
     if (!user) return null;
     return mapRow(user);
   }
@@ -111,6 +122,7 @@ export class UsersRepository implements IUsersRepository {
     const updated = await this.prisma.users.update({
       where: { id },
       data: updateUserDto as Prisma.usersUncheckedUpdateInput,
+      include: { type: true },
     });
     return mapRow(updated);
   }
