@@ -6,19 +6,19 @@ export interface UserNavigation {
   name: string;
   typeId: number;
   email: string | null;
-  password: string | null;
   createdAt: Date;
   deletedAt: Date | null;
   isActive: boolean;
-}
+};
 
 export interface FacilityNavigation {
   id: number;
   name: string;
-  address: string;
-  city: string;
-  state: string;
-}
+  capacity: number;
+  responsibleWorker: UserNavigation;
+  assistantWorker: UserNavigation | null;
+  isActive: boolean;
+};
 
 export type ActivityResponse = {
   id: number;
