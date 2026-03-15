@@ -1,9 +1,9 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth, ApiBody } from '@nestjs/swagger';
 import { ActivitiesService } from './activities.service';
-import { CreateActivityDto } from './dto/create-activities.dto';
-import { UpdateActivityDto } from './dto/update-activities.dto';
-import { ActivityResponseDto } from './dto/activity-response.dto';
+import { CreateActivityDto } from './dto/request/create-activities.dto';
+import { UpdateActivityDto } from './dto/request/update-activities.dto';
+import { ActivityResponseDto } from './dto/response/activity-response.dto';
 import { AuthGuard } from '../auth/guards/jwt-auth.guard';
 
 @ApiTags('Activities')

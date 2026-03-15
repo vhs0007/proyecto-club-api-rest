@@ -1,4 +1,5 @@
 import { Facility } from 'src/facilities/entities/facility.entity';
+import { User } from 'src/users/entities/user.entity';
 
 export class Activity {
   private _id: number;
@@ -6,7 +7,7 @@ export class Activity {
   private _type: string;
   private _startAt: Date;
   private _endAt: Date;
-  private _userId: number;
+  private _user: User;
   private _cost: number;
   private _facility: Facility;
   private _isActive: boolean;
@@ -17,7 +18,7 @@ export class Activity {
     if (data?.type != null) this._type = data.type;
     if (data?.startAt != null) this._startAt = data.startAt;
     if (data?.endAt != null) this._endAt = data.endAt;
-    if (data?.userId != null) this._userId = data.userId;
+    if (data?.user != null) this._user = data.user;
     if (data?.cost != null) this._cost = data.cost;
     if (data?.facility != null) this._facility = data.facility;
     if (data?.isActive !== undefined) this._isActive = data.isActive;
@@ -58,11 +59,11 @@ export class Activity {
     this._endAt = value;
   }
 
-  get userId(): number {
-    return this._userId;
+  get user(): User {
+    return this._user;
   }
-  set userId(value: number) {
-    this._userId = value;
+  set user(value: User) {
+    this._user = value;
   }
 
   get cost(): number {
