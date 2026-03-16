@@ -28,7 +28,9 @@ export class FacilitiesService {
   private async ensureWorker(userId: number, field: string): Promise<void> {
     const user = await this.prisma.users.findUnique({ where: { id: userId } });
     if (!user) throw new BadRequestException(`${field} not found`);
-    const workerType = await this.prisma.user_type.findFirst({ where: { name: 'Worker' } });
+    const workerType = await this.prisma.user_type.findFirst({
+      where: { name: { equals: 'Worker', mode: 'insensitive' } },
+    });
     if (!workerType) throw new BadRequestException('Worker user type is not configured in the database');
     if (user.typeId !== workerType.id) throw new BadRequestException(`${field} must be a Worker user`);
   }
