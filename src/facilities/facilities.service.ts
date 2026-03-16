@@ -6,7 +6,7 @@ import { FacilitiesRepository } from './repository/facilities.repository.impl';
 import type { FacilityResponse, WorkerNavigation } from './repository/facilities.repository';
 import { PrismaService } from '../prisma/prisma.service';
 import { MembershipType } from '../membership_type/entities/membership_type.entity';
-import { Worker, WorkerRole } from '../users/entities/worker.entity';
+import { Worker } from '../users/entities/worker.entity';
 import { UserType } from '../users/entities/user.entity';
 
 @Injectable()
@@ -28,7 +28,6 @@ export class FacilitiesService {
       updatedAt: null,
       deletedAt: res.deletedAt ?? null,
       isActive: res.isActive ?? true,
-      role: WorkerRole.ADMINISTRATIVE,
       salary: 0,
       hoursToWorkPerDay: null,
       startWorkAt: new Date(0),

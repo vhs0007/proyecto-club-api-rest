@@ -1,7 +1,6 @@
 import { User, UserType } from './user.entity';
 
 export class Worker extends User {
-  private _role: WorkerRole;
   private _salary: number;
   private _hoursToWorkPerDay: number | null;
   private _startWorkAt: Date;
@@ -9,7 +8,6 @@ export class Worker extends User {
 
   constructor(data: Partial<Worker>) {
     super(data);
-    if (data?.role != null) this._role = data.role;
     if (data?.salary != null) this._salary = data.salary;
     if (data?.hoursToWorkPerDay !== undefined) this._hoursToWorkPerDay = data.hoursToWorkPerDay;
     if (data?.startWorkAt != null) this._startWorkAt = data.startWorkAt;
@@ -18,13 +16,6 @@ export class Worker extends User {
 
   override get type(): UserType {
     return UserType.WORKER;
-  }
-
-  get role(): WorkerRole {
-    return this._role;
-  }
-  set role(value: WorkerRole) {
-    this._role = value;
   }
 
   get salary(): number {
@@ -54,17 +45,4 @@ export class Worker extends User {
   set endWorkAt(value: Date) {
     this._endWorkAt = value;
   }
-}
-
-// Comentadisimo tu enum 😛
-// mentira sabes que te iba a poner esto como string y despues dije NO QUE PAJA y no lo hice 
-
-export enum WorkerRole {
-  ADMIN = 1,
-  COACH = 2,
-  NUTRITIONIST = 3,
-  PSYCHOLOGIST = 4,
-  PHYSICAL_THERAPIST = 5,
-  ADMINISTRATIVE = 6,
-  CLEANER = 7,
 }

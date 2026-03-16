@@ -19,7 +19,7 @@ export class Facility {
     if (data?.responsibleWorker != null) this._responsibleWorker = data.responsibleWorker;
     if (data?.assistantWorker !== undefined) this._assistantWorker = data.assistantWorker;
     if (data?.isActive !== undefined) this._isActive = data.isActive;
-    this._membershipTypes = (data as any)?.membershipTypes ?? [];
+    this._membershipTypes = (data)?.membershipTypes ?? [];
   }
 
   get id(): number {
