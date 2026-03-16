@@ -1,13 +1,16 @@
 import { Membership } from 'src/membership/entities/membership.entity';
+import { Activity } from 'src/activities/entities/activity.entity';
+import { MembershipType } from 'src/membership_type/entities/membership_type.entity';
+import { Worker } from 'src/users/entities/worker.entity';
 
 export class Facility {
   private _id: number;
   private _type: string;
   private _capacity: number;
-  private _responsibleWorker: number;
-  private _assistantWorker: number | null;
+  private _responsibleWorker: Worker;
+  private _assistantWorker: Worker | null;
   private _isActive: boolean;
-  private _membership: Membership[];
+  private _membershipTypes: MembershipType[];
 
   constructor(data: Partial<Facility>) {
     if (data?.id != null) this._id = data.id;
@@ -16,7 +19,7 @@ export class Facility {
     if (data?.responsibleWorker != null) this._responsibleWorker = data.responsibleWorker;
     if (data?.assistantWorker !== undefined) this._assistantWorker = data.assistantWorker;
     if (data?.isActive !== undefined) this._isActive = data.isActive;
-    this._membership = (data as any)?.membership ?? [];
+    this._membershipTypes = (data)?.membershipTypes ?? [];
   }
 
   get id(): number {
@@ -43,19 +46,19 @@ export class Facility {
     this._capacity = value;
   }
 
-  get responsibleWorker(): number {
+  get responsibleWorker(): Worker {
     return this._responsibleWorker;
   }
 
-  set responsibleWorker(value: number) {
+  set responsibleWorker(value: Worker) {
     this._responsibleWorker = value;
   }
 
-  get assistantWorker(): number | null {
+  get assistantWorker(): Worker | null {
     return this._assistantWorker;
   }
 
-  set assistantWorker(value: number | null) {
+  set assistantWorker(value: Worker | null) {
     this._assistantWorker = value;
   }
 
@@ -67,12 +70,12 @@ export class Facility {
     this._isActive = value;
   }
 
-  get membership(): Membership[] {
-    return this._membership;
+  get membershipTypes(): MembershipType[] {
+    return this._membershipTypes;
   }
 
-  set membership(value: Membership[]) {
-    this._membership = value;
+  set membershipTypes(value: MembershipType[]) {
+    this._membershipTypes = value;
   }
 }
 

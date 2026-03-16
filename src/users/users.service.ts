@@ -5,7 +5,7 @@ import { CreateUserDto } from './dto/request/create-user.request.dto';
 import { UpdateUserDto } from './dto/request/update-user.request.dto';
 import { Athlete, Gender } from './entities/athlete.entity';
 import { Member, MemberRole } from './entities/member.entity';
-import { Worker, WorkerRole } from './entities/worker.entity';
+import { Worker } from './entities/worker.entity';
 import { UserType } from './entities/user.entity';
 import type { UserResponse } from './repository/users.repository';
 import { UsersRepository } from './repository/users.repository.impl';
@@ -61,7 +61,6 @@ function mapResponseToUser(res: UserResponse): UserEntity {
     return new Worker({
       ...base,
       type: UserType.WORKER,
-      role: WorkerRole.ADMINISTRATIVE,
       salary: res.salary ?? 0,
       hoursToWorkPerDay: res.hoursToWorkPerDay,
       startWorkAt: res.startWorkAt ?? new Date(),

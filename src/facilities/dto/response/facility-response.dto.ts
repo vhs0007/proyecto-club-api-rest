@@ -1,6 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import type { WorkerNavigation } from '../../repository/facilities.repository';
-import type { ActivitiesNavigation } from '../../repository/facilities.repository';
+import type { ActivitiesNavigation, WorkerNavigation, MembershipTypeNavigation } from '../../repository/facilities.repository';
 
 
 export class FacilityResponseDto {
@@ -18,4 +17,6 @@ export class FacilityResponseDto {
   isActive: boolean;
   @ApiProperty({ example: [{ id: 1, name: 'Actividad 1', type: 'Tipo 1', startAt: '2026-01-01', endAt: '2026-01-01', user: { id: 1, name: 'Juan Perez', typeId: 1, email: 'juan.perez@example.com', password: '123456', createdAt: '2026-01-01', deletedAt: null, isActive: true }, cost: 100, facility: { id: 1, name: 'Gimnasio', type: 'Tipo 1', capacity: 100, responsibleWorker: { id: 1, name: 'Juan Perez', typeId: 1, email: 'juan.perez@example.com', password: '123456', createdAt: '2026-01-01', deletedAt: null, isActive: true }, assistantWorker: null, isActive: true }, isActive: true }], description: 'Actividades' })
   activities: ActivitiesNavigation[];
+  @ApiProperty({ example: [{ id: 1, name: 'Membresía 1' }], description: 'Membresías' })
+  membershipTypes: MembershipTypeNavigation[];
 }

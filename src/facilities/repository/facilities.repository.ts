@@ -2,11 +2,14 @@ import { FacilityNavigation } from 'src/activities/repository/activitities.repos
 import { CreateFacilityDto } from '../dto/request/create-facility.dto';
 import { UpdateFacilityDto } from '../dto/request/update-facility.dto';
 
-
+export interface UserTypeNavigation {
+  id: number;
+  name: string;
+};
 export interface WorkerNavigation {
   id: number;
   name: string;
-  typeId: number;
+  type: UserTypeNavigation;
   email: string | null;
   password: string | null;
   createdAt: Date;
@@ -14,17 +17,30 @@ export interface WorkerNavigation {
   isActive: boolean;
 };
 
+export interface UserNavigation {
+  id: number;
+  name: string;
+  type: UserTypeNavigation;
+  email: string | null;
+  createdAt: Date;
+  deletedAt: Date | null;
+  isActive: boolean;
+};
 export interface ActivitiesNavigation {
   id: number;
   name: string;
   type: string;
   startAt: Date;
   endAt: Date;
-  user: WorkerNavigation;
+  user: UserNavigation;
   cost: number;
-  facility: FacilityNavigation;
   isActive: boolean;
 };
+export interface MembershipTypeNavigation {
+  id: number;
+  name: string;
+  price: number;
+}
 
 export type FacilityResponse = {
   id: number;
@@ -33,7 +49,8 @@ export type FacilityResponse = {
   responsibleWorker: WorkerNavigation;
   assistantWorker: WorkerNavigation | null;
   isActive: boolean;
-  membershipTypeIds: number[];
+  activities: ActivitiesNavigation[];
+  membershipTypes: MembershipTypeNavigation[];
 };
 
 export interface IFacilitiesRepository {
