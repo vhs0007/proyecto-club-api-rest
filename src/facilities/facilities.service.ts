@@ -8,6 +8,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import { MembershipType } from '../membership_type/entities/membership_type.entity';
 import { Worker } from '../users/entities/worker.entity';
 import { UserType } from '../users/entities/user.entity';
+import { FacilityResponseDto } from './dto/response/facility-response.dto';
 
 @Injectable()
 export class FacilitiesService {
@@ -16,38 +17,19 @@ export class FacilitiesService {
     private readonly prisma: PrismaService,
   ) {}
 
-  private mapResponseToWorker(res: WorkerNavigation): Worker {
-    const userType = res.type.id as UserType;
-    return new Worker({
-      id: res.id,
-      name: res.name,
-      type: userType,
-      email: res.email ?? null,
-      password: res.password ?? null,
-      createdAt: res.createdAt ?? new Date(0),
-      updatedAt: null,
-      deletedAt: res.deletedAt ?? null,
-      isActive: res.isActive ?? true,
-      salary: 0,
-      hoursToWorkPerDay: null,
-      startWorkAt: new Date(0),
-      endWorkAt: new Date(0),
-    });
-  }
 
-  private mapResponseToFacility(res: FacilityResponse): Facility {
-    const membershipTypes = (res.membershipTypes ?? []).map(
-      (mt) => new MembershipType({ id: mt.id, name: mt.name, price: mt.price }),
-    );
-    return new Facility({
+  private mapResponseToFacility(res: FacilityResponse): FacilityResponseDto {
+
+    return {
       id: res.id,
       type: res.type,
       capacity: res.capacity,
-      responsibleWorker: this.mapResponseToWorker(res.responsibleWorker),
-      assistantWorker: res.assistantWorker != null ? this.mapResponseToWorker(res.assistantWorker) : null,
+      responsibleWorker: res.responsibleWorker,
+      assistantWorker: res.assistantWorker,
       isActive: res.isActive ?? true,
-      membershipTypes,
-    });
+      membershipTypes: res.membershipTypes,
+      activities: res.activities,
+    };
   }
 
   private async ensureWorker(userId: number, field: string): Promise<void> {
@@ -73,7 +55,7 @@ export class FacilitiesService {
     }
   }
 
-  async create(createFacilityDto: CreateFacilityDto): Promise<Facility> {
+  async create(createFacilityDto: CreateFacilityDto): Promise<FacilityResponseDto> {
     await this.ensureWorker(createFacilityDto.responsibleWorker, 'Responsible worker');
     if (createFacilityDto.assistantWorker != null) {
       await this.ensureWorker(createFacilityDto.assistantWorker, 'Assistant worker');
@@ -83,18 +65,18 @@ export class FacilitiesService {
     return this.mapResponseToFacility(res);
   }
 
-  async findAll(): Promise<Facility[]> {
+  async findAll(): Promise<FacilityResponseDto[]> {
     const list = await this.facilitiesRepository.findAll();
     return list.map((r) => this.mapResponseToFacility(r));
   }
 
-  async findOne(id: number): Promise<Facility> {
+  async findOne(id: number): Promise<FacilityResponseDto> {
     const row = await this.facilitiesRepository.findById(id);
     if (!row) throw new NotFoundException('Facility not found');
     return this.mapResponseToFacility(row);
   }
 
-  async update(id: number, updateFacilityDto: UpdateFacilityDto): Promise<Facility> {
+  async update(id: number, updateFacilityDto: UpdateFacilityDto): Promise<FacilityResponseDto> {
     const row = await this.facilitiesRepository.findById(id);
     if (!row) throw new NotFoundException('Facility not found');
     if (updateFacilityDto.responsibleWorker !== undefined) {
@@ -107,7 +89,7 @@ export class FacilitiesService {
     return this.mapResponseToFacility(updated);
   }
 
-  async remove(id: number): Promise<Facility> {
+  async remove(id: number): Promise<FacilityResponseDto> {
     const row = await this.facilitiesRepository.findById(id);
     if (!row) throw new NotFoundException('Facility not found');
     await this.facilitiesRepository.delete(id);
