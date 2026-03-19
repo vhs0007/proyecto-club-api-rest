@@ -27,10 +27,10 @@ export class UserTypeRepository implements IUserTypeRepository {
     };
   }
 
-  // async create(data: { name: string }): Promise<UserTypeResponse> {
-  //   const row = await this.prisma.user_type.create({ data: { name: data.name } });
-  //   return { id: row.id, name: row.name };
-  // }
+   async create(data: { name: string }): Promise<UserTypeResponse> {
+     const row = await this.prisma.user_type.create({ data: { name: data.name } });
+     return { id: row.id, name: row.name };
+   }
 
   // async update(id: number, data: UpdateUserTypeData): Promise<UserTypeResponse> {
   //   const updateData: { name?: string } = {};

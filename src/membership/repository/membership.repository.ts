@@ -1,10 +1,12 @@
 import { CreateMembershipDto } from '../dto/request/create-membership.dto';
 import { UpdateMembershipDto } from '../dto/request/update-membership.dto';
+import { Prisma } from '@prisma/client';
 
 export type MembershipResponse = {
   id: number;
   type: membershipTypeNavigation;
   user: userNavigation;
+  expiration: Date;
 };
 
 export interface userNavigation{
@@ -19,6 +21,7 @@ export interface userNavigation{
 export interface membershipTypeNavigation{
   id: number;
   name: string;
+  price: Prisma.Decimal;
 }
 
 export interface IMembershipRepository {

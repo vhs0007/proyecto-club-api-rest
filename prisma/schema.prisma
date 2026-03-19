@@ -18,7 +18,7 @@ model membership {
   typeId   Int
   userId   Int
   user     users          @relation(fields: [userId], references: [id])
-  expirations expirations[]
+  expiration DateTime
 }
 
 model membership_type {
@@ -136,12 +136,4 @@ model users {
   allergies String?
   medications String?
   medicalConditions String?
-}
-
-
-model expirations {
-  id             Int        @id @default(autoincrement())
-  expirationDate DateTime
-  membershipId   Int
-  membership     membership @relation(fields: [membershipId], references: [id])
 }

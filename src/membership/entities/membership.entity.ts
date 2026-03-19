@@ -1,10 +1,12 @@
 export class Membership {
   private _id: number;
   private _type: number;
-
+  private _expirationDate: Date;
+  
   constructor(data: Partial<Membership>) {
     if (data?.id != null) this._id = data.id;
     if (data?.type != null) this._type = data.type;
+    if (data?.expirationDate != null) this._expirationDate = data.expirationDate;
   }
 
   get id(): number {
@@ -19,6 +21,13 @@ export class Membership {
   }
   set type(value: number) {
     this._type = value;
+  }
+
+  get expirationDate(): Date {
+    return this._expirationDate;
+  }
+  set expirationDate(value: Date) {
+    this._expirationDate = value;
   }
 }
 

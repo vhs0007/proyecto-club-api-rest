@@ -10,7 +10,7 @@ export interface UpdateUserTypeData {
 export interface IUserTypeRepository {
   findAll(): Promise<UserTypeResponse[]>;
   findById(id: number): Promise<UserTypeResponse | null>;
-  // create(data: { name: string }): Promise<UserTypeResponse>;
+  create(data: { name: string }): Promise<UserTypeResponse>;
   // update(id: number, data: UpdateUserTypeData): Promise<UserTypeResponse>;
   // delete(id: number): Promise<void>;
 }

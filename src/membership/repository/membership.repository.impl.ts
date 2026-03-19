@@ -3,6 +3,8 @@ import { PrismaService } from '../../prisma/prisma.service';
 import type { IMembershipRepository, MembershipResponse } from './membership.repository';
 import { CreateMembershipDto } from '../dto/request/create-membership.dto';
 import { UpdateMembershipDto } from '../dto/request/update-membership.dto';
+import { MembershipType } from 'src/membership_type/entities/membership_type.entity';
+import { Prisma } from '@prisma/client';
 
 @Injectable()
 export class MembershipRepository implements IMembershipRepository {
@@ -26,17 +28,21 @@ export class MembershipRepository implements IMembershipRepository {
 
   async create(createMembershipDto: CreateMembershipDto): Promise<MembershipResponse> {
     const typeId = await this.getTypeIdById(createMembershipDto.type);
+    const expirationDate = new Date();
+    expirationDate.setDate(expirationDate.getDate() + 30);
     const created = await this.membership.create({
-      data: { typeId, userId: createMembershipDto.userId },
+      data: { typeId, userId: createMembershipDto.userId , expiration : expirationDate },
       include: { type: true, user: { include: { type: true } } },
     });
+    
     return this.mapToMembershipResponse(created);
   }
   
   private mapToMembershipResponse(row: {
     id: number;
     typeId: number;
-    type: { id: number; name: string } | null;
+    expiration: Date;
+    type: { id: number; name: string, price: Prisma.Decimal } | null;
     user: {
       id: number;
       name: string;
@@ -47,7 +53,7 @@ export class MembershipRepository implements IMembershipRepository {
     };
   }): MembershipResponse {
     const type =
-      row.type != null ? { id: row.type.id, name: row.type.name } : { id: row.typeId, name: '' };
+      row.type != null ? { id: row.type.id, name: row.type.name, price: row.type.price } : { id: row.typeId, name: '', price: new Prisma.Decimal(0) };
     const u = row.user;
     const user = {
       id: u.id,
@@ -57,7 +63,7 @@ export class MembershipRepository implements IMembershipRepository {
       isActive: u.isActive,
       type: u.type != null ? { id: u.type.id, name: u.type.name } : { id: 0, name: '' },
     };
-    return { id: row.id, type, user };
+    return { id: row.id, type, user, expiration : row.expiration };
   }
 
   async findAll(): Promise<MembershipResponse[]> {
