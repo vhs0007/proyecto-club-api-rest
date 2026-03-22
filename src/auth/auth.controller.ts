@@ -1,4 +1,4 @@
-import { Body, Controller, Post } from '@nestjs/common';
+import { Body, Controller, InternalServerErrorException, Post } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBody } from '@nestjs/swagger';
 import { AuthService } from './auth.service';
 import { LoginRequestDto } from './dto/login-request.dto';
@@ -13,6 +13,10 @@ export class AuthController {
   @ApiOperation({ summary: 'Iniciar sesión' })
   @ApiBody({ type: LoginRequestDto })
   login(@Body() loginRequest: LoginRequestDto): Promise<LoginResponse> {
-    return this.authService.authenticateUser(loginRequest);
+    try{
+      return this.authService.authenticateUser(loginRequest);
+    } catch (error) {
+      throw new InternalServerErrorException(error);
+    }
   }
 }

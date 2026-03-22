@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, NotFoundException, InternalServerErrorException } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth, ApiBody } from '@nestjs/swagger';
 import { UsersService } from './users.service';
 import { UserResponseDto } from './dto/response/user.response.dto';
@@ -17,31 +17,51 @@ export class UsersController {
   @ApiOperation({ summary: 'Crear usuario' })
   @ApiBody({ type: CreateUserDto })
   create(@Body() createUserDto: CreateUserDto): Promise<UserResponseDto> {
-    return this.usersService.create(createUserDto);
+    try{
+      return this.usersService.create(createUserDto);
+    } catch (error) {
+      throw new InternalServerErrorException(error);
+    }
   }
 
   @Get()
   @ApiOperation({ summary: 'Obtener todos los usuarios' })
   findAll(): Promise<UserResponseDto[]> {
-    return this.usersService.findAll();
+    try{
+      return this.usersService.findAll();
+    } catch (error) {
+      throw new InternalServerErrorException(error);
+    }
   }
 
   @Get(':id')
   @ApiOperation({ summary: 'Obtener usuario por ID' })
   findOne(@Param('id') id: string): Promise<UserResponseDto> {
-    return this.usersService.findOne(+id);
+    try{
+      return this.usersService.findOne(+id);
+    } catch (error) {
+      throw new NotFoundException(error);
+    }
   }
 
   @Patch(':id')
   @ApiOperation({ summary: 'Actualizar usuario' })
   @ApiBody({ type: UpdateUserDto })
   update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto): Promise<UserResponseDto> {
-    return this.usersService.update(+id, updateUserDto);
+    try{
+      return this.usersService.update(+id, updateUserDto);
+    } catch (error) {
+      throw new InternalServerErrorException(error);
+    }
   }
 
   @Delete(':id')
   @ApiOperation({ summary: 'Eliminar usuario' })
   remove(@Param('id') id: string): Promise<UserResponseDto> {
-    return this.usersService.remove(+id);
+    try{
+      return this.usersService.remove(+id);
+    } catch (error) {
+      throw new InternalServerErrorException(error);
+    }
   }
 }

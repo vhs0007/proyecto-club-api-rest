@@ -1,4 +1,4 @@
-import { Controller, Get, Param, UseGuards, Post , Body} from '@nestjs/common';
+import { Controller, Get, InternalServerErrorException, NotFoundException, Param, UseGuards } from '@nestjs/common';
 import { UserTypeService } from './user_type.service';
 import { ApiTags, ApiOperation, ApiBearerAuth , ApiBody} from '@nestjs/swagger';
 import { UserTypeResponseDto } from './dto/response/user-type-response.dto';
@@ -16,7 +16,11 @@ export class UserTypeController {
   @ApiOperation({ summary: 'Obtener todos los tipos de usuario' })
   @Get()
   findAll(): Promise<UserTypeResponseDto[]> {
-    return this.userTypeService.findAll();
+    try{
+      return this.userTypeService.findAll();
+    } catch (error) {
+      throw new InternalServerErrorException(error);
+    }
   }
 
    @Post()
@@ -29,7 +33,11 @@ export class UserTypeController {
   @ApiOperation({ summary: 'Obtener tipo de usuario por ID' })
   @Get(':id')
   findOne(@Param('id') id: string): Promise<UserTypeResponseDto> {
-    return this.userTypeService.findOne(+id);
+    try{
+      return this.userTypeService.findOne(+id);
+    } catch (error) {
+      throw new NotFoundException(error);
+    }
   }
 
   // @Patch(':id')
