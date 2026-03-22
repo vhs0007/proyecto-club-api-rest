@@ -36,10 +36,10 @@ export class MembershipTypeRepository implements IMembershipTypeRepository {
     };
   }
 
-  // async create(data: { name: string; price: number }): Promise<MembershipTypeResponse> {
-  //   const row = await this.prisma.membership_type.create({ data: { name: data.name, price: data.price } });
-  //   return { id: row.id, name: row.name, price: this.toNumber(row.price) };
-  // }
+   async create(data: { name: string; price: number }): Promise<MembershipTypeResponse> {
+     const row = await this.prisma.membership_type.create({ data: { name: data.name, price: data.price } });
+     return { id: row.id, name: row.name, price: this.toNumber(row.price) };
+   }
 
   // async update(id: number, data: UpdateMembershipTypeData): Promise<MembershipTypeResponse> {
   //   const updateData: { name?: string; price?: number } = {};

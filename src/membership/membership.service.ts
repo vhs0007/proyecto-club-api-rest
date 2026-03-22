@@ -19,6 +19,7 @@ export class MembershipService {
       id: row.id,
       user: row.user,
       membershipType: row.type,
+      expiration: row.expiration,
     }
   }
 

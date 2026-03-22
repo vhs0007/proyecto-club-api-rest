@@ -1,6 +1,8 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { MembershipTypeRepository } from './repository/membership_type.repository.impl';
 import type { MembershipTypeResponseDto } from './dto/response/membership_type-response.dto';
+import type { CreateMembershipTypeDto } from './dto/request/create-membership_type.dto';
+
 
 @Injectable()
 export class MembershipTypeService {
@@ -10,9 +12,9 @@ export class MembershipTypeService {
     return this.membershipTypeRepository.findAll();
   }
 
-  // async create(dto: CreateMembershipTypeDto): Promise<MembershipTypeResponseDto> {
-  //   return this.membershipTypeRepository.create({ name: dto.name, price: dto.price });
-  // }
+   async create(dto: CreateMembershipTypeDto): Promise<MembershipTypeResponseDto> {
+     return this.membershipTypeRepository.create({ name: dto.name, price: dto.price });
+   }
 
   async findOne(id: number): Promise<MembershipTypeResponseDto> {
     const row = await this.membershipTypeRepository.findById(id);

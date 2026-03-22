@@ -1,8 +1,9 @@
 import { Controller, Get, InternalServerErrorException, NotFoundException, Param, UseGuards } from '@nestjs/common';
 import { MembershipTypeService } from './membership_type.service';
-import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiBearerAuth , ApiBody} from '@nestjs/swagger';
 import { MembershipTypeResponseDto } from './dto/response/membership_type-response.dto';
 import { AuthGuard } from '../auth/guards/jwt-auth.guard';
+import { CreateMembershipTypeDto } from './dto/request/create-membership_type.dto'
 
 @ApiTags('Membership Type')
 @ApiBearerAuth()
@@ -21,12 +22,12 @@ export class MembershipTypeController {
     }
   }
 
-  // @Post()
-  // @ApiOperation({ summary: 'Crear tipo de membresía' })
-  // @ApiBody({ type: CreateMembershipTypeDto })
-  // create(@Body() dto: CreateMembershipTypeDto): Promise<MembershipTypeResponseDto> {
-  //   return this.membershipTypeService.create(dto);
-  // }
+   @Post()
+   @ApiOperation({ summary: 'Crear tipo de membresía' })
+   @ApiBody({ type: CreateMembershipTypeDto })
+   create(@Body() dto: CreateMembershipTypeDto): Promise<MembershipTypeResponseDto> {
+     return this.membershipTypeService.create(dto);
+   }
 
   @ApiOperation({ summary: 'Obtener tipo de membresía por ID' })
   @Get(':id')
