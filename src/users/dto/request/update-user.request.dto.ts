@@ -1,4 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { Type } from 'class-transformer';
 import {
   IsString,
   IsNumber,
@@ -39,11 +40,13 @@ export class UpdateUserDto {
 
   @ApiProperty({ required: false })
   @IsOptional()
+  @Type(() => Date)
   @IsDate({ message: 'startWorkAt debe ser una fecha válida' })
   startWorkAt?: Date;
 
   @ApiProperty({ required: false })
   @IsOptional()
+  @Type(() => Date)
   @IsDate({ message: 'endWorkAt debe ser una fecha válida' })
   endWorkAt?: Date;
 
@@ -66,6 +69,7 @@ export class UpdateUserDto {
 
   @ApiProperty({ required: false })
   @IsOptional()
+  @Type(() => Date)
   @IsDate({ message: 'birthDate debe ser una fecha válida' })
   birthDate?: Date;
 
