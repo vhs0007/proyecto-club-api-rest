@@ -19,6 +19,8 @@ model membership {
   userId   Int
   user     users          @relation(fields: [userId], references: [id])
   expiration DateTime
+  clubId Int
+  club clubs @relation(fields: [clubId], references: [id])
 }
 
 model membership_type {
@@ -27,6 +29,8 @@ model membership_type {
   price                 Decimal                @db.Decimal(10, 2) @default(0)
   memberships           membership[]
   facilities_membership facilities_membership[]
+  clubId Int
+  club clubs @relation(fields: [clubId], references: [id])
 }
 
 model facilities_membership {
@@ -48,6 +52,8 @@ model facilities {
   isActive               Boolean
   activities             activity[]
   facilities_membership  facilities_membership[]
+  clubId Int
+  club clubs @relation(fields: [clubId], references: [id])
 }
 
 model activity {
@@ -73,6 +79,8 @@ model activity {
   facilityId Int
   facility facilities @relation(fields: [facilityId], references: [id])
   isActive Boolean
+  clubId Int
+  club clubs @relation(fields: [clubId], references: [id])
 }
 
 model user_type {
@@ -111,6 +119,7 @@ model users {
   
   id Int @id @default(autoincrement())
   name String
+  document String @unique
   typeId Int
   type user_type @relation(fields: [typeId], references: [id])
   email String?
@@ -136,4 +145,51 @@ model users {
   allergies String?
   medications String?
   medicalConditions String?
+  time_entries time_entries[]
+  clubId Int
+  club clubs @relation(fields: [clubId], references: [id])
+}
+
+model time_entries {
+  id Int @id @default(autoincrement())
+  userId Int
+  clubId Int
+  userDocument String
+  club clubs @relation(fields: [clubId], references: [id])
+  user users @relation(fields: [userDocument], references: [document])
+  clockIn DateTime
+  clockOut DateTime?
+}
+
+model clubs{
+  id Int @id @default(autoincrement())
+  name String
+  address String
+  phone String
+  email String
+  website String
+  logo String?
+  isActive Boolean
+  facilities facilities[]
+  time_entries time_entries[]
+  users users[]
+  activities activity[]
+  memberships membership[]
+  membership_types membership_type[]
+  plugins_clubs plugins_clubs[]
+}
+
+model plugins {
+  id Int @id @default(autoincrement())
+  name String
+  description String
+  plugins_clubs plugins_clubs[]
+}
+
+model plugins_clubs {
+  id Int @id @default(autoincrement())
+  pluginId Int
+  clubId Int
+  plugin plugins @relation(fields: [pluginId], references: [id])
+  club clubs @relation(fields: [clubId], references: [id])
 }
