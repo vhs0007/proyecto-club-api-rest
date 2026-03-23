@@ -1,4 +1,4 @@
-import { Controller, Get, InternalServerErrorException, NotFoundException, Param, UseGuards } from '@nestjs/common';
+import { Controller, Get, InternalServerErrorException, NotFoundException, Param, UseGuards, Post, Body } from '@nestjs/common';
 import { MembershipTypeService } from './membership_type.service';
 import { ApiTags, ApiOperation, ApiBearerAuth , ApiBody} from '@nestjs/swagger';
 import { MembershipTypeResponseDto } from './dto/response/membership_type-response.dto';
