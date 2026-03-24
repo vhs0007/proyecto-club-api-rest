@@ -1,4 +1,4 @@
-import { Controller, Get, InternalServerErrorException, NotFoundException, Param, UseGuards, Post, Body } from '@nestjs/common';
+import { Controller, Get, InternalServerErrorException, NotFoundException, Param, UseGuards, Post, Body, ParseIntPipe, Query } from '@nestjs/common';
 import { MembershipTypeService } from './membership_type.service';
 import { ApiTags, ApiOperation, ApiBearerAuth , ApiBody} from '@nestjs/swagger';
 import { MembershipTypeResponseDto } from './dto/response/membership_type-response.dto';
@@ -14,9 +14,9 @@ export class MembershipTypeController {
 
   @ApiOperation({ summary: 'Obtener todos los tipos de membresía' })
   @Get()
-  findAll(): Promise<MembershipTypeResponseDto[]> {
+  findAll(@Query('clubId', ParseIntPipe) clubId: number): Promise<MembershipTypeResponseDto[]> {
     try{
-      return this.membershipTypeService.findAll();
+      return this.membershipTypeService.findAll(clubId);
     } catch (error) {
       throw new InternalServerErrorException(error);
     }

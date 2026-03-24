@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, InternalServerErrorException, NotFoundException } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, InternalServerErrorException, NotFoundException, Query } from '@nestjs/common';
 import { MembershipService } from './membership.service';
 import { CreateMembershipDto } from './dto/request/create-membership.dto';
 import { UpdateMembershipDto } from './dto/request/update-membership.dto';
@@ -27,9 +27,9 @@ export class MembershipController {
 
   @ApiOperation({ summary: 'Obtener todas las membresías' })
   @Get()
-  findAll(): Promise<MembershipResponseDto[]> {
+  findAll(@Query('clubId') clubId: number): Promise<MembershipResponseDto[]> {
     try{
-      return this.membershipService.findAll();
+      return this.membershipService.findAll(clubId);
     } catch (error) {
       throw new InternalServerErrorException(error);
     }

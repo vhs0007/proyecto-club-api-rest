@@ -1,4 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { Type } from 'class-transformer';
 import {
   IsString,
   IsNumber,
@@ -6,7 +7,9 @@ import {
   IsBoolean,
   IsDate,
   IsDateString,
+  IsArray,
   Min,
+  ValidateNested,
 } from 'class-validator';
 import { UserTypeResponseDto } from '../../../user_type/dto/response/user-type-response.dto';
 
@@ -27,6 +30,12 @@ export class UserResponseDto {
   @ApiProperty({ type: () => UserTypeResponseDto, description: 'Tipo de usuario (navegación)' })
   @IsOptional()
   type?: UserTypeResponseDto;
+
+  @ApiProperty({ required: false })
+  @IsOptional()
+  @IsArray({ message: 'time_entries debe ser un array' })
+  @IsDate({ message: 'time_entries debe ser una fecha válida' })
+  time_entries?: Date[] | null;
 
   @ApiProperty({ required: false })
   @IsOptional()

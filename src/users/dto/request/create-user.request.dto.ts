@@ -8,6 +8,7 @@ import {
   IsDate,
   IsDateString,
   Min,
+  IsArray,
 } from 'class-validator';
 
 export class CreateUserDto {
@@ -19,6 +20,17 @@ export class CreateUserDto {
   @IsNumber({}, { message: 'typeId debe ser un número' })
   @Min(1, { message: 'typeId debe ser mayor 1' })
   typeId: number;
+
+  @ApiProperty({ example: 1, description: 'ID del club' })
+  @IsNumber({}, { message: 'clubId debe ser un número' })
+  @Min(1, { message: 'clubId debe ser al menos 1' })
+  clubId: number;
+
+  @ApiProperty({ required: false, example: [new Date(), new Date()], description: 'Fichadas del usuario' })
+  @IsOptional()
+  @IsArray({ message: 'time_entries debe ser un array' })
+  @IsDate({ message: 'time_entries debe ser una fecha válida' })
+  time_entries?: Date[] | null;
 
   @ApiProperty({ required: false })
   @IsOptional()
@@ -120,4 +132,8 @@ export class CreateUserDto {
   @IsOptional()
   @IsString({ message: 'medicalConditions debe ser un texto' })
   medicalConditions?: string | null;
+
+  @ApiProperty({ example: '1234567890', description: 'Documento del usuario' })
+  @IsString({ message: 'document debe ser un texto' })
+  document: string;
 }

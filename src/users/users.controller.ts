@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, NotFoundException, InternalServerErrorException } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, NotFoundException, InternalServerErrorException, Query, ParseIntPipe } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth, ApiBody } from '@nestjs/swagger';
 import { UsersService } from './users.service';
 import { UserResponseDto } from './dto/response/user.response.dto';
@@ -26,9 +26,9 @@ export class UsersController {
 
   @Get()
   @ApiOperation({ summary: 'Obtener todos los usuarios' })
-  findAll(): Promise<UserResponseDto[]> {
+  findAll(@Query('clubId', ParseIntPipe) clubId: number): Promise<UserResponseDto[]> {
     try{
-      return this.usersService.findAll();
+      return this.usersService.findAll(clubId);
     } catch (error) {
       throw new InternalServerErrorException(error);
     }

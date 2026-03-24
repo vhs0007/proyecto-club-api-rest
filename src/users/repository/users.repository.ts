@@ -30,7 +30,7 @@ export interface UserResponse {
 
 export interface IUsersRepository {
   create(createUserDto: CreateUserDto): Promise<UserResponse>;
-  findAll(): Promise<UserResponse[]>;
+  findAll(clubId: number): Promise<UserResponse[]>;
   findById(id: number): Promise<UserResponse | null>;
   findByEmail(email: string): Promise<UserResponse | null>;
   existsTypeId(typeId: number): Promise<boolean>;

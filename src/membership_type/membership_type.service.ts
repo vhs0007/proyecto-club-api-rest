@@ -8,12 +8,12 @@ import type { CreateMembershipTypeDto } from './dto/request/create-membership_ty
 export class MembershipTypeService {
   constructor(private readonly membershipTypeRepository: MembershipTypeRepository) {}
 
-  async findAll(): Promise<MembershipTypeResponseDto[]> {
-    return this.membershipTypeRepository.findAll();
+  async findAll(clubId: number): Promise<MembershipTypeResponseDto[]> {
+    return this.membershipTypeRepository.findAll(clubId);
   }
 
    async create(dto: CreateMembershipTypeDto): Promise<MembershipTypeResponseDto> {
-     return this.membershipTypeRepository.create({ name: dto.name, price: dto.price });
+     return this.membershipTypeRepository.create({ name: dto.name, price: dto.price, clubId: dto.clubId });
    }
 
   async findOne(id: number): Promise<MembershipTypeResponseDto> {

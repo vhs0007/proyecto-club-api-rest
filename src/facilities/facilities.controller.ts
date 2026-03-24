@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, InternalServerErrorException, NotFoundException } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, InternalServerErrorException, NotFoundException, ParseIntPipe, Query } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth, ApiOkResponse, ApiCreatedResponse, ApiBody } from '@nestjs/swagger';
 import { FacilitiesService } from './facilities.service';
 import { CreateFacilityDto } from './dto/request/create-facility.dto';
@@ -29,9 +29,9 @@ export class FacilitiesController {
   @Get()
   @ApiOperation({ summary: 'Obtener todas las instalaciones' })
   @ApiOkResponse({ description: 'Lista de instalaciones' })
-  findAll(): Promise<FacilityResponseDto[]> {
+  findAll(@Query('clubId', ParseIntPipe) clubId: number): Promise<FacilityResponseDto[]> {
     try{
-      return this.facilitiesService.findAll();
+      return this.facilitiesService.findAll(clubId);
     } catch (error) {
       throw new InternalServerErrorException(error);
     }
