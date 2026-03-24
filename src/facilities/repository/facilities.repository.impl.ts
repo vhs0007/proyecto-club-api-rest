@@ -176,6 +176,7 @@ export class FacilitiesRepository implements IFacilitiesRepository {
         responsibleWorker,
         assistantWorker,
         isActive: createFacilityDto.isActive ?? true,
+        clubId: createFacilityDto.clubId,
       },
       include: FACILITY_INCLUDE as { responsibleWorkerUser: { include: { type: true } }, assistantWorkerUser: { include: { type: true } }, activities: { include: { user: { include: { type: true } } } }, facilities_membership: { include: { type: true } } },
     });
@@ -191,8 +192,9 @@ export class FacilitiesRepository implements IFacilitiesRepository {
     return withMembershipTypes ?? this.mapRow(created);
   }
   
-  async findAll(): Promise<FacilityResponse[]> {
+  async findAll(clubId: number): Promise<FacilityResponse[]> {
     const list = await this.prisma.facilities.findMany({
+      where: { clubId },
       include: FACILITY_INCLUDE as { responsibleWorkerUser: { include: { type: true } }, assistantWorkerUser: { include: { type: true } }, activities: { include: { user: { include: { type: true } } } }, facilities_membership: { include: { type: true } } },
     });
     return list.map((row) => this.mapRow(row));

@@ -10,9 +10,9 @@ export interface UpdateMembershipTypeData {
 }
 
 export interface IMembershipTypeRepository {
-  findAll(): Promise<MembershipTypeResponse[]>;
+  findAll(clubId: number): Promise<MembershipTypeResponse[]>;
   findById(id: number): Promise<MembershipTypeResponse | null>;
-  create(data: { name: string; price: number }): Promise<MembershipTypeResponse>;
+  create(data: { name: string; price: number; clubId: number }): Promise<MembershipTypeResponse>;
   // update(id: number, data: UpdateMembershipTypeData): Promise<MembershipTypeResponse>;
   // delete(id: number): Promise<void>;
 }

@@ -8,6 +8,7 @@ import {
   IsDate,
   IsDateString,
   Min,
+  IsArray,
 } from 'class-validator';
 
 export class UpdateUserDto {
@@ -123,4 +124,10 @@ export class UpdateUserDto {
   @IsNumber({}, { message: 'typeId debe ser un número' })
   @Min(1, { message: 'typeId debe ser 1, 2 o 3' })
   typeId?: number;
+
+  @ApiProperty({ required: false, example: [new Date(), new Date()], description: 'Fichadas del usuario' })
+  @IsOptional()
+  @IsArray({ message: 'time_entries debe ser un array' })
+  @IsDate({ message: 'time_entries debe ser una fecha válida' })
+  time_entries?: Date[] | null;
 }

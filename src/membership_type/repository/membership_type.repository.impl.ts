@@ -17,8 +17,8 @@ export class MembershipTypeRepository implements IMembershipTypeRepository {
     return Number(value);
   }
 
-  async findAll(): Promise<MembershipTypeResponse[]> {
-    const list = await this.prisma.membership_type.findMany();
+  async findAll(clubId: number): Promise<MembershipTypeResponse[]> {
+    const list = await this.prisma.membership_type.findMany({ where: { clubId }});
     return list.map((row) => ({
       id: row.id,
       name: row.name,
@@ -27,7 +27,7 @@ export class MembershipTypeRepository implements IMembershipTypeRepository {
   }
 
   async findById(id: number): Promise<MembershipTypeResponse | null> {
-    const row = await this.prisma.membership_type.findUnique({ where: { id } });
+    const row = await this.prisma.membership_type.findUnique({ where: { id }});
     if (!row) return null;
     return {
       id: row.id,
@@ -36,8 +36,8 @@ export class MembershipTypeRepository implements IMembershipTypeRepository {
     };
   }
 
-   async create(data: { name: string; price: number }): Promise<MembershipTypeResponse> {
-     const row = await this.prisma.membership_type.create({ data: { name: data.name, price: data.price } });
+   async create(data: { name: string; price: number; clubId: number }): Promise<MembershipTypeResponse> {
+     const row = await this.prisma.membership_type.create({ data: { name: data.name, price: data.price, clubId: data.clubId } });
      return { id: row.id, name: row.name, price: this.toNumber(row.price) };
    }
 
@@ -48,8 +48,8 @@ export class MembershipTypeRepository implements IMembershipTypeRepository {
   //   const row = await this.prisma.membership_type.update({
   //     where: { id },
   //     data: updateData,
-  //   });
-  //   return {
+    //   });
+    //   return {
   //     id: row.id,
   //     name: row.name,
   //     price: this.toNumber(row.price),

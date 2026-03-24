@@ -65,8 +65,8 @@ export class FacilitiesService {
     return this.mapResponseToFacility(res);
   }
 
-  async findAll(): Promise<FacilityResponseDto[]> {
-    const list = await this.facilitiesRepository.findAll();
+  async findAll(clubId: number): Promise<FacilityResponseDto[]> {
+    const list = await this.facilitiesRepository.findAll(clubId);
     return list.map((r) => this.mapResponseToFacility(r));
   }
 

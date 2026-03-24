@@ -28,4 +28,7 @@ export class ActivityResponseDto {
 
   @ApiProperty({ example: true, description: '¿Está activa la actividad?' })
   isActive: boolean;
+
+  @ApiProperty({ example: '1234567890', description: 'Documento del usuario' })
+  document: string;
 }

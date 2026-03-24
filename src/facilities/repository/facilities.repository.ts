@@ -54,8 +54,8 @@ export type FacilityResponse = {
 };
 
 export interface IFacilitiesRepository {
-  create(createFacilityDto: CreateFacilityDto): Promise<FacilityResponse>;
-  findAll(): Promise<FacilityResponse[]>;
+  create(createFacilityDto: CreateFacilityDto, clubId: number): Promise<FacilityResponse>;
+  findAll(clubId: number): Promise<FacilityResponse[]>;
   findById(id: number): Promise<FacilityResponse | null>;
   update(id: number, updateFacilityDto: UpdateFacilityDto): Promise<FacilityResponse>;
   delete(id: number): Promise<void>;

@@ -31,7 +31,7 @@ export class MembershipRepository implements IMembershipRepository {
     const expirationDate = new Date();
     expirationDate.setDate(expirationDate.getDate() + 30);
     const created = await this.membership.create({
-      data: { typeId, userId: createMembershipDto.userId , expiration : expirationDate },
+      data: { typeId, userId: createMembershipDto.userId , expiration : expirationDate, clubId: createMembershipDto.clubId},
       include: { type: true, user: { include: { type: true } } },
     });
     
@@ -66,10 +66,11 @@ export class MembershipRepository implements IMembershipRepository {
     return { id: row.id, type, user, expiration : row.expiration };
   }
 
-  async findAll(): Promise<MembershipResponse[]> {
+  async findAll(clubId: number): Promise<MembershipResponse[]> {
     const list = await this.membership.findMany({
+      where: { clubId },
       include: { type: true, user: { include: { type: true } } },
-    });
+    }); 
     return list.map((row) => this.mapToMembershipResponse(row));
   }
 

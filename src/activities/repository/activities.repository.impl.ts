@@ -14,6 +14,7 @@ type UserFromPrisma = {
   createdAt: Date;
   deletedAt: Date | null;
   isActive: boolean;
+  document: string;
 };
 
 type FacilityFromPrisma = {
@@ -39,6 +40,7 @@ type ActivityWithRelations = {
   isActive: boolean;
   user: UserFromPrisma;
   facility: FacilityFromPrisma;
+  clubId: number;
 };
 
 const ACTIVITY_INCLUDE = {
@@ -106,6 +108,8 @@ export class ActivitiesRepository implements IActivitiesRepository {
       cost,
       facility: this.facilityPrismaToInterface(row.facility),
       isActive: row.isActive,
+      clubId: row.clubId,
+      document: row.user.document,
     };
   }
 
@@ -116,14 +120,16 @@ export class ActivitiesRepository implements IActivitiesRepository {
         ...rest,
         facilityId,
         isActive: isActive ?? true,
+        clubId: createActivityDto.clubId,
       },
       include: ACTIVITY_INCLUDE as { user: true; facility: { include: { responsibleWorkerUser: true; assistantWorkerUser: true } } },
     });
     return this.mapRow(created as ActivityWithRelations);
   }
 
-  async findAll(): Promise<ActivityResponse[]> {
+  async findAll(clubId: number): Promise<ActivityResponse[]> {
     const list = await this.prisma.activity.findMany({
+      where: { clubId },
       include: ACTIVITY_INCLUDE as { user: true; facility: { include: { responsibleWorkerUser: true; assistantWorkerUser: true } } },
     });
     return list.map((row) => this.mapRow(row as ActivityWithRelations));

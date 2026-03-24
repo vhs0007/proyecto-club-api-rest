@@ -30,11 +30,13 @@ export type ActivityResponse = {
   cost: number;
   facility: FacilityNavigation;
   isActive: boolean;
+  clubId: number;
+  document: string;
 };
 
 export interface IActivitiesRepository {
   create(createActivityDto: CreateActivityDto): Promise<ActivityResponse>;
-  findAll(): Promise<ActivityResponse[]>;
+  findAll(clubId: number): Promise<ActivityResponse[]>;
   findById(id: number): Promise<ActivityResponse | null>;
   update(id: number, updateActivityDto: UpdateActivityDto): Promise<ActivityResponse>;
   delete(id: number): Promise<void>;

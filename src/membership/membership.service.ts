@@ -32,8 +32,8 @@ export class MembershipService {
     return this.fromPrismaToResponse(res);
   }
 
-  async findAll(): Promise<MembershipResponseDto[]> {
-    const list = await this.membershipRepository.findAll();
+  async findAll(clubId: number): Promise<MembershipResponseDto[]> {
+    const list = await this.membershipRepository.findAll(clubId);
     return list.map((r) => this.fromPrismaToResponse(r));
   }
 

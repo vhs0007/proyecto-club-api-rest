@@ -75,6 +75,8 @@ export class UsersRepository implements IUsersRepository {
       name: createUserDto.name,
       typeId: createUserDto.typeId,
       isActive: createUserDto.isActive,
+      clubId: createUserDto.clubId,
+      document: createUserDto.document,
     };
     if (createUserDto.email != null) data.email = createUserDto.email;
     if (createUserDto.password != null) data.password = createUserDto.password;
@@ -96,8 +98,8 @@ export class UsersRepository implements IUsersRepository {
     return mapRow(created);
   }
 
-  async findAll(): Promise<UserResponse[]> {
-    const users = await this.prisma.users.findMany({ include: { type: true } });
+  async findAll(clubId: number): Promise<UserResponse[]> {
+    const users = await this.prisma.users.findMany({ where: { clubId }, include: { type: true } });
     return users.map(mapRow);
   }
 

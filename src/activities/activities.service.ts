@@ -24,6 +24,7 @@ export class ActivitiesService {
       cost: row.cost,
       facility: row.facility,
       isActive: row.isActive,
+      document: row.document,
     }
   }
 
@@ -39,8 +40,8 @@ export class ActivitiesService {
     return this.toDto(result);
   }
 
-  async findAll(): Promise<ActivityResponseDto[]> {
-    const list = await this.activitiesRepository.findAll();
+  async findAll(clubId: number): Promise<ActivityResponseDto[]> {
+    const list = await this.activitiesRepository.findAll(clubId);
     return list.map((row) => this.toDto(row));
   }
 

@@ -125,8 +125,8 @@ export class UsersService {
     return mapToUserResponseDto(res);
   }
 
-  async findAll(): Promise<UserResponseDto[]> {
-    const list = await this.usersRepository.findAll();
+  async findAll(clubId: number): Promise<UserResponseDto[]> {
+    const list = await this.usersRepository.findAll(clubId);
     return list.map(mapToUserResponseDto);
   }
 

@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, InternalServerErrorException, NotFoundException } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, InternalServerErrorException, NotFoundException, ParseIntPipe, Query } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth, ApiBody } from '@nestjs/swagger';
 import { ActivitiesService } from './activities.service';
 import { CreateActivityDto } from './dto/request/create-activities.dto';
@@ -26,9 +26,9 @@ export class ActivitiesController {
 
   @Get()
   @ApiOperation({ summary: 'Obtener todas las actividades' })
-  findAll(): Promise<ActivityResponseDto[]> {
+  findAll(@Query('clubId', ParseIntPipe) clubId: number): Promise<ActivityResponseDto[]> {
     try{
-      return this.activitiesService.findAll();
+      return this.activitiesService.findAll(clubId);
     } catch (error) {
       throw new InternalServerErrorException(error);
     }

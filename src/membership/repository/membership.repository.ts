@@ -26,7 +26,7 @@ export interface membershipTypeNavigation{
 
 export interface IMembershipRepository {
   create(createMembershipDto: CreateMembershipDto): Promise<MembershipResponse>;
-  findAll(): Promise<MembershipResponse[]>;
+  findAll(clubId: number): Promise<MembershipResponse[]>;
   findById(id: number): Promise<MembershipResponse | null>;
   update(id: number, updateMembershipDto: UpdateMembershipDto): Promise<MembershipResponse>;
   delete(id: number): Promise<void>;
