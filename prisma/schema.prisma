@@ -86,6 +86,8 @@ model activity {
 model user_type {
   id    Int     @id @default(autoincrement())
   name  String
+  clubId Int
+  club clubs @relation(fields: [clubId], references: [id])
   users users[]
 }
 
@@ -177,6 +179,7 @@ model clubs{
   memberships membership[]
   membership_types membership_type[]
   plugins_clubs plugins_clubs[]
+  user_types user_type[]
 }
 
 model plugins {
