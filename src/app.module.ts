@@ -10,6 +10,7 @@ import { PrismaModule } from './prisma/prisma.module';
 import { MembershipTypeModule } from './membership_type/membership_type.module';
 import { UserTypeModule } from './user_type/user_type.module';
 import { ReportsModule } from './reports/reports.module';
+import { TimeEntriesModule } from './time-entries/time-entries.module';
 
 @Module({
   imports: [
@@ -22,6 +23,7 @@ import { ReportsModule } from './reports/reports.module';
     MembershipTypeModule,
     UserTypeModule,
     ReportsModule,
+    TimeEntriesModule,
   ],
   controllers: [AppController],
   providers: [AppService],
