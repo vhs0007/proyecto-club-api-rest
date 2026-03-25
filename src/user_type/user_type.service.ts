@@ -8,12 +8,12 @@ import type { CreateUserTypeDto } from './dto/request/create-user_type.dto';
 export class UserTypeService {
   constructor(private readonly userTypeRepository: UserTypeRepository) {}
 
-  async findAll(): Promise<UserTypeResponseDto[]> {
-    return this.userTypeRepository.findAll();
+  async findAll(clubId: number): Promise<UserTypeResponseDto[]> {
+    return this.userTypeRepository.findAll(clubId);
   }
 
    async create(createUserTypeDto: CreateUserTypeDto): Promise<UserTypeResponseDto> {
-     return this.userTypeRepository.create({ name: createUserTypeDto.name });
+     return this.userTypeRepository.create({ name: createUserTypeDto.name, clubId: createUserTypeDto.clubId });
    }
 
   async findOne(id: number): Promise<UserTypeResponseDto> {
