@@ -85,6 +85,9 @@ export class FacilitiesService {
     if (updateFacilityDto.assistantWorker !== undefined && updateFacilityDto.assistantWorker != null) {
       await this.ensureWorker(updateFacilityDto.assistantWorker, 'Assistant worker');
     }
+    if (updateFacilityDto.membershipTypeIds !== undefined) {
+      await this.ensureMembershipTypes(updateFacilityDto.membershipTypeIds);
+    }
     const updated = await this.facilitiesRepository.update(id, updateFacilityDto);
     return this.mapResponseToFacility(updated);
   }

@@ -11,11 +11,14 @@ export class ActivityResponseDto {
   @ApiProperty({ example: 'Type 1', description: 'Tipo de actividad' })
   type: string;
 
-  @ApiProperty({ example: '2026-01-01', description: 'Fecha de inicio de la actividad' })
-  startAt: Date;
+  @ApiProperty({ example: '10:00', description: 'Hora de inicio (HH:mm)' })
+  hourStart: string;
 
-  @ApiProperty({ example: '2026-01-01', description: 'Fecha de fin de la actividad' })
-  endAt: Date;
+  @ApiProperty({ example: '12:00', description: 'Hora de fin (HH:mm)' })
+  hourEnd: string;
+
+  @ApiProperty({ example: '2026-01-01', description: 'Fecha de la actividad' })
+  date: Date;
 
   @ApiProperty({ example: 1, description: 'Usuario' })
   user: UserNavigation;

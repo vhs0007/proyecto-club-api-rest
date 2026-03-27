@@ -49,4 +49,5 @@ export class CreateFacilityDto {
   @IsNumber({}, { message: 'clubId debe ser un número' })
   @Min(1, { message: 'clubId debe ser al menos 1' })
   clubId: number;
+  
 }

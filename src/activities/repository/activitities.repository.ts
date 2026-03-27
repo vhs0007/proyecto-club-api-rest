@@ -24,8 +24,9 @@ export type ActivityResponse = {
   id: number;
   name: string;
   type: string;
-  startAt: Date;
-  endAt: Date;
+  hourStart: string;
+  hourEnd: string;
+  date: Date;
   user: UserNavigation;
   cost: number;
   facility: FacilityNavigation;

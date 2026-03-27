@@ -32,8 +32,9 @@ type ActivityWithRelations = {
   id: number;
   name: string;
   type: string;
-  startAt: Date;
-  endAt: Date;
+  hourStart: string;
+  hourEnd: string;
+  date: Date;
   userId: number;
   cost: Prisma.Decimal;
   facilityId: number;
@@ -102,8 +103,9 @@ export class ActivitiesRepository implements IActivitiesRepository {
       id: row.id,
       name: row.name,
       type: row.type,
-      startAt: row.startAt,
-      endAt: row.endAt,
+      hourStart: row.hourStart,
+      hourEnd: row.hourEnd,
+      date: row.date,
       user: this.userPrismaToInterface(row.user),
       cost,
       facility: this.facilityPrismaToInterface(row.facility),
@@ -147,8 +149,9 @@ export class ActivitiesRepository implements IActivitiesRepository {
     const data: Record<string, unknown> = {};
     if (updateActivityDto.name !== undefined) data.name = updateActivityDto.name;
     if (updateActivityDto.type !== undefined) data.type = updateActivityDto.type;
-    if (updateActivityDto.startAt !== undefined) data.startAt = updateActivityDto.startAt;
-    if (updateActivityDto.endAt !== undefined) data.endAt = updateActivityDto.endAt;
+    if (updateActivityDto.hourStart !== undefined) data.hourStart = updateActivityDto.hourStart;
+    if (updateActivityDto.hourEnd !== undefined) data.hourEnd = updateActivityDto.hourEnd;
+    if (updateActivityDto.date !== undefined) data.date = updateActivityDto.date;
     if (updateActivityDto.userId !== undefined) data.userId = updateActivityDto.userId;
     if (updateActivityDto.cost !== undefined) data.cost = updateActivityDto.cost;
     if (updateActivityDto.facilityId !== undefined) data.facilityId = updateActivityDto.facilityId;

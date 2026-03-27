@@ -30,8 +30,9 @@ export interface ActivitiesNavigation {
   id: number;
   name: string;
   type: string;
-  startAt: Date;
-  endAt: Date;
+  date: Date;
+  hourStart: string;
+  hourEnd: string;
   user: UserNavigation;
   cost: number;
   isActive: boolean;

@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { PrismaService } from '../../prisma/prisma.service';
 import type { IFacilitiesRepository, FacilityResponse, MembershipTypeNavigation } from './facilities.repository';
@@ -46,8 +46,9 @@ type ActivityFromPrisma = {
   id: number;
   name: string;
   type: string;
-  startAt: Date;
-  endAt: Date;
+  date: Date;
+  hourStart: string;
+  hourEnd: string;
   userId: number;
   user: UserFromPrisma;
   cost: number;
@@ -126,8 +127,9 @@ export class FacilitiesRepository implements IFacilitiesRepository {
       id: activity.id,
       name: activity.name,
       type: activity.type,
-      startAt: activity.startAt,
-      endAt: activity.endAt,
+      date: activity.date,
+      hourStart: activity.hourStart,
+      hourEnd: activity.hourEnd,
       user: this.userPrismaToInterface(activity.user),
       cost: Number(activity.cost),
       isActive: activity.isActive,
@@ -216,6 +218,27 @@ export class FacilitiesRepository implements IFacilitiesRepository {
     if (updateFacilityDto.responsibleWorker !== undefined) data.responsibleWorker = updateFacilityDto.responsibleWorker;
     if (updateFacilityDto.assistantWorker !== undefined) data.assistantWorker = updateFacilityDto.assistantWorker;
     if (updateFacilityDto.isActive !== undefined) data.isActive = updateFacilityDto.isActive;
+
+    const membershipTypeIds = updateFacilityDto.membershipTypeIds;
+
+    if (membershipTypeIds !== undefined) {
+      await this.prisma.facilities_membership.deleteMany({ where: { facilityId: id } });
+      if (membershipTypeIds.length > 0) {
+        await this.prisma.facilities_membership.createMany({
+          data: membershipTypeIds.map(membershipTypeId => ({
+            facilityId: id,
+            membershipTypeId,
+          })),
+        });
+      }
+      if (Object.keys(data).length > 0) {
+        await this.prisma.facilities.update({ where: { id }, data });
+      }
+      const refreshed = await this.findById(id);
+      if (!refreshed) throw new NotFoundException(`Facility ${id} not found after update`);
+      return refreshed;
+    }
+
     const updated = await this.prisma.facilities.update({
       where: { id },
       data,
