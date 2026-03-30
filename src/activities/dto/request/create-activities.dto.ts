@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import {IsString, IsNumber,IsOptional,IsBoolean,IsDateString,Min,} from 'class-validator';
+import {IsString, IsNumber,IsOptional,IsBoolean,IsDateString,Min, IsDate,} from 'class-validator';
 
 export class CreateActivityDto {
   @ApiProperty({ example: 'Partido de fútbol', description: 'Nombre de la actividad' })
@@ -10,13 +10,13 @@ export class CreateActivityDto {
   @IsString({ message: 'type debe ser un texto' })
   type: string;
 
-  @ApiProperty({ example: '2026-03-03T10:00:00.000Z', description: 'Fecha y hora de inicio' })
-  @IsDateString({}, { message: 'startAt debe ser una fecha válida en formato ISO' })
-  startAt: string;
-
   @ApiProperty({ example: '2026-03-03T12:00:00.000Z', description: 'Fecha y hora de fin' })
   @IsDateString({}, { message: 'endAt debe ser una fecha válida en formato ISO' })
-  endAt: string;
+  hourEnd: string;
+
+  @ApiProperty({ example: '10:00', description: 'Hora de inicio' })
+  @IsString({ message: 'hourStart debe ser un texto' })
+  hourStart: string;
 
   @ApiProperty({ example: 1, description: 'Id del usuario' })
   @IsNumber({}, { message: 'userId debe ser un número' })
@@ -42,4 +42,8 @@ export class CreateActivityDto {
   @IsNumber({}, { message: 'clubId debe ser un número' })
   @Min(1, { message: 'clubId debe ser al menos 1' })
   clubId: number;
+
+  @ApiProperty({ example: '2026-03-03', description: 'Fecha de la actividad' })
+  @IsDate({ message: 'date debe ser una fecha válida' })
+  date: Date;
 }

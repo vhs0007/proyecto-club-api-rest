@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsString, IsNumber, IsOptional, IsBoolean, Min } from 'class-validator';
+import { IsString, IsNumber, IsOptional, IsBoolean, Min, Matches } from 'class-validator';
 
 export class UpdateActivityDto {
   @ApiProperty({ example: 'Partido de fútbol', required: false })
@@ -12,13 +12,17 @@ export class UpdateActivityDto {
   @IsString({ message: 'type debe ser un texto' })
   type?: string;
 
-  @ApiProperty({ example: '2026-03-03T10:00:00.000Z', required: false })
+  @ApiProperty({ example: '10:00', required: false })
   @IsOptional()
-  startAt?: string;
+  @IsString({ message: 'hourStart debe ser un texto' })
+  @Matches(/^([01]\d|2[0-3]):([0-5]\d)$/, { message: 'hourStart debe tener formato HH:mm' })
+  hourStart?: string;
 
-  @ApiProperty({ example: '2026-03-03T12:00:00.000Z', required: false })
+  @ApiProperty({ example: '12:00', required: false })
   @IsOptional()
-  endAt?: string;
+  @IsString({ message: 'hourEnd debe ser un texto' })
+  @Matches(/^([01]\d|2[0-3]):([0-5]\d)$/, { message: 'hourEnd debe tener formato HH:mm' })
+  hourEnd?: string;
 
   @ApiProperty({ example: 1, required: false })
   @IsOptional()
@@ -42,4 +46,9 @@ export class UpdateActivityDto {
   @IsOptional()
   @IsBoolean({ message: 'isActive debe ser true o false' })
   isActive?: boolean;
+
+  @ApiProperty({ example: '2026-03-03', description: 'Fecha de la actividad' })
+  @IsOptional()
+  @IsString({ message: 'date debe ser un texto' })
+  date: string;
 }

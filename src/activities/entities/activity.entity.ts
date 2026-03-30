@@ -5,23 +5,25 @@ export class Activity {
   private _id: number;
   private _name: string;
   private _type: string;
-  private _startAt: Date;
-  private _endAt: Date;
+  private _hourStart: string;
+  private _hourEnd: string;
   private _user: User;
   private _cost: number;
   private _facility: Facility;
   private _isActive: boolean;
+  private _date: Date;
 
   constructor(data: Partial<Activity>) {
     if (data?.id != null) this._id = data.id;
     if (data?.name != null) this._name = data.name;
     if (data?.type != null) this._type = data.type;
-    if (data?.startAt != null) this._startAt = data.startAt;
-    if (data?.endAt != null) this._endAt = data.endAt;
+    if (data?.hourStart != null) this._hourStart = data.hourStart;
+    if (data?.hourEnd != null) this._hourEnd = data.hourEnd;
     if (data?.user != null) this._user = data.user;
     if (data?.cost != null) this._cost = data.cost;
     if (data?.facility != null) this._facility = data.facility;
     if (data?.isActive !== undefined) this._isActive = data.isActive;
+    if (data?.date != null) this._date = data.date;
   }
 
   get id(): number {
@@ -45,18 +47,18 @@ export class Activity {
     this._type = value;
   }
 
-  get startAt(): Date {
-    return this._startAt;
+  get hourStart(): string {
+    return this._hourStart;
   }
-  set startAt(value: Date) {
-    this._startAt = value;
+  set hourStart(value: string) {
+    this._hourStart = value;
   }
 
-  get endAt(): Date {
-    return this._endAt;
+  get hourEnd(): string {
+    return this._hourEnd;
   }
-  set endAt(value: Date) {
-    this._endAt = value;
+  set hourEnd(value: string) {
+    this._hourEnd = value;
   }
 
   get user(): User {
@@ -85,5 +87,12 @@ export class Activity {
   }
   set isActive(value: boolean) {
     this._isActive = value;
+  }
+
+  get date(): Date {
+    return this._date;
+  } 
+  set date(value: Date) {
+    this._date = value;
   }
 }

@@ -61,8 +61,9 @@ model activity {
     id: number;
   name: string;
   type: string;
-  startAt: Date;
-  endAt: Date;
+  dateStart: Date;
+  hourStart: string;
+  hourEnd: string;
   userId: number;
   cost: number;
   facility: Facility;
@@ -71,8 +72,9 @@ model activity {
   id Int @id @default(autoincrement())
   name String
   type String
-  startAt DateTime
-  endAt DateTime
+  date DateTime
+  hourStart String
+  hourEnd String
   userId Int
   user     users     @relation(fields: [userId], references: [id])
   cost Decimal @db.Decimal(10, 2)

@@ -13,13 +13,19 @@ export class ActivitiesService {
     private readonly prisma: PrismaService,
   ) {}
 
+  private toMinutes(hour: string): number {
+    const [hh, mm] = hour.split(':').map((value) => Number(value));
+    return (hh * 60) + mm;
+  }
+
   private toDto(row: ActivityResponse): ActivityResponseDto {
     return{
       id: row.id,
       name: row.name,
       type: row.type,
-      startAt: row.startAt,
-      endAt: row.endAt,
+      hourStart: row.hourStart,
+      hourEnd: row.hourEnd,
+      date: row.date,
       user: row.user,
       cost: row.cost,
       facility: row.facility,
@@ -33,8 +39,8 @@ export class ActivitiesService {
     if (!user) throw new BadRequestException('User not found');
     const facility = await this.prisma.facilities.findUnique({ where: { id: createActivityDto.facilityId } });
     if (!facility) throw new BadRequestException('Facility not found');
-    if (new Date(createActivityDto.startAt) >= new Date(createActivityDto.endAt)) {
-      throw new BadRequestException('startAt must be before endAt');
+    if (this.toMinutes(createActivityDto.hourStart) >= this.toMinutes(createActivityDto.hourEnd)) {
+      throw new BadRequestException('hourStart must be before hourEnd');
     }
     const result = await this.activitiesRepository.create(createActivityDto);
     return this.toDto(result);
@@ -62,9 +68,11 @@ export class ActivitiesService {
       const facility = await this.prisma.facilities.findUnique({ where: { id: updateActivityDto.facilityId } });
       if (!facility) throw new BadRequestException('Facility not found');
     }
-    const startAt = updateActivityDto.startAt !== undefined ? new Date(updateActivityDto.startAt) : new Date(row.startAt);
-    const endAt = updateActivityDto.endAt !== undefined ? new Date(updateActivityDto.endAt) : new Date(row.endAt);
-    if (startAt >= endAt) throw new BadRequestException('startAt must be before endAt');
+    const hourStart = updateActivityDto.hourStart !== undefined ? updateActivityDto.hourStart : row.hourStart;
+    const hourEnd = updateActivityDto.hourEnd !== undefined ? updateActivityDto.hourEnd : row.hourEnd;
+    if (this.toMinutes(hourStart) >= this.toMinutes(hourEnd)) {
+      throw new BadRequestException('hourStart must be before hourEnd');
+    }
     const result = await this.activitiesRepository.update(id, updateActivityDto);
     return this.toDto(result);
   }
