@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import {IsString, IsNumber,IsOptional,IsBoolean,IsDateString,Min, IsDate,} from 'class-validator';
+import { IsString, IsNumber, IsOptional, IsBoolean, Min, IsDate, Matches } from 'class-validator';
 
 export class CreateActivityDto {
   @ApiProperty({ example: 'Partido de fútbol', description: 'Nombre de la actividad' })
@@ -10,12 +10,14 @@ export class CreateActivityDto {
   @IsString({ message: 'type debe ser un texto' })
   type: string;
 
-  @ApiProperty({ example: '2026-03-03T12:00:00.000Z', description: 'Fecha y hora de fin' })
-  @IsDateString({}, { message: 'endAt debe ser una fecha válida en formato ISO' })
+  @ApiProperty({ example: '12:00', description: 'Hora de fin (HH:mm, 24h)' })
+  @IsString({ message: 'hourEnd debe ser un texto' })
+  @Matches(/^([01]\d|2[0-3]):([0-5]\d)$/, { message: 'hourEnd debe tener formato HH:mm' })
   hourEnd: string;
 
-  @ApiProperty({ example: '10:00', description: 'Hora de inicio' })
+  @ApiProperty({ example: '10:00', description: 'Hora de inicio (HH:mm, 24h)' })
   @IsString({ message: 'hourStart debe ser un texto' })
+  @Matches(/^([01]\d|2[0-3]):([0-5]\d)$/, { message: 'hourStart debe tener formato HH:mm' })
   hourStart: string;
 
   @ApiProperty({ example: 1, description: 'Id del usuario' })
