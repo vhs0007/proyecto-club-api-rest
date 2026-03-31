@@ -6,6 +6,8 @@ import { NewUsersReportRequestDto } from './dto/request/newUsers_report-request'
 import { NewUsersReportResponseDto } from './dto/response/newUsers_report-response';
 import { MonthIncomeReportRequestDto } from './dto/request/monthIncome_report-request.dto';
 import { MonthIncomeReportResponseDto } from './dto/response/monthIncome_report-respones.dto';
+import { MonthlyProgressionIncomeReportRequestDto } from './dto/request/monthlyProgressionIncome_report-request.dto';
+import { MonthlyProgressionIncomeReportResponseDto } from './dto/response/monthlyProgressionIncome_report-response.dto';
 
 @Injectable()
 export class ReportsService {
@@ -21,5 +23,9 @@ export class ReportsService {
 
   async getMonthIncomeReport(request: MonthIncomeReportRequestDto): Promise<MonthIncomeReportResponseDto> {
     return this.reportsRepository.getMonthIncomeReport(request);
+  }
+
+  async getMonthlyProgressionIncomeReport(request: MonthlyProgressionIncomeReportRequestDto): Promise<MonthlyProgressionIncomeReportResponseDto> {
+    return this.reportsRepository.getMonthlyProgressionIncomeReport(request);
   }
 }

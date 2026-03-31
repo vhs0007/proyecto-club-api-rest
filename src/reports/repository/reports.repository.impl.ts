@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from "@nestjs/common";
+import { BadRequestException, Injectable, NotFoundException } from "@nestjs/common";
 import { IReportsRepository } from "./reports.repository";
 import { SalaryReportRequestDto } from "../dto/request/salary_report-request.dto";
 import { PrismaService } from "src/prisma/prisma.service";
@@ -9,6 +9,8 @@ import { NewUsersReportResponseDto } from "../dto/response/newUsers_report-respo
 import { NewUsersReportRequestDto } from "../dto/request/newUsers_report-request";
 import { MonthIncomeReportRequestDto } from "../dto/request/monthIncome_report-request.dto";
 import { MonthIncomeReportResponseDto } from "../dto/response/monthIncome_report-respones.dto";
+import { MonthlyProgressionIncomeReportRequestDto } from "../dto/request/monthlyProgressionIncome_report-request.dto";
+import { MonthlyProgressionIncomeReportResponseDto } from "../dto/response/monthlyProgressionIncome_report-response.dto";
 
 
 interface UserFromPrisma {
@@ -171,4 +173,53 @@ export class ReportsRepository implements IReportsRepository {
       monthIncomeActivities,
     };
   }
+
+  async getMonthlyProgressionIncomeReport(request: MonthlyProgressionIncomeReportRequestDto): Promise<MonthlyProgressionIncomeReportResponseDto> {
+    const start = new Date(request.dateStart);
+    const end = new Date(request.dateEnd);
+
+    if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime())) {
+      throw new BadRequestException("Las fechas ingresadas no son válidas");
+    }
+
+    const current = new Date(start.getFullYear(), start.getMonth(), 1);
+    const endMonth = new Date(end.getFullYear(), end.getMonth(), 1);
+
+    if (current > endMonth) {
+      throw new BadRequestException("dateStart no puede ser mayor a dateEnd");
+    }
+
+    const monthlyIncomes: MonthIncomeReportResponseDto[] = [];
+
+    while (current <= endMonth) {
+      const monthIncome = await this.getMonthIncomeReport({
+        clubId: request.clubId,
+        date: current.toISOString(),
+      });
+
+      monthlyIncomes.push(monthIncome);
+
+      current.setMonth(current.getMonth() + 1);
+    }
+
+    const totalIncome = monthlyIncomes.reduce(
+      (acc, month) => acc + month.monthIncomeTotal, 0
+    );
+    const totalIncomeMemberships = monthlyIncomes.reduce(
+      (acc, month) => acc + month.monthIncomeMemberships, 0
+    );
+    const totalIncomeActivities = monthlyIncomes.reduce(
+      (acc, month) => acc + month.monthIncomeActivities, 0
+    );
+    return {
+      dateStart: start,
+      dateEnd: end,
+      totalIncome,
+      totalIncomeMemberships,
+      totalIncomeActivities,
+      monthlyIncomes,
+    };
+  }
+
+
 }

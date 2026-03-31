@@ -7,6 +7,8 @@ import { NewUsersReportRequestDto } from './dto/request/newUsers_report-request'
 import { NewUsersReportResponseDto } from './dto/response/newUsers_report-response';
 import { MonthIncomeReportRequestDto } from './dto/request/monthIncome_report-request.dto';
 import { MonthIncomeReportResponseDto } from './dto/response/monthIncome_report-respones.dto';
+import { MonthlyProgressionIncomeReportRequestDto } from './dto/request/monthlyProgressionIncome_report-request.dto';
+import { MonthlyProgressionIncomeReportResponseDto } from './dto/response/monthlyProgressionIncome_report-response.dto';
 
 @Controller('reports')
 export class ReportsController {
@@ -37,6 +39,16 @@ export class ReportsController {
   async getNewUsersReport(@Query() request: NewUsersReportRequestDto): Promise<NewUsersReportResponseDto> {
     try{
       return this.reportsService.getNewUsersReport(request);
+    } catch (error) {
+      throw new InternalServerErrorException(error);
+    }
+  }
+
+  @Get('monthlyProgressionIncome')
+  @ApiOperation({ summary: 'Obtener reporte de ingresos mensuales' })
+  async getMonthlyProgressionIncomeReport(@Query() request: MonthlyProgressionIncomeReportRequestDto): Promise<MonthlyProgressionIncomeReportResponseDto> {
+    try{
+      return this.reportsService.getMonthlyProgressionIncomeReport(request);
     } catch (error) {
       throw new InternalServerErrorException(error);
     }
