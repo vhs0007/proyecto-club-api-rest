@@ -134,4 +134,8 @@ export class CreateUserDto {
   @IsOptional()
   @IsString({ message: 'medicalConditions debe ser un texto' })
   medicalConditions?: string | null;
+
+  @ApiProperty({ required: true })
+  @IsString({ message: 'document debe ser un texto' })
+  document: string;
 }

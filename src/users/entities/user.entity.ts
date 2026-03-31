@@ -8,6 +8,7 @@ export abstract class User {
   private _updatedAt: Date | null;
   private _deletedAt: Date | null;
   private _isActive: boolean;
+  private _document: string;
 
   constructor(data: Partial<User>) {
     if (data?.id != null) this._id = data.id;
@@ -19,6 +20,7 @@ export abstract class User {
     if (data?.updatedAt !== undefined) this._updatedAt = data.updatedAt;
     if (data?.deletedAt !== undefined) this._deletedAt = data.deletedAt;
     if (data?.isActive !== undefined) this._isActive = data.isActive;
+    if (data?.document != null) this._document = data.document;
   }
 
   get id(): number {
@@ -82,6 +84,12 @@ export abstract class User {
   }
   set isActive(value: boolean) {
     this._isActive = value;
+  }
+  get document(): string {
+    return this._document;
+  }
+  set document(value: string) {
+    this._document = value;
   }
 }
 

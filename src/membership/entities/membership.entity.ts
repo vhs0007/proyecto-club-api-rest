@@ -3,11 +3,13 @@ export class Membership {
   private _type: number;
   private _expirationDate: Date;
   private _clubId: number;
+  private _createdAt: Date;
   constructor(data: Partial<Membership>) {
     if (data?.id != null) this._id = data.id;
     if (data?.type != null) this._type = data.type;
     if (data?.expirationDate != null) this._expirationDate = data.expirationDate;
     if (data?.clubId != null) this._clubId = data.clubId;
+    if (data?.createdAt != null) this._createdAt = data.createdAt;
   }
 
   get id(): number {
@@ -36,6 +38,13 @@ export class Membership {
   }
   set clubId(value: number) {
     this._clubId = value;
+  }
+
+  get createdAt(): Date {
+    return this._createdAt;
+  }
+  set createdAt(value: Date) {
+    this._createdAt = value;
   }
 }
 

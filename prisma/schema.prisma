@@ -17,6 +17,7 @@ model membership {
   type     membership_type @relation(fields: [typeId], references: [id])
   typeId   Int
   userId   Int
+  createdAt DateTime
   user     users          @relation(fields: [userId], references: [id])
   expiration DateTime
   clubId Int

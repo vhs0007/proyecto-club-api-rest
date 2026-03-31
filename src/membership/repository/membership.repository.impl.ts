@@ -28,10 +28,11 @@ export class MembershipRepository implements IMembershipRepository {
 
   async create(createMembershipDto: CreateMembershipDto): Promise<MembershipResponse> {
     const typeId = await this.getTypeIdById(createMembershipDto.type);
+    const dateCreated = new Date();
     const expirationDate = new Date();
     expirationDate.setDate(expirationDate.getDate() + 30);
     const created = await this.membership.create({
-      data: { typeId, userId: createMembershipDto.userId , expiration : expirationDate, clubId: createMembershipDto.clubId},
+      data: { typeId, createdAt: dateCreated, userId: createMembershipDto.userId , expiration : expirationDate, clubId: createMembershipDto.clubId},
       include: { type: true, user: { include: { type: true } } },
     });
     
@@ -43,6 +44,7 @@ export class MembershipRepository implements IMembershipRepository {
     typeId: number;
     expiration: Date;
     type: { id: number; name: string, price: Prisma.Decimal } | null;
+    createdAt: Date;
     user: {
       id: number;
       name: string;
@@ -63,7 +65,7 @@ export class MembershipRepository implements IMembershipRepository {
       isActive: u.isActive,
       type: u.type != null ? { id: u.type.id, name: u.type.name } : { id: 0, name: '' },
     };
-    return { id: row.id, type, user, expiration : row.expiration };
+    return { id: row.id, type, user, expiration : row.expiration , createdAt: row.createdAt};
   }
 
   async findAll(clubId: number): Promise<MembershipResponse[]> {
