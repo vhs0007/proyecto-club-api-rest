@@ -1,10 +1,23 @@
-import { Controller, Get, InternalServerErrorException, NotFoundException, Param, UseGuards, Post, Body, ParseIntPipe, Query } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  InternalServerErrorException,
+  NotFoundException,
+  Param,
+  UseGuards,
+  Post,
+  Body,
+  ParseIntPipe,
+  Query,
+  Patch,
+  Delete,
+} from '@nestjs/common';
 import { MembershipTypeService } from './membership_type.service';
 import { ApiTags, ApiOperation, ApiBearerAuth , ApiBody} from '@nestjs/swagger';
 import { MembershipTypeResponseDto } from './dto/response/membership_type-response.dto';
 import { AuthGuard } from '../auth/guards/jwt-auth.guard';
 import { CreateMembershipTypeDto } from './dto/request/create-membership_type.dto'
-
+import { UpdateMembershipTypeDto } from './dto/request/update-membership_type.dto'
 @ApiTags('Membership Type')
 @ApiBearerAuth()
 @Controller('membership-type')
@@ -39,19 +52,19 @@ export class MembershipTypeController {
     }
   }
 
-  // @ApiOperation({ summary: 'Actualizar tipo de membresía' })
-  // @Patch(':id')
-  // @ApiBody({ type: UpdateMembershipTypeDto })
-  // update(
-  //   @Param('id') id: string,
-  //   @Body() updateMembershipTypeDto: UpdateMembershipTypeDto,
-  // ): Promise<MembershipType> {
-  //   return this.membershipTypeService.update(+id, updateMembershipTypeDto);
-  // }
+  @ApiOperation({ summary: 'Actualizar tipo de membresía' })
+  @Patch(':id')
+  @ApiBody({ type: UpdateMembershipTypeDto })
+  update(
+    @Param('id') id: string,
+    @Body() updateMembershipTypeDto: UpdateMembershipTypeDto,
+  ): Promise<MembershipTypeResponseDto> {
+    return this.membershipTypeService.update(+id, updateMembershipTypeDto);
+  }
 
-  // @ApiOperation({ summary: 'Eliminar tipo de membresía' })
-  // @Delete(':id')
-  // remove(@Param('id') id: string): Promise<void> {
-  //   return this.membershipTypeService.remove(+id);
-  // }
+  @ApiOperation({ summary: 'Eliminar tipo de membresía' })
+  @Delete(':id')
+  remove(@Param('id') id: string): Promise<void> {
+    return this.membershipTypeService.remove(+id);
+  }
 }

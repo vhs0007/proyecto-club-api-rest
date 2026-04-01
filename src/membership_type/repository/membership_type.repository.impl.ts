@@ -41,22 +41,22 @@ export class MembershipTypeRepository implements IMembershipTypeRepository {
      return { id: row.id, name: row.name, price: this.toNumber(row.price) };
    }
 
-  // async update(id: number, data: UpdateMembershipTypeData): Promise<MembershipTypeResponse> {
-  //   const updateData: { name?: string; price?: number } = {};
-  //   if (data.name !== undefined) updateData.name = data.name;
-  //   if (data.price !== undefined) updateData.price = data.price;
-  //   const row = await this.prisma.membership_type.update({
-  //     where: { id },
-  //     data: updateData,
-    //   });
-    //   return {
-  //     id: row.id,
-  //     name: row.name,
-  //     price: this.toNumber(row.price),
-  //   };
-  // }
+  async update(id: number, data: UpdateMembershipTypeData): Promise<MembershipTypeResponse> {
+    const updateData: { name?: string; price?: number } = {};
+    if (data.name !== undefined) updateData.name = data.name;
+    if (data.price !== undefined) updateData.price = data.price;
+    const row = await this.prisma.membership_type.update({
+      where: { id },
+      data: updateData,
+    });
+    return {
+      id: row.id,
+      name: row.name,
+      price: this.toNumber(row.price),
+    };
+  }
 
-  // async delete(id: number): Promise<void> {
-  //   await this.prisma.membership_type.delete({ where: { id } });
-  // }
+  async delete(id: number): Promise<void> {
+    await this.prisma.membership_type.delete({ where: { id } });
+  }
 }

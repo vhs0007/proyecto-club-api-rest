@@ -2,6 +2,8 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { MembershipTypeRepository } from './repository/membership_type.repository.impl';
 import type { MembershipTypeResponseDto } from './dto/response/membership_type-response.dto';
 import type { CreateMembershipTypeDto } from './dto/request/create-membership_type.dto';
+import type { UpdateMembershipTypeDto } from './dto/request/update-membership_type.dto';
+import type { UpdateMembershipTypeData } from './repository/membership_type.repository';
 
 
 @Injectable()
@@ -22,12 +24,22 @@ export class MembershipTypeService {
     return row;
   }
 
-  // async update(id: number, updateMembershipTypeDto: UpdateMembershipTypeDto): Promise<MembershipType> {
-  //   const res = await this.membershipTypeRepository.update(id, updateMembershipTypeDto);
-  //   return this.mapResponseToMembershipType(res);
-  // }
+  async update(
+    id: number,
+    updateMembershipTypeDto: UpdateMembershipTypeDto,
+  ): Promise<MembershipTypeResponseDto> {
+    await this.findOne(id);
+    const data: UpdateMembershipTypeData = {};
+    if (updateMembershipTypeDto.name !== undefined) data.name = updateMembershipTypeDto.name;
+    if (updateMembershipTypeDto.price !== undefined) data.price = updateMembershipTypeDto.price;
+    if (Object.keys(data).length === 0) {
+      return this.findOne(id);
+    }
+    return this.membershipTypeRepository.update(id, data);
+  }
 
-  // async remove(id: number): Promise<void> {
-  //   await this.membershipTypeRepository.delete(id);
-  // }
+  async remove(id: number): Promise<void> {
+    await this.findOne(id);
+    await this.membershipTypeRepository.delete(id);
+  }
 }
