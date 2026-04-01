@@ -77,12 +77,12 @@ export class UpdateUserDto {
   @ApiProperty({ required: false })
   @IsOptional()
   @IsDateString({}, { message: 'createdAt debe ser una fecha válida en formato ISO' })
-  createdAt?: Date;
+  createdAt?: string;
 
   @ApiProperty({ required: false })
   @IsOptional()
   @IsDateString({}, { message: 'deletedAt debe ser una fecha válida en formato ISO' })
-  deletedAt?: Date | null;
+  deletedAt?: string | null;
 
   @ApiProperty({ required: false })
   @IsOptional()

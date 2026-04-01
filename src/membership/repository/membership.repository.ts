@@ -7,6 +7,7 @@ export type MembershipResponse = {
   type: membershipTypeNavigation;
   user: userNavigation;
   expiration: Date;
+  createdAt: Date;
 };
 
 export interface userNavigation{

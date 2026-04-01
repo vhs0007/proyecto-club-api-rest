@@ -37,6 +37,10 @@ export class UserResponseDto {
   @IsDate({ message: 'time_entries debe ser una fecha válida' })
   time_entries?: Date[] | null;
 
+  @ApiProperty({ required: true })
+  @IsString({ message: 'document debe ser un texto' })
+  document: string;
+  
   @ApiProperty({ required: false })
   @IsOptional()
   @IsString({ message: 'email debe ser un texto' })

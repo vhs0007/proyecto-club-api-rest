@@ -5,4 +5,5 @@ export class MembershipResponseDto {
   user: userNavigation;
   membershipType: membershipTypeNavigation;
   expiration: Date;
+  createdAt: Date;
 }
