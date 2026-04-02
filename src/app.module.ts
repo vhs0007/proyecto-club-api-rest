@@ -1,4 +1,5 @@
-import { Module } from '@nestjs/common';
+import { MiddlewareConsumer, Module, NestModule, RequestMethod } from '@nestjs/common';
+import { APP_INTERCEPTOR } from '@nestjs/core';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AuthModule } from './auth/auth.module';
@@ -11,6 +12,8 @@ import { MembershipTypeModule } from './membership_type/membership_type.module';
 import { UserTypeModule } from './user_type/user_type.module';
 import { ReportsModule } from './reports/reports.module';
 import { TimeEntriesModule } from './time-entries/time-entries.module';
+import { HttpLoggingInterceptor } from './common/interceptors/http-logging.interceptor';
+import { LoggerMiddleware } from './common/middleware/logger.middleware';
 
 @Module({
   imports: [
@@ -26,6 +29,18 @@ import { TimeEntriesModule } from './time-entries/time-entries.module';
     TimeEntriesModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [
+    AppService,
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: HttpLoggingInterceptor,
+    },
+  ],
 })
-export class AppModule {}
+export class AppModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer
+      .apply(LoggerMiddleware)
+      .forRoutes({ path: '*', method: RequestMethod.ALL });
+  }
+}
