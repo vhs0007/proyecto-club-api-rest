@@ -3,6 +3,20 @@ import { PrismaPg } from '@prisma/adapter-pg';
 import { PrismaClient } from '@prisma/client';
 import type { PoolConfig } from 'pg';
 
+/** Postgres en Render usa certificados que Node no valida con la CA por defecto. */
+function needsFlexibleSslForConnection(connectionString: string): boolean {
+  if (process.env.RENDER === 'true') {
+    return true;
+  }
+  try {
+    const normalized = connectionString.replace(/^postgresql(\+[\w]+)?:/i, 'http:');
+    const host = new URL(normalized).hostname.toLowerCase();
+    return host.includes('render.com') || host.startsWith('dpg-');
+  } catch {
+    return false;
+  }
+}
+
 @Injectable()
 export class PrismaService
   extends PrismaClient
@@ -17,7 +31,7 @@ export class PrismaService
     }
 
     const poolConfig: PoolConfig = { connectionString };
-    if (process.env.RENDER === 'true') {
+    if (needsFlexibleSslForConnection(connectionString)) {
       poolConfig.ssl = { rejectUnauthorized: false };
     }
 
