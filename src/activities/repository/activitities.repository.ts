@@ -13,7 +13,7 @@ export interface UserNavigation {
 
 export interface FacilityNavigation {
   id: number;
-  name: string;
+  type: string;
   capacity: number;
   responsibleWorker: UserNavigation;
   assistantWorker: UserNavigation | null;

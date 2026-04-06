@@ -17,6 +17,7 @@ function mapToUserResponseDto(res: UserResponse): UserResponseDto {
   dto.typeId = res.typeId;
   dto.type = res.type;
   dto.email = res.email;
+  dto.membership = res.membership;
   dto.createdAt = res.createdAt;
   dto.deletedAt = res.deletedAt;
   dto.isActive = res.isActive;

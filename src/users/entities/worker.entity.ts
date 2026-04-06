@@ -3,8 +3,8 @@ import { User, UserType } from './user.entity';
 export class Worker extends User {
   private _salary: number;
   private _hoursToWorkPerDay: number | null;
-  private _startWorkAt: String;
-  private _endWorkAt: String;
+  private _startWorkAt: string;
+  private _endWorkAt: string;
 
   constructor(data: Partial<Worker>) {
     super(data);
@@ -32,17 +32,17 @@ export class Worker extends User {
     this._hoursToWorkPerDay = value;
   }
 
-  get startWorkAt(): String {
+  get startWorkAt(): string {
     return this._startWorkAt;
   }
-  set startWorkAt(value: String) {
+  set startWorkAt(value: string) {
     this._startWorkAt = value;
   }
 
-  get endWorkAt(): String {
+  get endWorkAt(): string {
     return this._endWorkAt;
   }
-  set endWorkAt(value: String) {
+  set endWorkAt(value: string) {
     this._endWorkAt = value;
   }
 }

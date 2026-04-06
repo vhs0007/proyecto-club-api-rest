@@ -27,8 +27,8 @@ interface UserFromPrisma {
   salary: Prisma.Decimal | null;
   hoursToWorkPerDay: number | null;
   employmentStartDate: Date | null;
-  startWorkAt: String | null;
-  endWorkAt: String | null;
+  startWorkAt: string | null;
+  endWorkAt: string | null;
   weight: Prisma.Decimal | null;
   height: Prisma.Decimal | null;
   gender: string | null;
