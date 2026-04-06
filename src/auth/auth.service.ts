@@ -16,7 +16,7 @@ export class AuthService {
     if (loginRequest.email === 'admin@admin.com' && loginRequest.password === 'admin') {
       const payload = { sub: 0, email: 'admin@admin.com', role: 'admin' };
       const accessToken = this.jwtService.sign(payload);
-      return { accessToken, role: 'admin', clubId: 1 };
+      return { accessToken, role: 'admin', clubId: loginRequest.clubId };
     }
     const user = await this.prisma.users.findFirst({
       where: { email: loginRequest.email },
