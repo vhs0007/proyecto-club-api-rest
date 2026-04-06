@@ -76,16 +76,21 @@ export class UserResponseDto {
   @IsNumber({}, { message: 'hoursToWorkPerDay debe ser un número' })
   @Min(0, { message: 'hoursToWorkPerDay debe ser 0 o mayor' })
   hoursToWorkPerDay?: number | null;
+  
+  @ApiProperty({ required: false })
+  @IsOptional()
+  @IsDate({ message: 'employmentStartDate debe ser una fecha válida' })
+  employmentStartDate?: Date | null;
 
   @ApiProperty({ required: false })
   @IsOptional()
-  @IsDate({ message: 'startWorkAt debe ser una fecha válida' })
-  startWorkAt?: Date | null;
+  @IsString({ message: 'startWorkAt debe ser un texto' })
+  startWorkAt?: String | null;
 
   @ApiProperty({ required: false })
   @IsOptional()
-  @IsDate({ message: 'endWorkAt debe ser una fecha válida' })
-  endWorkAt?: Date | null;
+  @IsString({ message: 'endWorkAt debe ser un texto' })
+  endWorkAt?: String | null;
 
   @ApiProperty({ required: false })
   @IsOptional()

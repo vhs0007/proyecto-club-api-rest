@@ -26,8 +26,9 @@ interface UserFromPrisma {
   isActive: boolean;
   salary: Prisma.Decimal | null;
   hoursToWorkPerDay: number | null;
-  startWorkAt: Date | null;
-  endWorkAt: Date | null;
+  employmentStartDate: Date | null;
+  startWorkAt: String | null;
+  endWorkAt: String | null;
   weight: Prisma.Decimal | null;
   height: Prisma.Decimal | null;
   gender: string | null;
@@ -77,8 +78,8 @@ export class ReportsRepository implements IReportsRepository {
       deletedAt: user.deletedAt,
       salary: user.salary?.toNumber() ?? 0,
       hoursToWorkPerDay: user.hoursToWorkPerDay ?? 0,
-      startWorkAt: user.startWorkAt ?? null,
-      endWorkAt: user.endWorkAt ?? null,
+      startWorkAt: user.startWorkAt ?? '',
+      endWorkAt: user.endWorkAt ?? '',
       weight: user.weight?.toNumber() ?? 0,
       height: user.height?.toNumber() ?? 0,
       gender: user.gender ?? null,

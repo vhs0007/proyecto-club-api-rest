@@ -63,8 +63,8 @@ function mapResponseToUser(res: UserResponse): UserEntity {
       type: UserType.WORKER,
       salary: res.salary ?? 0,
       hoursToWorkPerDay: res.hoursToWorkPerDay,
-      startWorkAt: res.startWorkAt ?? new Date(),
-      endWorkAt: res.endWorkAt ?? new Date(),
+      startWorkAt: res.startWorkAt ?? '',
+      endWorkAt: res.endWorkAt ?? '',
     });
   }
 
