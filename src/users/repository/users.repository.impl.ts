@@ -5,7 +5,8 @@ import type { IUsersRepository, UserResponse } from './users.repository';
 import { UpdateUserDto } from '../dto/request/update-user.request.dto';
 import { CreateUserDto } from '../dto/request/create-user.request.dto';
 import { UserTypeResponseDto } from '../../user_type/dto/response/user-type-response.dto';
-
+import { membershipNavigation } from './users.repository';
+import { MembershipTypeResponseDto } from 'src/membership_type/dto/response/membership_type-response.dto';
 
 interface UserRow {
   id: number;
@@ -14,14 +15,15 @@ interface UserRow {
   type?: UserTypeResponseDto;
   email: string | null;
   password: string | null;
+  membership?: membershipNavigation[];
   createdAt: Date;
   deletedAt: Date | null;
   isActive: boolean;
   salary?: { toNumber(): number } | null;
   hoursToWorkPerDay: number | null;
   employmentStartDate: Date | null;
-  startWorkAt: String | null;
-  endWorkAt: String | null;
+  startWorkAt: string | null;
+  endWorkAt: string | null;
   weight?: { toNumber(): number } | null;
   height?: { toNumber(): number } | null;
   gender: string | null;
@@ -32,6 +34,33 @@ interface UserRow {
   allergies: string | null;
   medications: string | null;
   medicalConditions: string | null;
+}
+
+type MembershipWithTypeRow = {
+  id: number;
+  userId: number;
+  expiration: Date;
+  createdAt: Date;
+  typeId: number;
+  type: {
+    id: number;
+    name: string;
+    price: Prisma.Decimal;
+  } | null;
+};
+
+function mapMembership(row: MembershipWithTypeRow): membershipNavigation {
+  const membershipType = new MembershipTypeResponseDto();
+  membershipType.id = row.type?.id ?? row.typeId;
+  membershipType.name = row.type?.name ?? '';
+  membershipType.price = row.type?.price?.toNumber() ?? 0;
+
+  return {
+    id: row.id,
+    expiration: row.expiration,
+    createdAt: row.createdAt,
+    membershipType,
+  };
 }
 
 function mapRow(row: UserRow): UserResponse {
@@ -102,14 +131,28 @@ export class UsersRepository implements IUsersRepository {
   }
 
   async findAll(clubId: number): Promise<UserResponse[]> {
-    const users = await this.prisma.users.findMany({ where: { clubId }, include: { type: true } });
-    return users.map(mapRow);
+    const users = await this.prisma.users.findMany({
+      where: { clubId },
+      include: { type: true, memberships: { include: { type: true } } },
+    });
+
+    const usersConMembership = users.map(user => {
+      const userResponse = mapRow(user);
+      userResponse.membership = user.memberships.map((membership) => mapMembership(membership as MembershipWithTypeRow));
+      return userResponse;
+    });
+    return usersConMembership;
   }
 
   async findById(id: number): Promise<UserResponse | null> {
-    const user = await this.prisma.users.findUnique({ where: { id }, include: { type: true } });
+    const user = await this.prisma.users.findUnique({
+      where: { id },
+      include: { type: true, memberships: { include: { type: true } } },
+    });
     if (!user) return null;
-    return mapRow(user);
+    const userResponse = mapRow(user);
+    userResponse.membership = user.memberships.map((membership) => mapMembership(membership as MembershipWithTypeRow));
+    return userResponse;
   }
 
   async findByEmail(email: string): Promise<UserResponse | null> {

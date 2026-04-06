@@ -1,6 +1,7 @@
 import { CreateUserDto } from '../dto/request/create-user.request.dto';
 import { UpdateUserDto } from '../dto/request/update-user.request.dto';
 import { UserTypeResponseDto } from '../../user_type/dto/response/user-type-response.dto';
+import { MembershipTypeResponseDto } from 'src/membership_type/dto/response/membership_type-response.dto';
 
 export interface UserResponse {
   id: number;
@@ -9,14 +10,15 @@ export interface UserResponse {
   type?: UserTypeResponseDto;
   email: string | null;
   password: string | null;
+  membership?: membershipNavigation[] | undefined;
   createdAt: Date;
   deletedAt: Date | null;
   isActive: boolean;
   salary: number | null;
-  hoursToWorkPerDay: number | null;
   employmentStartDate: Date | null;
-  startWorkAt: String | null;
-  endWorkAt: String | null;
+  hoursToWorkPerDay: number | null;
+  startWorkAt: string | null;
+  endWorkAt: string | null;
   weight: number | null;
   height: number | null;
   gender: string | null;
@@ -27,6 +29,13 @@ export interface UserResponse {
   allergies: string | null;
   medications: string | null;
   medicalConditions: string | null;
+}
+
+export interface membershipNavigation{
+  id: number;
+  expiration: Date;
+  createdAt: Date;
+  membershipType: MembershipTypeResponseDto;
 }
 
 export interface IUsersRepository {

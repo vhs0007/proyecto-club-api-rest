@@ -82,7 +82,7 @@ export class ActivitiesRepository implements IActivitiesRepository {
     });
     return {
       id: facility.id,
-      name: facility.type,
+      type: facility.type,
       capacity: facility.capacity,
       responsibleWorker: facility.responsibleWorkerUser
         ? this.userPrismaToInterface(facility.responsibleWorkerUser)
