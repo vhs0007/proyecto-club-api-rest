@@ -17,7 +17,7 @@ export class UserTypeController {
   @Get()
   findAll(@Query('clubId', ParseIntPipe) clubId: number): Promise<UserTypeResponseDto[]> {
     try{
-      return this.userTypeService.findAll(clubId);
+      return this.userTypeService.findAll();
     } catch (error) {
       throw new InternalServerErrorException(error);
     }

@@ -10,12 +10,11 @@ import type {
 export class UserTypeRepository implements IUserTypeRepository {
   constructor(private readonly prisma: PrismaService) {}
 
-  async findAll(clubId: number): Promise<UserTypeResponse[]> {
-    const list = await this.prisma.user_type.findMany({ where: { clubId } });
+  async findAll(): Promise<UserTypeResponse[]> {
+    const list = await this.prisma.user_type.findMany();
     return list.map((row) => ({
       id: row.id,
       name: row.name,
-      clubId: row.clubId,
     }));
   }
 
@@ -25,13 +24,12 @@ export class UserTypeRepository implements IUserTypeRepository {
     return {
       id: row.id,
       name: row.name,
-      clubId: row.clubId,
     };
   }
 
-   async create(data: { name: string, clubId: number }): Promise<UserTypeResponse> {
-     const row = await this.prisma.user_type.create({ data: { name: data.name, clubId: data.clubId } });
-     return { id: row.id, name: row.name, clubId: row.clubId };
+   async create(data: { name: string }): Promise<UserTypeResponse> {
+     const row = await this.prisma.user_type.create({ data: { name: data.name } });
+     return { id: row.id, name: row.name };
    }
 
   // async update(id: number, data: UpdateUserTypeData): Promise<UserTypeResponse> {

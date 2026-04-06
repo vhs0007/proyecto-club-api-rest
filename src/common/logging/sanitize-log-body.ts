@@ -1,4 +1,4 @@
-const BODY_MAX_CHARS = 1000;
+const BODY_MAX_CHARS = 5000;
 const REDACT_KEYS = new Set([
   'password',
   'token',
