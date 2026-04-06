@@ -40,7 +40,7 @@ export class AuthService {
     return {
       accessToken,
       role: roleName,
-      clubId: 1, // TODO: get clubId from user
+      clubId: loginRequest.clubId,
     };
   }
 }
