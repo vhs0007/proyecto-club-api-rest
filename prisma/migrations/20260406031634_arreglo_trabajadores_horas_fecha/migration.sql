@@ -1,0 +1,4 @@
+-- AlterTable
+ALTER TABLE "users" ADD COLUMN     "employmentStartDate" TIMESTAMP(3),
+ALTER COLUMN "startWorkAt" SET DATA TYPE TEXT,
+ALTER COLUMN "endWorkAt" SET DATA TYPE TEXT;

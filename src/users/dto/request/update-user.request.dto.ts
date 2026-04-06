@@ -42,6 +42,12 @@ export class UpdateUserDto {
   @ApiProperty({ required: false })
   @IsOptional()
   @Type(() => Date)
+  @IsDate({ message: 'employmentStartDate debe ser una fecha válida' })
+  employmentStartDate?: Date;
+
+  @ApiProperty({ required: false })
+  @IsOptional()
+  @Type(() => Date)
   @IsDate({ message: 'startWorkAt debe ser una fecha válida' })
   startWorkAt?: Date;
 

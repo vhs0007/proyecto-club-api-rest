@@ -136,8 +136,9 @@ model users {
   facilitiesAsAssistant    facilities[] @relation("FacilityAssistant")
   salary Decimal? @db.Decimal(10, 2)
   hoursToWorkPerDay Int?
-  startWorkAt DateTime?
-  endWorkAt DateTime?
+  employmentStartDate DateTime?
+  startWorkAt String?
+  endWorkAt String?
   weight Decimal? @db.Decimal(10, 2)
   height Decimal? @db.Decimal(10, 2)
   gender String?

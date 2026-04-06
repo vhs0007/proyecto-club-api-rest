@@ -19,8 +19,9 @@ interface UserRow {
   isActive: boolean;
   salary?: { toNumber(): number } | null;
   hoursToWorkPerDay: number | null;
-  startWorkAt: Date | null;
-  endWorkAt: Date | null;
+  employmentStartDate: Date | null;
+  startWorkAt: String | null;
+  endWorkAt: String | null;
   weight?: { toNumber(): number } | null;
   height?: { toNumber(): number } | null;
   gender: string | null;
@@ -51,6 +52,7 @@ function mapRow(row: UserRow): UserResponse {
     isActive: row.isActive,
     salary: row.salary?.toNumber() ?? null,
     hoursToWorkPerDay: row.hoursToWorkPerDay,
+    employmentStartDate: row.employmentStartDate,
     startWorkAt: row.startWorkAt,
     endWorkAt: row.endWorkAt,
     weight: row.weight?.toNumber() ?? null,
@@ -82,8 +84,9 @@ export class UsersRepository implements IUsersRepository {
     if (createUserDto.password != null) data.password = createUserDto.password;
     if (createUserDto.salary != null) data.salary = createUserDto.salary;
     if (createUserDto.hoursToWorkPerDay != null) data.hoursToWorkPerDay = createUserDto.hoursToWorkPerDay;
-    if (createUserDto.startWorkAt != null) data.startWorkAt = createUserDto.startWorkAt;
-    if (createUserDto.endWorkAt != null) data.endWorkAt = createUserDto.endWorkAt;
+    if (createUserDto.employmentStartDate != null) data.employmentStartDate = createUserDto.employmentStartDate;
+    if (createUserDto.startWorkAt != null) data.startWorkAt = createUserDto.startWorkAt.toISOString();
+    if (createUserDto.endWorkAt != null) data.endWorkAt = createUserDto.endWorkAt.toISOString();
     if (createUserDto.weight != null) data.weight = createUserDto.weight;
     if (createUserDto.height != null) data.height = createUserDto.height;
     if (createUserDto.gender != null) data.gender = createUserDto.gender;
