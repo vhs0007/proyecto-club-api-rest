@@ -76,13 +76,13 @@ export class CreateUserDto {
 
   @ApiProperty({ required: false })
   @IsOptional()
-  @Type(() => Date)
-  startWorkAt?: Date | null;
+  @IsString({ message: 'startWorkAt debe ser un texto' })
+  startWorkAt?: string | null;
 
   @ApiProperty({ required: false })
   @IsOptional()
-  @Type(() => Date)
-  endWorkAt?: Date | null;
+  @IsString({ message: 'endWorkAt debe ser un texto' })
+  endWorkAt?: string | null;
 
   @ApiProperty({ required: false })
   @IsOptional()
