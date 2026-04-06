@@ -12,6 +12,7 @@ import {
   ValidateNested,
 } from 'class-validator';
 import { UserTypeResponseDto } from '../../../user_type/dto/response/user-type-response.dto';
+import { membershipNavigation } from 'src/users/repository/users.repository';
 
 export class UserResponseDto {
   @ApiProperty({ example: 1, description: 'ID del usuario' })
@@ -30,6 +31,10 @@ export class UserResponseDto {
   @ApiProperty({ type: () => UserTypeResponseDto, description: 'Tipo de usuario (navegación)' })
   @IsOptional()
   type?: UserTypeResponseDto;
+
+  @ApiProperty({ description: 'Membresía del usuario (navegación)' })
+  @IsOptional()
+  membership?: membershipNavigation[] | undefined;
 
   @ApiProperty({ required: false })
   @IsOptional()
@@ -76,21 +81,16 @@ export class UserResponseDto {
   @IsNumber({}, { message: 'hoursToWorkPerDay debe ser un número' })
   @Min(0, { message: 'hoursToWorkPerDay debe ser 0 o mayor' })
   hoursToWorkPerDay?: number | null;
-  
-  @ApiProperty({ required: false })
-  @IsOptional()
-  @IsDate({ message: 'employmentStartDate debe ser una fecha válida' })
-  employmentStartDate?: Date | null;
 
   @ApiProperty({ required: false })
   @IsOptional()
-  @IsString({ message: 'startWorkAt debe ser un texto' })
-  startWorkAt?: String | null;
+  @IsDate({ message: 'startWorkAt debe ser una fecha válida' })
+  startWorkAt?: string | null;
 
   @ApiProperty({ required: false })
   @IsOptional()
-  @IsString({ message: 'endWorkAt debe ser un texto' })
-  endWorkAt?: String | null;
+  @IsDate({ message: 'endWorkAt debe ser una fecha válida' })
+  endWorkAt?: string | null;
 
   @ApiProperty({ required: false })
   @IsOptional()
