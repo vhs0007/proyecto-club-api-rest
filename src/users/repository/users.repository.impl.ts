@@ -97,8 +97,12 @@ export class UsersRepository implements IUsersRepository {
     if (createUserDto.allergies != null) data.allergies = createUserDto.allergies;
     if (createUserDto.medications != null) data.medications = createUserDto.medications;
     if (createUserDto.medicalConditions != null) data.medicalConditions = createUserDto.medicalConditions;
-    const created = await this.prisma.users.create({ data, include: { type: true } });
-    return mapRow(created);
+   
+    const created = await this.prisma.users.create({ data, include: { type: true, memberships: { include: { type: true } } } });
+    const userResponse = mapRow(created);
+    userResponse.membership = created.memberships.map((membership) => mapMembership(membership as MembershipWithTypeRow));
+    return userResponse;
+    //te prometo que fue necesario 
   }
 
   async findAll(clubId: number): Promise<UserResponse[]> {
@@ -127,9 +131,11 @@ export class UsersRepository implements IUsersRepository {
     const updated = await this.prisma.users.update({
       where: { id },
       data: updateUserDto as Prisma.usersUncheckedUpdateInput,
-      include: { type: true },
+      include: { type: true , memberships: { include: { type: true } } },
     });
-    return mapRow(updated);
+    const userResponse = mapRow(updated);
+    userResponse.membership = updated.memberships.map((membership) => mapMembership(membership as MembershipWithTypeRow));
+    return userResponse;
   }
 
   async delete(id: number): Promise<void> {
