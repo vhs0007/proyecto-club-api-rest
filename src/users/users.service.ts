@@ -99,31 +99,42 @@ export class UsersService {
   constructor(private readonly usersRepository: UsersRepository) {}
 
   async create(createUserDto: CreateUserDto): Promise<UserResponseDto> {
+    
     if (createUserDto.email != null && createUserDto.email.trim() !== '') {
       const existingByEmail = await this.usersRepository.findByEmail(createUserDto.email);
       if (existingByEmail) throw new ConflictException('Email already in use');
     }
+
     const typeExists = await this.usersRepository.existsTypeId(createUserDto.typeId);
     if (!typeExists) throw new BadRequestException('Invalid typeId');
+
     if (createUserDto.typeId === UserType.ATHLETE) {
+      
       if (createUserDto.gender != null && createUserDto.gender.trim() !== '') {
         const g = createUserDto.gender.toLowerCase();
         if (g !== 'male' && g !== 'female') throw new BadRequestException('gender must be male or female');
       }
+
       if (createUserDto.birthDate != null) {
         if (new Date(createUserDto.birthDate) > new Date()) throw new BadRequestException('birthDate cannot be in the future');
       }
+
     }
+
     if (createUserDto.typeId === UserType.WORKER && createUserDto.startWorkAt != null && createUserDto.endWorkAt != null) {
-      if (new Date(createUserDto.startWorkAt) >= new Date(createUserDto.endWorkAt))
-        throw new BadRequestException('startWorkAt must be before endWorkAt');
+
+      if (new Date(createUserDto.startWorkAt) >= new Date(createUserDto.endWorkAt)) throw new BadRequestException('startWorkAt must be before endWorkAt');
+    
     }
     const dataToCreate = { ...createUserDto };
+
     if (dataToCreate.password != null && dataToCreate.password.trim() !== '') {
       dataToCreate.password = await hashPassword(dataToCreate.password);
     }
+
     const res = await this.usersRepository.create(dataToCreate);
     return mapToUserResponseDto(res);
+
   }
 
   async findAll(clubId: number): Promise<UserResponseDto[]> {

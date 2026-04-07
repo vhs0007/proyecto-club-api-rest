@@ -47,15 +47,13 @@ export class UpdateUserDto {
 
   @ApiProperty({ required: false })
   @IsOptional()
-  @Type(() => Date)
-  @IsDate({ message: 'startWorkAt debe ser una fecha válida' })
-  startWorkAt?: Date;
+  @IsString({ message: 'startWorkAt debe ser un texto' })
+  startWorkAt?: string | null;
 
   @ApiProperty({ required: false })
   @IsOptional()
-  @Type(() => Date)
-  @IsDate({ message: 'endWorkAt debe ser una fecha válida' })
-  endWorkAt?: Date;
+  @IsString({ message: 'endWorkAt debe ser un texto' })
+  endWorkAt?: string | null;
 
   @ApiProperty({ required: false })
   @IsOptional()

@@ -176,6 +176,7 @@ export class UsersRepository implements IUsersRepository {
       data: updateUserDto as Prisma.usersUncheckedUpdateInput,
       include: { type: true , memberships: { include: { type: true } } },
     });
+    const lastMembership = await this.prisma.membership.findFirst({ where: { userId: id }, orderBy: { createdAt: 'desc' } });
     const userResponse = mapRow(updated);
     userResponse.membership = updated.memberships.map((membership) => mapMembership(membership));
     return userResponse;
