@@ -8,6 +8,7 @@ import { UserTypeResponseDto } from '../../user_type/dto/response/user-type-resp
 import { membershipNavigation } from './users.repository';
 import { MembershipTypeResponseDto } from 'src/membership_type/dto/response/membership_type-response.dto';
 import { UserType } from '../entities/user.entity';
+import { QueryUserRequestDto } from '../dto/request/query-user.request.dto';
 
 interface UserRow {
   id: number;
@@ -215,9 +216,10 @@ export class UsersRepository implements IUsersRepository {
     return usersConMembership;
   }
 
-  async findById(id: number): Promise<UserResponse | null> {
+  async findById(queryUserRequestDto: QueryUserRequestDto): Promise<UserResponse | null> {
+    const { clubId, userId } = queryUserRequestDto;
     const user = await this.prisma.users.findUnique({
-      where: { id },
+      where: { id_clubId: { id: userId, clubId } },
       include: { type: true, memberships: { include: { type: true } } },
     });
     if (!user) return null;
@@ -239,17 +241,18 @@ export class UsersRepository implements IUsersRepository {
 
   async update(id: number, updateUserDto: UpdateUserDto): Promise<UserResponse> {
     const updated = await this.prisma.users.update({
-      where: { id },
+      where: { id_clubId: { id, clubId: updateUserDto.clubId } },
       data: updateUserDto as Prisma.usersUncheckedUpdateInput,
       include: { type: true , memberships: { include: { type: true } } },
     });
-    const lastMembership = await this.prisma.membership.findFirst({ where: { userId: id }, orderBy: { createdAt: 'desc' } });
+    const lastMembership = await this.prisma.membership.findFirst({ where: { userId: id, clubId: updateUserDto.clubId }, orderBy: { createdAt: 'desc' } });
     const userResponse = mapRow(updated);
     userResponse.membership = updated.memberships.map((membership) => mapMembership(membership));
     return userResponse;
   }
 
-  async delete(id: number): Promise<void> {
-    await this.prisma.users.delete({ where: { id } });
+  async delete(queryUserRequestDto: QueryUserRequestDto): Promise<void> {
+    const { clubId, userId } = queryUserRequestDto;
+    await this.prisma.users.delete({ where: { id_clubId: { id: userId, clubId } } });
   }
 }

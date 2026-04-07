@@ -32,8 +32,15 @@ export class FacilitiesService {
     };
   }
 
-  private async ensureWorker(userId: number, field: string): Promise<void> {
-    const user = await this.prisma.users.findUnique({ where: { id: userId } });
+  private async ensureWorker(userId: number, clubId: number, field: string): Promise<void> {
+    const user = await this.prisma.users.findUnique({
+      where: {
+        id_clubId: {
+          id: userId,
+          clubId,
+        },
+      },
+    });
     if (!user) throw new BadRequestException(`${field} not found`);
     const workerType = await this.prisma.user_type.findFirst({
       where: { name: { equals: 'Trabajador', mode: 'insensitive' } },
@@ -56,9 +63,9 @@ export class FacilitiesService {
   }
 
   async create(createFacilityDto: CreateFacilityDto): Promise<FacilityResponseDto> {
-    await this.ensureWorker(createFacilityDto.responsibleWorker, 'Responsible worker');
+    await this.ensureWorker(createFacilityDto.responsibleWorker, createFacilityDto.clubId, 'Responsible worker');
     if (createFacilityDto.assistantWorker != null) {
-      await this.ensureWorker(createFacilityDto.assistantWorker, 'Assistant worker');
+      await this.ensureWorker(createFacilityDto.assistantWorker, createFacilityDto.clubId, 'Assistant worker');
     }
     await this.ensureMembershipTypes(createFacilityDto.membershipTypeIds);
     const res = await this.facilitiesRepository.create(createFacilityDto);
@@ -79,11 +86,16 @@ export class FacilitiesService {
   async update(id: number, updateFacilityDto: UpdateFacilityDto): Promise<FacilityResponseDto> {
     const row = await this.facilitiesRepository.findById(id);
     if (!row) throw new NotFoundException('Facility not found');
+    const facility = await this.prisma.facilities.findUnique({
+      where: { id },
+      select: { clubId: true },
+    });
+    if (!facility) throw new NotFoundException('Facility not found');
     if (updateFacilityDto.responsibleWorker !== undefined) {
-      await this.ensureWorker(updateFacilityDto.responsibleWorker, 'Responsible worker');
+      await this.ensureWorker(updateFacilityDto.responsibleWorker, facility.clubId, 'Responsible worker');
     }
     if (updateFacilityDto.assistantWorker !== undefined && updateFacilityDto.assistantWorker != null) {
-      await this.ensureWorker(updateFacilityDto.assistantWorker, 'Assistant worker');
+      await this.ensureWorker(updateFacilityDto.assistantWorker, facility.clubId, 'Assistant worker');
     }
     if (updateFacilityDto.membershipTypeIds !== undefined) {
       await this.ensureMembershipTypes(updateFacilityDto.membershipTypeIds);

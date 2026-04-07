@@ -6,6 +6,10 @@ export class SalaryReportRequestDto {
   @IsNumber({}, { message: 'userId debe ser un número' })
   userId: number;
 
+  @ApiProperty({ example: 1, description: 'ID del club' })
+  @IsNumber({}, { message: 'clubId debe ser un número' })
+  clubId: number;
+
   //Las fechas no se utilizan asi que te las voy a comentar pelado
   //Se podria usar las times entries del usuario para hacer un calculo exacto
   //Pero eso lo charlamos lately

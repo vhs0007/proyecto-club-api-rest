@@ -134,4 +134,10 @@ export class UpdateUserDto {
   @IsArray({ message: 'time_entries debe ser un array' })
   @IsDate({ message: 'time_entries debe ser una fecha válida' })
   time_entries?: Date[] | null;
+
+  @ApiProperty()
+  @IsOptional()
+  @IsNumber({}, { message: 'clubId debe ser un número' })
+  @Min(1, { message: 'clubId debe ser al menos 1' })
+  clubId: number;
 }

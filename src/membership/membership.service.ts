@@ -25,7 +25,14 @@ export class MembershipService {
   }
 
   async create(createMembershipDto: CreateMembershipDto): Promise<MembershipResponseDto> {
-    const user = await this.prisma.users.findUnique({ where: { id: createMembershipDto.userId } });
+    const user = await this.prisma.users.findUnique({
+      where: {
+        id_clubId: {
+          id: createMembershipDto.userId,
+          clubId: createMembershipDto.clubId,
+        },
+      },
+    });
     if (!user) throw new BadRequestException('User not found');
     const membershipType = await this.prisma.membership_type.findUnique({ where: { id: createMembershipDto.type } });
     if (!membershipType) throw new BadRequestException('Membership type not found');
@@ -47,8 +54,20 @@ export class MembershipService {
   async update(id: number, updateMembershipDto: UpdateMembershipDto): Promise<MembershipResponseDto> {
     const row = await this.membershipRepository.findById(id);
     if (!row) throw new NotFoundException('Membership not found');
+    const membership = await this.prisma.membership.findUnique({
+      where: { id },
+      select: { clubId: true },
+    });
+    if (!membership) throw new NotFoundException('Membership not found');
     if (updateMembershipDto.userId !== undefined) {
-      const user = await this.prisma.users.findUnique({ where: { id: updateMembershipDto.userId } });
+      const user = await this.prisma.users.findUnique({
+        where: {
+          id_clubId: {
+            id: updateMembershipDto.userId,
+            clubId: membership.clubId,
+          },
+        },
+      });
       if (!user) throw new BadRequestException('User not found');
     }
     if (updateMembershipDto.type !== undefined) {

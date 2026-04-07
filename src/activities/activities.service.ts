@@ -35,7 +35,14 @@ export class ActivitiesService {
   }
 
   async create(createActivityDto: CreateActivityDto): Promise<ActivityResponseDto> {
-    const user = await this.prisma.users.findUnique({ where: { id: createActivityDto.userId } });
+    const user = await this.prisma.users.findUnique({
+      where: {
+        id_clubId: {
+          id: createActivityDto.userId,
+          clubId: createActivityDto.clubId,
+        },
+      },
+    });
     if (!user) throw new BadRequestException('User not found');
     const facility = await this.prisma.facilities.findUnique({ where: { id: createActivityDto.facilityId } });
     if (!facility) throw new BadRequestException('Facility not found');
@@ -61,7 +68,14 @@ export class ActivitiesService {
     const row = await this.activitiesRepository.findById(id);
     if (!row) throw new NotFoundException('Activity not found');
     if (updateActivityDto.userId !== undefined) {
-      const user = await this.prisma.users.findUnique({ where: { id: updateActivityDto.userId } });
+      const user = await this.prisma.users.findUnique({
+        where: {
+          id_clubId: {
+            id: updateActivityDto.userId,
+            clubId: row.clubId,
+          },
+        },
+      });
       if (!user) throw new BadRequestException('User not found');
     }
     if (updateActivityDto.facilityId !== undefined) {

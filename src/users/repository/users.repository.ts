@@ -2,6 +2,7 @@ import { CreateUserDto } from '../dto/request/create-user.request.dto';
 import { UpdateUserDto } from '../dto/request/update-user.request.dto';
 import { UserTypeResponseDto } from '../../user_type/dto/response/user-type-response.dto';
 import { MembershipTypeResponseDto } from 'src/membership_type/dto/response/membership_type-response.dto';
+import { QueryUserRequestDto } from '../dto/request/query-user.request.dto';
 
 export interface UserResponse {
   id: number;
@@ -41,9 +42,9 @@ export interface membershipNavigation{
 export interface IUsersRepository {
   create(createUserDto: CreateUserDto): Promise<UserResponse>;
   findAll(clubId: number): Promise<UserResponse[]>;
-  findById(id: number): Promise<UserResponse | null>;
+  findById(queryUserRequestDto: QueryUserRequestDto): Promise<UserResponse | null>;
   findByEmail(email: string): Promise<UserResponse | null>;
   existsTypeId(typeId: number): Promise<boolean>;
   update(id: number, updateUserDto: UpdateUserDto): Promise<UserResponse>;
-  delete(id: number): Promise<void>;
+  delete(queryUserRequestDto: QueryUserRequestDto): Promise<void>;
 }
