@@ -134,7 +134,6 @@ export class UsersService {
 
     const res = await this.usersRepository.create(dataToCreate);
     return mapToUserResponseDto(res);
-
   }
 
   async findAll(clubId: number): Promise<UserResponseDto[]> {

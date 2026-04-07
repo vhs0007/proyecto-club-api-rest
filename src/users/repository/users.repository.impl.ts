@@ -113,7 +113,7 @@ export class UsersRepository implements IUsersRepository {
     return numerator;
   }
 
-  async create(createUserDto: CreateUserDto): Promise<UserResponse | null> {
+  async create(createUserDto: CreateUserDto): Promise<UserResponse> {
     const data: Prisma.usersUncheckedCreateInput = {
       name: createUserDto.name,
       typeId: createUserDto.typeId,
