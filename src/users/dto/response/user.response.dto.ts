@@ -84,12 +84,12 @@ export class UserResponseDto {
 
   @ApiProperty({ required: false })
   @IsOptional()
-  @IsDate({ message: 'startWorkAt debe ser una fecha válida' })
+  @IsString({ message: 'startWorkAt debe ser un texto' })
   startWorkAt?: string | null;
 
   @ApiProperty({ required: false })
   @IsOptional()
-  @IsDate({ message: 'endWorkAt debe ser una fecha válida' })
+  @IsString({ message: 'endWorkAt debe ser un texto' })
   endWorkAt?: string | null;
 
   @ApiProperty({ required: false })

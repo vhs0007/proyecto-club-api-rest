@@ -129,7 +129,7 @@ export class UsersRepository implements IUsersRepository {
    
     const created = await this.prisma.users.create({ data, include: { type: true, memberships: { include: { type: true } } } });
     const userResponse = mapRow(created);
-    userResponse.membership = created.memberships.map((membership) => mapMembership(membership as MembershipWithTypeRow));
+    userResponse.membership = created.memberships.map((membership) => mapMembership(membership));
     return userResponse;
     //te prometo que fue necesario 
   }
@@ -142,7 +142,7 @@ export class UsersRepository implements IUsersRepository {
 
     const usersConMembership = users.map(user => {
       const userResponse = mapRow(user);
-      userResponse.membership = user.memberships.map((membership) => mapMembership(membership as MembershipWithTypeRow));
+      userResponse.membership = user.memberships.map((membership) => mapMembership(membership));
       return userResponse;
     });
     return usersConMembership;
@@ -155,7 +155,7 @@ export class UsersRepository implements IUsersRepository {
     });
     if (!user) return null;
     const userResponse = mapRow(user);
-    userResponse.membership = user.memberships.map((membership) => mapMembership(membership as MembershipWithTypeRow));
+    userResponse.membership = user.memberships.map((membership) => mapMembership(membership));
     return userResponse;
   }
 
@@ -177,7 +177,7 @@ export class UsersRepository implements IUsersRepository {
       include: { type: true , memberships: { include: { type: true } } },
     });
     const userResponse = mapRow(updated);
-    userResponse.membership = updated.memberships.map((membership) => mapMembership(membership as MembershipWithTypeRow));
+    userResponse.membership = updated.memberships.map((membership) => mapMembership(membership));
     return userResponse;
   }
 
