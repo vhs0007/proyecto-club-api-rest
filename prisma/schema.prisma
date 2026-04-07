@@ -181,6 +181,7 @@ model clubs{
   memberships membership[]
   membership_types membership_type[]
   plugins_clubs plugins_clubs[]
+  numerators numerator[]
 }
 
 model plugins {
@@ -196,4 +197,12 @@ model plugins_clubs {
   clubId Int
   plugin plugins @relation(fields: [pluginId], references: [id])
   club clubs @relation(fields: [clubId], references: [id])
+}
+
+model numerator{
+  id Int @id @default(autoincrement())
+  name String
+  clubId Int
+  club clubs @relation(fields: [clubId], references: [id])
+  value Int
 }

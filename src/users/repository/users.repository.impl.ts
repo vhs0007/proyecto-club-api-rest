@@ -1,5 +1,5 @@
-import { Injectable } from '@nestjs/common';
-import { Prisma } from '@prisma/client';
+import { BadRequestException, Injectable } from '@nestjs/common';
+import { numerator, Prisma } from '@prisma/client';
 import { PrismaService } from '../../prisma/prisma.service';
 import type { IUsersRepository, UserResponse } from './users.repository';
 import { UpdateUserDto } from '../dto/request/update-user.request.dto';
@@ -7,6 +7,7 @@ import { CreateUserDto } from '../dto/request/create-user.request.dto';
 import { UserTypeResponseDto } from '../../user_type/dto/response/user-type-response.dto';
 import { membershipNavigation } from './users.repository';
 import { MembershipTypeResponseDto } from 'src/membership_type/dto/response/membership_type-response.dto';
+import { UserType } from '../entities/user.entity';
 
 interface UserRow {
   id: number;
@@ -101,7 +102,18 @@ function mapRow(row: UserRow): UserResponse {
 export class UsersRepository implements IUsersRepository {
   constructor(private readonly prisma: PrismaService) {}
 
-  async create(createUserDto: CreateUserDto): Promise<UserResponse> {
+  private async createNumerator(name: string, clubId: number): Promise<numerator> {
+    const numerator = await this.prisma.numerator.create({
+      data: {
+        name,
+        clubId,
+        value: 1,
+      },
+    });
+    return numerator;
+  }
+
+  async create(createUserDto: CreateUserDto): Promise<UserResponse | null> {
     const data: Prisma.usersUncheckedCreateInput = {
       name: createUserDto.name,
       typeId: createUserDto.typeId,
@@ -114,8 +126,8 @@ export class UsersRepository implements IUsersRepository {
     if (createUserDto.salary != null) data.salary = createUserDto.salary;
     if (createUserDto.hoursToWorkPerDay != null) data.hoursToWorkPerDay = createUserDto.hoursToWorkPerDay;
     if (createUserDto.employmentStartDate != null) data.employmentStartDate = createUserDto.employmentStartDate;
-    if (createUserDto.startWorkAt != null) data.startWorkAt = createUserDto.startWorkAt
-    if (createUserDto.endWorkAt != null) data.endWorkAt = createUserDto.endWorkAt
+    if (createUserDto.startWorkAt != null) data.startWorkAt = createUserDto.startWorkAt;
+    if (createUserDto.endWorkAt != null) data.endWorkAt = createUserDto.endWorkAt;
     if (createUserDto.weight != null) data.weight = createUserDto.weight;
     if (createUserDto.height != null) data.height = createUserDto.height;
     if (createUserDto.gender != null) data.gender = createUserDto.gender;
@@ -126,12 +138,67 @@ export class UsersRepository implements IUsersRepository {
     if (createUserDto.allergies != null) data.allergies = createUserDto.allergies;
     if (createUserDto.medications != null) data.medications = createUserDto.medications;
     if (createUserDto.medicalConditions != null) data.medicalConditions = createUserDto.medicalConditions;
-   
-    const created = await this.prisma.users.create({ data, include: { type: true, memberships: { include: { type: true } } } });
-    const userResponse = mapRow(created);
-    userResponse.membership = created.memberships.map((membership) => mapMembership(membership));
-    return userResponse;
-    //te prometo que fue necesario 
+
+    if (createUserDto.typeId === UserType.MEMBER) {
+
+      const existNumerator: numerator | null = await this.prisma.numerator.findFirst({ where: { name: 'memberId', clubId: createUserDto.clubId } });
+
+      let updatedNumerator: numerator | null = null;
+
+      if (existNumerator) {
+        updatedNumerator = await this.prisma.numerator.update({
+          where: { id: existNumerator.id },
+          data: { value: existNumerator.value + 1 },
+        });
+      } else {
+        updatedNumerator = await this.createNumerator('memberId', createUserDto.clubId);
+      }
+
+      data.id = updatedNumerator.value;
+      const created = await this.prisma.users.create({ data, include: { type: true, memberships: { include: { type: true } } } });
+      const userResponse = mapRow(created);
+      userResponse.membership = created.memberships.map((membership) => mapMembership(membership));
+      return userResponse;
+
+    } else if (createUserDto.typeId === UserType.ATHLETE) {
+
+      const existNumerator: numerator | null = await this.prisma.numerator.findFirst({ where: { name: 'athleteId', clubId: createUserDto.clubId } });
+      let updatedNumerator: numerator | null = null;
+      if (existNumerator) {
+        updatedNumerator = await this.prisma.numerator.update({
+          where: { id: existNumerator.id },
+          data: { value: existNumerator.value + 1 },
+        });
+      } else {
+        updatedNumerator = await this.createNumerator('athleteId', createUserDto.clubId);
+      }
+      data.id = updatedNumerator.value;
+      const created = await this.prisma.users.create({ data, include: { type: true, memberships: { include: { type: true } } } });
+      const userResponse = mapRow(created);
+      userResponse.membership = created.memberships.map((membership) => mapMembership(membership));
+      return userResponse;
+
+    } else if (createUserDto.typeId === UserType.WORKER) {
+
+      const existNumerator: numerator | null = await this.prisma.numerator.findFirst({ where: { name: 'adminId', clubId: createUserDto.clubId } });
+      let updatedNumerator: numerator | null = null;
+      if (existNumerator) {
+        updatedNumerator = await this.prisma.numerator.update({
+          where: { id: existNumerator.id },
+          data: { value: existNumerator.value + 1 },
+        });
+      } else {
+        updatedNumerator = await this.createNumerator('adminId', createUserDto.clubId);
+      }
+      data.id = updatedNumerator.value;
+      const created = await this.prisma.users.create({ data, include: { type: true, memberships: { include: { type: true } } } });
+      const userResponse = mapRow(created);
+      userResponse.membership = created.memberships.map((membership) => mapMembership(membership));
+      return userResponse;
+
+    } else {
+      throw new BadRequestException('Invalid typeId');
+    }
   }
 
   async findAll(clubId: number): Promise<UserResponse[]> {

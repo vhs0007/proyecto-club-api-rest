@@ -39,7 +39,7 @@ export interface membershipNavigation{
 }
 
 export interface IUsersRepository {
-  create(createUserDto: CreateUserDto): Promise<UserResponse>;
+  create(createUserDto: CreateUserDto): Promise<UserResponse | null>;
   findAll(clubId: number): Promise<UserResponse[]>;
   findById(id: number): Promise<UserResponse | null>;
   findByEmail(email: string): Promise<UserResponse | null>;
