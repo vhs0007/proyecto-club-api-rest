@@ -10,7 +10,7 @@ export interface UserResponse {
   type?: UserTypeResponseDto;
   email: string | null;
   password: string | null;
-  membership?: membershipNavigation[] | undefined;
+  membership?: membershipNavigation | undefined;
   createdAt: Date;
   deletedAt: Date | null;
   isActive: boolean;

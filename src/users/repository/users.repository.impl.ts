@@ -15,7 +15,7 @@ interface UserRow {
   type?: UserTypeResponseDto;
   email: string | null;
   password: string | null;
-  membership?: membershipNavigation[];
+  membership?: membershipNavigation;
   createdAt: Date;
   deletedAt: Date | null;
   isActive: boolean;
@@ -61,6 +61,16 @@ function mapMembership(row: MembershipWithTypeRow): membershipNavigation {
     createdAt: row.createdAt,
     membershipType,
   };
+}
+
+function getLastMembership(memberships: MembershipWithTypeRow[]): membershipNavigation | undefined {
+  if (memberships.length === 0) return undefined;
+
+  const latest = memberships.reduce((current, item) =>
+    item.createdAt > current.createdAt ? item : current,
+  );
+
+  return mapMembership(latest);
 }
 
 function mapRow(row: UserRow): UserResponse {
@@ -129,7 +139,7 @@ export class UsersRepository implements IUsersRepository {
    
     const created = await this.prisma.users.create({ data, include: { type: true, memberships: { include: { type: true } } } });
     const userResponse = mapRow(created);
-    userResponse.membership = created.memberships.map((membership) => mapMembership(membership));
+    userResponse.membership = getLastMembership(created.memberships);
     return userResponse;
     //te prometo que fue necesario 
   }
@@ -142,7 +152,7 @@ export class UsersRepository implements IUsersRepository {
 
     const usersConMembership = users.map(user => {
       const userResponse = mapRow(user);
-      userResponse.membership = user.memberships.map((membership) => mapMembership(membership));
+      userResponse.membership = getLastMembership(user.memberships);
       return userResponse;
     });
     return usersConMembership;
@@ -155,7 +165,7 @@ export class UsersRepository implements IUsersRepository {
     });
     if (!user) return null;
     const userResponse = mapRow(user);
-    userResponse.membership = user.memberships.map((membership) => mapMembership(membership));
+    userResponse.membership = getLastMembership(user.memberships);
     return userResponse;
   }
 
@@ -178,7 +188,7 @@ export class UsersRepository implements IUsersRepository {
     });
     const lastMembership = await this.prisma.membership.findFirst({ where: { userId: id }, orderBy: { createdAt: 'desc' } });
     const userResponse = mapRow(updated);
-    userResponse.membership = updated.memberships.map((membership) => mapMembership(membership));
+    userResponse.membership = getLastMembership(updated.memberships);
     return userResponse;
   }
 
