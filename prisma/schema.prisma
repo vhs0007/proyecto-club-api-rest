@@ -18,7 +18,7 @@ model membership {
   typeId   Int
   userId   Int
   createdAt DateTime
-  user     users          @relation(fields: [userId], references: [id])
+  user     users          @relation(fields: [userId, clubId], references: [id, clubId])
   expiration DateTime
   clubId Int
   club clubs @relation(fields: [clubId], references: [id])
@@ -47,9 +47,9 @@ model facilities {
   type                   String
   capacity               Int
   responsibleWorker      Int
-  responsibleWorkerUser  users?                 @relation("FacilityResponsible", fields: [responsibleWorker], references: [id])
+  responsibleWorkerUser  users?                 @relation("FacilityResponsible", fields: [responsibleWorker, clubId], references: [id, clubId])
   assistantWorker        Int?
-  assistantWorkerUser    users?                 @relation("FacilityAssistant", fields: [assistantWorker], references: [id])
+  assistantWorkerUser    users?                 @relation("FacilityAssistant", fields: [assistantWorker, clubId], references: [id, clubId])
   isActive               Boolean
   activities             activity[]
   facilities_membership  facilities_membership[]
@@ -77,7 +77,7 @@ model activity {
   hourStart String
   hourEnd String
   userId Int
-  user     users     @relation(fields: [userId], references: [id])
+  user     users     @relation(fields: [userId, clubId], references: [id, clubId])
   cost Decimal @db.Decimal(10, 2)
   facilityId Int
   facility facilities @relation(fields: [facilityId], references: [id])
@@ -120,7 +120,7 @@ model users {
   */
 
   
-  id Int @id @default(autoincrement())
+  id Int @default(autoincrement())
   name String
   document String @unique
   typeId Int
@@ -150,8 +150,9 @@ model users {
   medications String?
   medicalConditions String?
   time_entries time_entries[]
-  clubId Int
+  clubId Int 
   club clubs @relation(fields: [clubId], references: [id])
+  @@id([id, clubId])
 }
 
 model time_entries {
