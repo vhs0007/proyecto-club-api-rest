@@ -217,9 +217,9 @@ export class UsersRepository implements IUsersRepository {
   }
 
   async findById(queryUserRequestDto: QueryUserRequestDto): Promise<UserResponse | null> {
-    const { clubId, userId } = queryUserRequestDto;
+    const { clubId, userId, typeId } = queryUserRequestDto;
     const user = await this.prisma.users.findUnique({
-      where: { id_clubId: { id: userId, clubId } },
+      where: { id_clubId_typeId: { id: userId, clubId, typeId } },
       include: { type: true, memberships: { include: { type: true } } },
     });
     if (!user) return null;
@@ -241,7 +241,7 @@ export class UsersRepository implements IUsersRepository {
 
   async update(id: number, updateUserDto: UpdateUserDto): Promise<UserResponse> {
     const updated = await this.prisma.users.update({
-      where: { id_clubId: { id, clubId: updateUserDto.clubId } },
+      where: { id_clubId_typeId: { id, clubId: updateUserDto.clubId, typeId: updateUserDto.typeId } },
       data: updateUserDto as Prisma.usersUncheckedUpdateInput,
       include: { type: true , memberships: { include: { type: true } } },
     });
@@ -252,7 +252,7 @@ export class UsersRepository implements IUsersRepository {
   }
 
   async delete(queryUserRequestDto: QueryUserRequestDto): Promise<void> {
-    const { clubId, userId } = queryUserRequestDto;
-    await this.prisma.users.delete({ where: { id_clubId: { id: userId, clubId } } });
+    const { clubId, userId, typeId } = queryUserRequestDto;
+    await this.prisma.users.delete({ where: { id_clubId_typeId: { id: userId, clubId, typeId } } });
   }
 }

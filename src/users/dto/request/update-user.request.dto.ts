@@ -56,6 +56,11 @@ export class UpdateUserDto {
   endWorkAt?: string | null;
 
   @ApiProperty({ required: false })
+  @IsNumber({}, { message: 'typeId debe ser un número' })
+  @Min(1, { message: 'typeId debe ser al menos 1' })
+  typeId: number;
+
+  @ApiProperty({ required: false })
   @IsOptional()
   @IsNumber({}, { message: 'weight debe ser un número' })
   @Min(0, { message: 'weight debe ser 0 o mayor' })
@@ -122,12 +127,6 @@ export class UpdateUserDto {
   @IsOptional()
   @IsString({ message: 'medicalConditions debe ser un texto' })
   medicalConditions?: string;
-
-  @ApiProperty({ required: false })
-  @IsOptional()
-  @IsNumber({}, { message: 'typeId debe ser un número' })
-  @Min(1, { message: 'typeId debe ser 1, 2 o 3' })
-  typeId?: number;
 
   @ApiProperty({ required: false, example: [new Date(), new Date()], description: 'Fichadas del usuario' })
   @IsOptional()

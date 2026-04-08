@@ -37,9 +37,10 @@ export class ActivitiesService {
   async create(createActivityDto: CreateActivityDto): Promise<ActivityResponseDto> {
     const user = await this.prisma.users.findUnique({
       where: {
-        id_clubId: {
+        id_clubId_typeId: {
           id: createActivityDto.userId,
           clubId: createActivityDto.clubId,
+          typeId: createActivityDto.userTypeId,
         },
       },
     });
@@ -70,9 +71,10 @@ export class ActivitiesService {
     if (updateActivityDto.userId !== undefined) {
       const user = await this.prisma.users.findUnique({
         where: {
-          id_clubId: {
+          id_clubId_typeId: {
             id: updateActivityDto.userId,
             clubId: row.clubId,
+            typeId: updateActivityDto.userTypeId,
           },
         },
       });

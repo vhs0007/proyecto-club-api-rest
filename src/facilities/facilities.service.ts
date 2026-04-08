@@ -35,9 +35,10 @@ export class FacilitiesService {
   private async ensureWorker(userId: number, clubId: number, field: string): Promise<void> {
     const user = await this.prisma.users.findUnique({
       where: {
-        id_clubId: {
+        id_clubId_typeId: {
           id: userId,
           clubId,
+          typeId: 2,
         },
       },
     });

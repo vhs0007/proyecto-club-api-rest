@@ -175,8 +175,10 @@ export class FacilitiesRepository implements IFacilitiesRepository {
     const created = await this.prisma.facilities.create({
       data: {
         ...rest,
+        responsibleWorkerTypeId: 1,
         responsibleWorker,
         assistantWorker,
+        assistantWorkerTypeId: 1,
         isActive: createFacilityDto.isActive ?? true,
         clubId: createFacilityDto.clubId,
       },

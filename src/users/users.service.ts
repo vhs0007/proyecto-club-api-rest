@@ -150,7 +150,7 @@ export class UsersService {
 
   async update(id: number, updateUserDto: UpdateUserDto): Promise<UserResponseDto> {
     const { clubId } = updateUserDto;
-    const existing = await this.usersRepository.findById({ clubId, userId: id });
+    const existing = await this.usersRepository.findById({ clubId, userId: id, typeId: updateUserDto.typeId });
     if (!existing) throw new NotFoundException('User not found');
     if (updateUserDto.email != null && updateUserDto.email.trim() !== '') {
       const byEmail = await this.usersRepository.findByEmail(updateUserDto.email);

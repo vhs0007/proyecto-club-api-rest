@@ -11,4 +11,9 @@ export class QueryUserRequestDto {
   @IsNumber({}, { message: 'userId debe ser un número' })
   @Min(1, { message: 'userId debe ser al menos 1' })
   userId: number;
+
+  @ApiProperty({ example: 3, description: 'ID del tipo de usuario a filtrar' })
+  @IsNumber({}, { message: 'typeId debe ser un número' })
+  @Min(1, { message: 'typeId debe ser al menos 1' })
+  typeId: number;
 }

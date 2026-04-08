@@ -18,7 +18,7 @@ model membership {
   typeId   Int
   userId   Int
   createdAt DateTime
-  user     users          @relation(fields: [userId, clubId], references: [id, clubId])
+  user     users          @relation(fields: [userId, clubId, typeId], references: [id, clubId, typeId])
   expiration DateTime
   clubId Int
   club clubs @relation(fields: [clubId], references: [id])
@@ -46,10 +46,12 @@ model facilities {
   id                     Int                    @id @default(autoincrement())
   type                   String
   capacity               Int
+  responsibleWorkerTypeId Int
+  assistantWorkerTypeId Int?
   responsibleWorker      Int
-  responsibleWorkerUser  users?                 @relation("FacilityResponsible", fields: [responsibleWorker, clubId], references: [id, clubId])
+  responsibleWorkerUser  users?                 @relation("FacilityResponsible", fields: [responsibleWorker, clubId, responsibleWorkerTypeId], references: [id, clubId, typeId])
   assistantWorker        Int?
-  assistantWorkerUser    users?                 @relation("FacilityAssistant", fields: [assistantWorker, clubId], references: [id, clubId])
+  assistantWorkerUser    users?                 @relation("FacilityAssistant", fields: [assistantWorker, clubId, assistantWorkerTypeId], references: [id, clubId, typeId])
   isActive               Boolean
   activities             activity[]
   facilities_membership  facilities_membership[]
@@ -77,7 +79,8 @@ model activity {
   hourStart String
   hourEnd String
   userId Int
-  user     users     @relation(fields: [userId, clubId], references: [id, clubId])
+  userTypeId Int
+  user     users     @relation(fields: [userId, clubId, userTypeId], references: [id, clubId, typeId])
   cost Decimal @db.Decimal(10, 2)
   facilityId Int
   facility facilities @relation(fields: [facilityId], references: [id])
@@ -122,7 +125,7 @@ model users {
   
   id Int @default(autoincrement())
   name String
-  document String @unique
+  document String
   typeId Int
   type user_type @relation(fields: [typeId], references: [id])
   email String?
@@ -152,7 +155,9 @@ model users {
   time_entries time_entries[]
   clubId Int 
   club clubs @relation(fields: [clubId], references: [id])
-  @@id([id, clubId])
+  @@id([id, clubId, typeId])
+  @@unique([clubId, email])
+  @@unique([clubId, document])
 }
 
 model time_entries {
@@ -161,7 +166,7 @@ model time_entries {
   clubId Int
   userDocument String
   club clubs @relation(fields: [clubId], references: [id])
-  user users @relation(fields: [userDocument], references: [document])
+  user users @relation(fields: [userDocument, clubId], references: [document, clubId])
   clockIn DateTime
   clockOut DateTime?
 }

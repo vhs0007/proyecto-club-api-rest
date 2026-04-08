@@ -27,9 +27,10 @@ export class MembershipService {
   async create(createMembershipDto: CreateMembershipDto): Promise<MembershipResponseDto> {
     const user = await this.prisma.users.findUnique({
       where: {
-        id_clubId: {
+        id_clubId_typeId: {
           id: createMembershipDto.userId,
           clubId: createMembershipDto.clubId,
+          typeId: createMembershipDto.userTypeId,
         },
       },
     });
@@ -62,9 +63,10 @@ export class MembershipService {
     if (updateMembershipDto.userId !== undefined) {
       const user = await this.prisma.users.findUnique({
         where: {
-          id_clubId: {
+          id_clubId_typeId: {
             id: updateMembershipDto.userId,
             clubId: membership.clubId,
+            typeId: updateMembershipDto.userTypeId,
           },
         },
       });

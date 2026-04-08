@@ -36,9 +36,9 @@ export class UsersController {
 
   @Get(':id')
   @ApiOperation({ summary: 'Obtener usuario por ID' })
-  findOne(@Param('id', ParseIntPipe) id: number, @Query('clubId', ParseIntPipe) clubId: number): Promise<UserResponseDto> {
+  findOne(@Param('id', ParseIntPipe) id: number, @Query('clubId', ParseIntPipe) clubId: number, @Query('typeId', ParseIntPipe) typeId: number): Promise<UserResponseDto> {
     try{
-      return this.usersService.findOne({ clubId, userId: id });
+      return this.usersService.findOne({ clubId, userId: id, typeId });
     } catch (error) {
       throw new NotFoundException(error);
     }
@@ -57,9 +57,9 @@ export class UsersController {
 
   @Delete(':id')
   @ApiOperation({ summary: 'Eliminar usuario' })
-  remove(@Param('id', ParseIntPipe) id: number, @Query('clubId', ParseIntPipe) clubId: number): Promise<UserResponseDto> {
+  remove(@Param('id', ParseIntPipe) id: number, @Query('clubId', ParseIntPipe) clubId: number, @Query('typeId', ParseIntPipe) typeId: number): Promise<UserResponseDto> {
     try{
-      return this.usersService.remove({ clubId, userId: id });
+      return this.usersService.remove({ clubId, userId: id, typeId });
     } catch (error) {
       throw new InternalServerErrorException(error);
     }

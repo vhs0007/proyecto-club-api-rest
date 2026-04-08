@@ -48,4 +48,9 @@ export class CreateActivityDto {
   @ApiProperty({ example: '2026-03-03', description: 'Fecha de la actividad' })
   @IsDate({ message: 'date debe ser una fecha válida' })
   date: Date;
+  
+  @ApiProperty({ example: 1, description: 'Id del tipo de usuario' })
+  @IsNumber({}, { message: 'userTypeId debe ser un número' })
+  @Min(1, { message: 'userTypeId debe ser al menos 1' })
+  userTypeId: number;
 }
