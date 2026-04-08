@@ -48,14 +48,22 @@ export class MembershipRepository implements IMembershipRepository {
 
 
   async create(createMembershipDto: CreateMembershipDto): Promise<MembershipResponse> {
-    const typeId = await this.getTypeIdById(createMembershipDto.type);
+    const membershipTypeId = await this.getTypeIdById(createMembershipDto.type);
     const dateCreated = new Date();
     const expirationDate = new Date();
     expirationDate.setDate(expirationDate.getDate() + 30);
     const numerator = await this.generateNumerator(createMembershipDto.clubId);
     const id = numerator.value;
     const created = await this.membership.create({
-      data: { id, typeId, createdAt: dateCreated, userId: createMembershipDto.userId , expiration : expirationDate, clubId: createMembershipDto.clubId},
+      data: {
+        id,
+        membershipTypeId,
+        createdAt: dateCreated,
+        userId: createMembershipDto.userId,
+        userTypeId: createMembershipDto.userTypeId,
+        expiration: expirationDate,
+        clubId: createMembershipDto.clubId,
+      },
       include: { type: true, user: { include: { type: true } } },
     });
     
@@ -64,7 +72,7 @@ export class MembershipRepository implements IMembershipRepository {
   
   private mapToMembershipResponse(row: {
     id: number;
-    typeId: number;
+    membershipTypeId: number;
     expiration: Date;
     type: { id: number; name: string, price: Prisma.Decimal } | null;
     createdAt: Date;
@@ -78,7 +86,7 @@ export class MembershipRepository implements IMembershipRepository {
     };
   }): MembershipResponse {
     const type =
-      row.type != null ? { id: row.type.id, name: row.type.name, price: row.type.price } : { id: row.typeId, name: '', price: new Prisma.Decimal(0) };
+      row.type != null ? { id: row.type.id, name: row.type.name, price: row.type.price } : { id: row.membershipTypeId, name: '', price: new Prisma.Decimal(0) };
     const u = row.user;
     const user = {
       id: u.id,
@@ -111,12 +119,15 @@ export class MembershipRepository implements IMembershipRepository {
 
   async update(queryMembershipRequestDto: QueryMembershipRequestDto, updateMembershipDto: UpdateMembershipDto): Promise<MembershipResponse> {
     const { clubId, id } = queryMembershipRequestDto;
-    const data: { typeId?: number; userId?: number } = {};
+    const data: { membershipTypeId?: number; userId?: number; userTypeId?: number } = {};
     if (updateMembershipDto.type != null) {
-      data.typeId = await this.getTypeIdById(updateMembershipDto.type);
+      data.membershipTypeId = await this.getTypeIdById(updateMembershipDto.type);
     }
     if (updateMembershipDto.userId != null) {
       data.userId = updateMembershipDto.userId;
+    }
+    if (updateMembershipDto.userTypeId != null) {
+      data.userTypeId = updateMembershipDto.userTypeId;
     }
     const updated = await this.membership.update({
       where: { id_clubId: { id: id, clubId: clubId } },

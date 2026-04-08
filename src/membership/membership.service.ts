@@ -64,12 +64,13 @@ export class MembershipService {
     });
     if (!membership) throw new NotFoundException('Membership not found');
     if (updateMembershipDto.userId !== undefined) {
+      const userTypeId = updateMembershipDto.userTypeId ?? row.user.type.id;
       const user = await this.prisma.users.findUnique({
         where: {
           id_clubId_typeId: {
             id: updateMembershipDto.userId,
             clubId: membership.clubId,
-            typeId: updateMembershipDto.userTypeId,
+            typeId: userTypeId,
           },
         },
       });

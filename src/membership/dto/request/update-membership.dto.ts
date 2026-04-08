@@ -18,7 +18,7 @@ export class UpdateMembershipDto {
   @IsOptional()
   @IsNumber({}, { message: 'userTypeId debe ser un número' })
   @Min(1, { message: 'userTypeId debe ser al menos 1' })
-  userTypeId: number;
+  userTypeId?: number;
 
   @ApiProperty({ example: 1, description: 'Id del club' })
   @IsNumber({}, { message: 'clubId debe ser un número' })

@@ -14,11 +14,12 @@ datasource db {
 
 model membership {
   id       Int            @default(autoincrement())
-  type     membership_type @relation(fields: [typeId, clubId], references: [id, clubId])
-  typeId   Int
+  type     membership_type @relation(fields: [membershipTypeId, clubId], references: [id, clubId])
+  membershipTypeId   Int
   userId   Int
+  userTypeId Int
   createdAt DateTime
-  user     users          @relation(fields: [userId, clubId, typeId], references: [id, clubId, typeId])
+  user     users          @relation(fields: [userId, clubId, userTypeId], references: [id, clubId, typeId])
   expiration DateTime
   clubId Int
   club clubs @relation(fields: [clubId], references: [id])

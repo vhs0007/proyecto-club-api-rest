@@ -43,7 +43,7 @@ type MembershipWithTypeRow = {
   userId: number;
   expiration: Date;
   createdAt: Date;
-  typeId: number;
+  membershipTypeId: number;
   type: {
     id: number;
     name: string;
@@ -53,7 +53,7 @@ type MembershipWithTypeRow = {
 
 function mapMembership(row: MembershipWithTypeRow): membershipNavigation {
   const membershipType = new MembershipTypeResponseDto();
-  membershipType.id = row.type?.id ?? row.typeId;
+  membershipType.id = row.type?.id ?? row.membershipTypeId;
   membershipType.name = row.type?.name ?? '';
   membershipType.price = row.type?.price?.toNumber() ?? 0;
 
