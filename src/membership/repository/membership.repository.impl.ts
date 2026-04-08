@@ -4,7 +4,7 @@ import type { IMembershipRepository, MembershipResponse } from './membership.rep
 import { CreateMembershipDto } from '../dto/request/create-membership.dto';
 import { UpdateMembershipDto } from '../dto/request/update-membership.dto';
 import { MembershipType } from 'src/membership_type/entities/membership_type.entity';
-import { Prisma } from '@prisma/client';
+import { numerator, Prisma } from '@prisma/client';
 import { QueryMembershipRequestDto } from '../dto/request/query-membership.request.dto';
 
 @Injectable()
@@ -27,13 +27,35 @@ export class MembershipRepository implements IMembershipRepository {
     return row.id;
   }
 
+  private async generateNumerator(clubId: number): Promise<numerator> {
+    const existNumerator = await this.prisma.numerator.findFirst({ where: { name: 'membershipId', clubId } });
+    if (existNumerator) {
+      return await this.prisma.numerator.update({
+        where: { id: existNumerator.id },
+        data: { value: existNumerator.value + 1 },
+      });
+    }
+    const numerator = await this.prisma.numerator.create({
+      data: {
+        name: 'membershipId',
+        clubId,
+        value: 1,
+      },
+    });
+      return numerator;
+  }
+
+
+
   async create(createMembershipDto: CreateMembershipDto): Promise<MembershipResponse> {
     const typeId = await this.getTypeIdById(createMembershipDto.type);
     const dateCreated = new Date();
     const expirationDate = new Date();
     expirationDate.setDate(expirationDate.getDate() + 30);
+    const numerator = await this.generateNumerator(createMembershipDto.clubId);
+    const id = numerator.value;
     const created = await this.membership.create({
-      data: { typeId, createdAt: dateCreated, userId: createMembershipDto.userId , expiration : expirationDate, clubId: createMembershipDto.clubId},
+      data: { id, typeId, createdAt: dateCreated, userId: createMembershipDto.userId , expiration : expirationDate, clubId: createMembershipDto.clubId},
       include: { type: true, user: { include: { type: true } } },
     });
     

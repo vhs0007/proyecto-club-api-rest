@@ -16,7 +16,7 @@ export class MembershipTypeService {
   }
 
    async create(dto: CreateMembershipTypeDto): Promise<MembershipTypeResponseDto> {
-     return this.membershipTypeRepository.create({ name: dto.name, price: dto.price, clubId: dto.clubId });
+     return this.membershipTypeRepository.create({ id: null, name: dto.name, price: dto.price, clubId: dto.clubId });
    }
 
   async findOne(queryMembershipTypeRequestDto: QueryMembershipTypeRequestDto): Promise<MembershipTypeResponseDto> {
