@@ -189,6 +189,7 @@ export class FacilitiesRepository implements IFacilitiesRepository {
         data: membershipTypeIds.map((membershipTypeId) => ({
           facilityId: created.id,
           membershipTypeId,
+          clubId: createFacilityDto.clubId,
         })),
       });
     }
@@ -230,6 +231,7 @@ export class FacilitiesRepository implements IFacilitiesRepository {
           data: membershipTypeIds.map(membershipTypeId => ({
             facilityId: id,
             membershipTypeId,
+            clubId: updateFacilityDto.clubId,
           })),
         });
       }

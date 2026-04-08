@@ -13,8 +13,8 @@ datasource db {
 }
 
 model membership {
-  id       Int            @id @default(autoincrement())
-  type     membership_type @relation(fields: [typeId], references: [id])
+  id       Int            @default(autoincrement())
+  type     membership_type @relation(fields: [typeId, clubId], references: [id, clubId])
   typeId   Int
   userId   Int
   createdAt DateTime
@@ -22,24 +22,29 @@ model membership {
   expiration DateTime
   clubId Int
   club clubs @relation(fields: [clubId], references: [id])
+  @@id([id, clubId])
 }
 
 model membership_type {
-  id                    Int                    @id @default(autoincrement())
+  id                    Int                    @default(autoincrement())
   name                  String
   price                 Decimal                @db.Decimal(10, 2) @default(0)
   memberships           membership[]
   facilities_membership facilities_membership[]
   clubId Int
   club clubs @relation(fields: [clubId], references: [id])
+  @@id([id, clubId])
 }
 
 model facilities_membership {
-  id                Int           @id @default(autoincrement())
+  id                Int           @default(autoincrement())
   facilityId        Int
+  clubId Int
+  club clubs @relation(fields: [clubId], references: [id])
   membershipTypeId  Int
   facility          facilities   @relation(fields: [facilityId], references: [id])
-  type              membership_type @relation(fields: [membershipTypeId], references: [id])
+  type              membership_type @relation(fields: [membershipTypeId, clubId], references: [id, clubId])
+  @@id([id, clubId])
 }
 
 model facilities {
@@ -188,6 +193,7 @@ model clubs{
   membership_types membership_type[]
   plugins_clubs plugins_clubs[]
   numerators numerator[]
+  facilities_membership facilities_membership[]
 }
 
 model plugins {

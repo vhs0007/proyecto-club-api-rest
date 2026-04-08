@@ -5,6 +5,7 @@ import { CreateMembershipDto } from '../dto/request/create-membership.dto';
 import { UpdateMembershipDto } from '../dto/request/update-membership.dto';
 import { MembershipType } from 'src/membership_type/entities/membership_type.entity';
 import { Prisma } from '@prisma/client';
+import { QueryMembershipRequestDto } from '../dto/request/query-membership.request.dto';
 
 @Injectable()
 export class MembershipRepository implements IMembershipRepository {
@@ -76,16 +77,18 @@ export class MembershipRepository implements IMembershipRepository {
     return list.map((row) => this.mapToMembershipResponse(row));
   }
 
-  async findById(id: number): Promise<MembershipResponse | null> {
+  async findById(queryMembershipRequestDto: QueryMembershipRequestDto): Promise<MembershipResponse | null> {
+    const { clubId, id } = queryMembershipRequestDto;
     const row = await this.membership.findUnique({
-      where: { id },
+      where: { id_clubId: { id: id, clubId: clubId } },
       include: { type: true, user: { include: { type: true } } },
     });
     if (!row) return null;
     return this.mapToMembershipResponse(row);
   }
 
-  async update(id: number, updateMembershipDto: UpdateMembershipDto): Promise<MembershipResponse> {
+  async update(queryMembershipRequestDto: QueryMembershipRequestDto, updateMembershipDto: UpdateMembershipDto): Promise<MembershipResponse> {
+    const { clubId, id } = queryMembershipRequestDto;
     const data: { typeId?: number; userId?: number } = {};
     if (updateMembershipDto.type != null) {
       data.typeId = await this.getTypeIdById(updateMembershipDto.type);
@@ -94,14 +97,15 @@ export class MembershipRepository implements IMembershipRepository {
       data.userId = updateMembershipDto.userId;
     }
     const updated = await this.membership.update({
-      where: { id },
+      where: { id_clubId: { id: id, clubId: clubId } },
       data,
       include: { type: true, user: { include: { type: true } } },
     });
     return this.mapToMembershipResponse(updated);
   }
 
-  async delete(id: number): Promise<void> {
-    await this.membership.delete({ where: { id } });
+  async delete(queryMembershipRequestDto: QueryMembershipRequestDto): Promise<void> {
+    const { clubId, id } = queryMembershipRequestDto;
+    await this.membership.delete({ where: { id_clubId: { id: id, clubId: clubId } } });
   }
 }

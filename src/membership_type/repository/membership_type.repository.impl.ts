@@ -5,6 +5,7 @@ import type {
   MembershipTypeResponse,
   UpdateMembershipTypeData,
 } from './membership_type.repository';
+import { QueryMembershipTypeRequestDto } from '../dto/request/query-membership_type.request.dto';
 
 @Injectable()
 export class MembershipTypeRepository implements IMembershipTypeRepository {
@@ -26,8 +27,9 @@ export class MembershipTypeRepository implements IMembershipTypeRepository {
     }));
   }
 
-  async findById(id: number): Promise<MembershipTypeResponse | null> {
-    const row = await this.prisma.membership_type.findUnique({ where: { id }});
+  async findById(queryMembershipTypeRequestDto: QueryMembershipTypeRequestDto): Promise<MembershipTypeResponse | null> {
+    const { clubId, id } = queryMembershipTypeRequestDto;
+    const row = await this.prisma.membership_type.findUnique({ where: { id_clubId: { id: id, clubId: clubId } }});
     if (!row) return null;
     return {
       id: row.id,
@@ -41,12 +43,13 @@ export class MembershipTypeRepository implements IMembershipTypeRepository {
      return { id: row.id, name: row.name, price: this.toNumber(row.price) };
    }
 
-  async update(id: number, data: UpdateMembershipTypeData): Promise<MembershipTypeResponse> {
+  async update(queryMembershipTypeRequestDto: QueryMembershipTypeRequestDto, data: UpdateMembershipTypeData): Promise<MembershipTypeResponse> {
+    const { clubId, id } = queryMembershipTypeRequestDto;
     const updateData: { name?: string; price?: number } = {};
     if (data.name !== undefined) updateData.name = data.name;
     if (data.price !== undefined) updateData.price = data.price;
     const row = await this.prisma.membership_type.update({
-      where: { id },
+      where: { id_clubId: { id: id, clubId: clubId } },
       data: updateData,
     });
     return {
@@ -56,7 +59,8 @@ export class MembershipTypeRepository implements IMembershipTypeRepository {
     };
   }
 
-  async delete(id: number): Promise<void> {
-    await this.prisma.membership_type.delete({ where: { id } });
+  async delete(queryMembershipTypeRequestDto: QueryMembershipTypeRequestDto): Promise<void> {
+    const { clubId, id } = queryMembershipTypeRequestDto;
+    await this.prisma.membership_type.delete({ where: { id_clubId: { id: id, clubId: clubId } } });
   }
 }

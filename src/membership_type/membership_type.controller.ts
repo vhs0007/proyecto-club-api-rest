@@ -44,9 +44,9 @@ export class MembershipTypeController {
 
   @ApiOperation({ summary: 'Obtener tipo de membresía por ID' })
   @Get(':id')
-  findOne(@Param('id') id: string): Promise<MembershipTypeResponseDto> {
+  findOne(@Param('id') id: string, @Query('clubId', ParseIntPipe) clubId: number): Promise<MembershipTypeResponseDto> {
     try{
-      return this.membershipTypeService.findOne(+id);
+      return this.membershipTypeService.findOne({ clubId, id: +id });
     } catch (error) {
       throw new NotFoundException(error);
     }
@@ -57,14 +57,15 @@ export class MembershipTypeController {
   @ApiBody({ type: UpdateMembershipTypeDto })
   update(
     @Param('id') id: string,
+    @Query('clubId', ParseIntPipe) clubId: number,
     @Body() updateMembershipTypeDto: UpdateMembershipTypeDto,
   ): Promise<MembershipTypeResponseDto> {
-    return this.membershipTypeService.update(+id, updateMembershipTypeDto);
+    return this.membershipTypeService.update({ clubId, id: +id }, updateMembershipTypeDto);
   }
 
   @ApiOperation({ summary: 'Eliminar tipo de membresía' })
   @Delete(':id')
-  remove(@Param('id') id: string): Promise<void> {
-    return this.membershipTypeService.remove(+id);
+  remove(@Param('id') id: string, @Query('clubId', ParseIntPipe) clubId: number): Promise<void> {
+    return this.membershipTypeService.remove({ clubId, id: +id });
   }
 }

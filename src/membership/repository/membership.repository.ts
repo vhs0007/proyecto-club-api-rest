@@ -1,4 +1,5 @@
 import { CreateMembershipDto } from '../dto/request/create-membership.dto';
+import { QueryMembershipRequestDto } from '../dto/request/query-membership.request.dto';
 import { UpdateMembershipDto } from '../dto/request/update-membership.dto';
 import { Prisma } from '@prisma/client';
 
@@ -28,7 +29,7 @@ export interface membershipTypeNavigation{
 export interface IMembershipRepository {
   create(createMembershipDto: CreateMembershipDto): Promise<MembershipResponse>;
   findAll(clubId: number): Promise<MembershipResponse[]>;
-  findById(id: number): Promise<MembershipResponse | null>;
-  update(id: number, updateMembershipDto: UpdateMembershipDto): Promise<MembershipResponse>;
-  delete(id: number): Promise<void>;
+  findById(queryMembershipRequestDto: QueryMembershipRequestDto): Promise<MembershipResponse | null>;
+  update(queryMembershipRequestDto: QueryMembershipRequestDto, updateMembershipDto: UpdateMembershipDto): Promise<MembershipResponse>;
+  delete(queryMembershipRequestDto: QueryMembershipRequestDto): Promise<void>;
 }
