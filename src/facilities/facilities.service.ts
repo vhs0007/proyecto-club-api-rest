@@ -38,7 +38,7 @@ export class FacilitiesService {
         id_clubId_typeId: {
           id: userId,
           clubId,
-          typeId: 2,
+          typeId: 1,
         },
       },
     });
