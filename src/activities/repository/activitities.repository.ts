@@ -1,5 +1,6 @@
 import { CreateActivityDto } from '../dto/request/create-activities.dto';
 import { UpdateActivityDto } from '../dto/request/update-activities.dto';
+import {QueryActivitiesRequestDto} from '../dto/request/query-activities.request.dto';
 
 export interface UserNavigation {
   id: number;
@@ -38,7 +39,7 @@ export type ActivityResponse = {
 export interface IActivitiesRepository {
   create(createActivityDto: CreateActivityDto): Promise<ActivityResponse>;
   findAll(clubId: number): Promise<ActivityResponse[]>;
-  findById(id: number): Promise<ActivityResponse | null>;
-  update(id: number, updateActivityDto: UpdateActivityDto): Promise<ActivityResponse>;
-  delete(id: number): Promise<void>;
+  findById(query: QueryActivitiesRequestDto): Promise<ActivityResponse | null>;
+  update(query: QueryActivitiesRequestDto, updateActivityDto: UpdateActivityDto): Promise<ActivityResponse>;
+  delete(query: QueryActivitiesRequestDto): Promise<void>;
 }

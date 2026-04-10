@@ -43,13 +43,13 @@ model facilities_membership {
   clubId Int
   club clubs @relation(fields: [clubId], references: [id])
   membershipTypeId  Int
-  facility          facilities   @relation(fields: [facilityId], references: [id])
+  facility          facilities   @relation(fields: [facilityId, clubId], references: [id, clubId])
   type              membership_type @relation(fields: [membershipTypeId, clubId], references: [id, clubId])
   @@id([id, clubId])
 }
 
 model facilities {
-  id                     Int                    @id @default(autoincrement())
+  id                     Int                    @default(autoincrement())
   type                   String
   capacity               Int
   responsibleWorkerTypeId Int
@@ -63,6 +63,7 @@ model facilities {
   facilities_membership  facilities_membership[]
   clubId Int
   club clubs @relation(fields: [clubId], references: [id])
+  @@id([id, clubId])
 }
 
 model activity {
@@ -78,7 +79,7 @@ model activity {
   facility: Facility;
   isActive: boolean;
   */
-  id Int @id @default(autoincrement())
+  id Int @default(autoincrement())
   name String
   type String
   date DateTime
@@ -89,10 +90,11 @@ model activity {
   user     users     @relation(fields: [userId, clubId, userTypeId], references: [id, clubId, typeId])
   cost Decimal @db.Decimal(10, 2)
   facilityId Int
-  facility facilities @relation(fields: [facilityId], references: [id])
+  facility facilities @relation(fields: [facilityId, clubId], references: [id, clubId])
   isActive Boolean
   clubId Int
   club clubs @relation(fields: [clubId], references: [id])
+  @@id([id, clubId])
 }
 
 model user_type {

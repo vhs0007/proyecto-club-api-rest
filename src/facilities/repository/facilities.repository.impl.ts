@@ -1,10 +1,11 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { Prisma } from '@prisma/client';
+import { numerator, Prisma } from '@prisma/client';
 import { PrismaService } from '../../prisma/prisma.service';
 import type { IFacilitiesRepository, FacilityResponse, MembershipTypeNavigation } from './facilities.repository';
 import { CreateFacilityDto } from '../dto/request/create-facility.dto';
 import { UpdateFacilityDto } from '../dto/request/update-facility.dto';
 import type { WorkerNavigation, UserTypeNavigation, UserNavigation, ActivitiesNavigation } from './facilities.repository';
+import { QueryFacilitiesRequestDto } from '../dto/request/query-facilities.request.dto';
 
 type FacilityCreateResult = Prisma.facilitiesGetPayload<{
   include: {
@@ -172,8 +173,11 @@ export class FacilitiesRepository implements IFacilitiesRepository {
 
   async create(createFacilityDto: CreateFacilityDto): Promise<FacilityResponse> {
     const { responsibleWorker, assistantWorker, membershipTypeIds, id: _id, ...rest } = createFacilityDto;
+    const numerator = await this.generateNumerator(createFacilityDto.clubId);
+    const id = numerator.value;
     const created = await this.prisma.facilities.create({
       data: {
+        id,
         ...rest,
         responsibleWorkerTypeId: 1,
         responsibleWorker,
@@ -193,8 +197,26 @@ export class FacilitiesRepository implements IFacilitiesRepository {
         })),
       });
     }
-    const withMembershipTypes = await this.findById(created.id);
+    const withMembershipTypes = await this.findById({id: created.id, clubId: createFacilityDto.clubId});
     return withMembershipTypes ?? this.mapRow(created);
+  }
+
+  private async generateNumerator(clubId: number): Promise<numerator> {
+    const existNumerator = await this.prisma.numerator.findFirst({ where: { name: 'facilityId', clubId } });
+    if (existNumerator) {
+      return await this.prisma.numerator.update({
+        where: { id: existNumerator.id },
+        data: { value: existNumerator.value + 1 },
+      });
+    }
+    const numerator = await this.prisma.numerator.create({
+      data: {
+        name: 'facilityId',
+        clubId,
+        value: 1,
+      },
+    });
+      return numerator;
   }
   
   async findAll(clubId: number): Promise<FacilityResponse[]> {
@@ -205,16 +227,16 @@ export class FacilitiesRepository implements IFacilitiesRepository {
     return list.map((row) => this.mapRow(row));
   }
 
-  async findById(id: number): Promise<FacilityResponse | null> {
+  async findById(query: QueryFacilitiesRequestDto): Promise<FacilityResponse | null> {
     const row = await this.prisma.facilities.findUnique({
-      where: { id },
+      where: { id_clubId: {id: query.id, clubId: query.clubId}},
       include: FACILITY_INCLUDE as { responsibleWorkerUser: { include: { type: true } }, assistantWorkerUser: { include: { type: true } }, activities: { include: { user: { include: { type: true } } } }, facilities_membership: { include: { type: true } } },
     });
     return row ? this.mapRow(row) : null;
   }
 
 
-  async update(id: number, updateFacilityDto: UpdateFacilityDto): Promise<FacilityResponse> {
+  async update(query: QueryFacilitiesRequestDto, updateFacilityDto: UpdateFacilityDto): Promise<FacilityResponse> {
     const data: Record<string, unknown> = {};
     if (updateFacilityDto.type !== undefined) data.type = updateFacilityDto.type;
     if (updateFacilityDto.capacity !== undefined) data.capacity = updateFacilityDto.capacity;
@@ -225,39 +247,39 @@ export class FacilitiesRepository implements IFacilitiesRepository {
     const membershipTypeIds = updateFacilityDto.membershipTypeIds;
 
     if (membershipTypeIds !== undefined) {
-      await this.prisma.facilities_membership.deleteMany({ where: { facilityId: id } });
+      await this.prisma.facilities_membership.deleteMany({ where: { facilityId: query.id, clubId: query.clubId } });
       if (membershipTypeIds.length > 0) {
         await this.prisma.facilities_membership.createMany({
           data: membershipTypeIds.map(membershipTypeId => ({
-            facilityId: id,
+            facilityId: query.id,
             membershipTypeId,
             clubId: updateFacilityDto.clubId,
           })),
         });
       }
       if (Object.keys(data).length > 0) {
-        await this.prisma.facilities.update({ where: { id }, data });
+        await this.prisma.facilities.update({ where: { id_clubId: {id: query.id, clubId: query.clubId}}, data });
       }
-      const refreshed = await this.findById(id);
-      if (!refreshed) throw new NotFoundException(`Facility ${id} not found after update`);
+      const refreshed = await this.findById(query);
+      if (!refreshed) throw new NotFoundException(`Facility ${query.id} not found after update`);
       return refreshed;
     }
 
     const updated = await this.prisma.facilities.update({
-      where: { id },
+      where: { id_clubId: {id: query.id, clubId: query.clubId}},
       data,
       include: FACILITY_INCLUDE as { responsibleWorkerUser: { include: { type: true } }, assistantWorkerUser: { include: { type: true } }, activities: { include: { user: { include: { type: true } } } }, facilities_membership: { include: { type: true } } },
     });
     return this.mapRow(updated);
   }
 
-  async delete(id: number): Promise<void> {
+  async delete(query: QueryFacilitiesRequestDto): Promise<void> {
     await this.prisma.activity.deleteMany({
-      where: { facilityId: id },
+      where: { facilityId: query.id, clubId: query.clubId},
     });
     await this.prisma.facilities_membership.deleteMany({
-      where: { facilityId: id },
+      where: { facilityId: query.id, clubId: query.clubId},
     });
-    await this.prisma.facilities.delete({ where: { id } });
+    await this.prisma.facilities.delete({ where: { id_clubId: {id: query.id, clubId: query.clubId} } });
   }
 }

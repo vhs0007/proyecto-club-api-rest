@@ -36,9 +36,14 @@ export class ActivitiesController {
 
   @Get(':id')
   @ApiOperation({ summary: 'Obtener actividad por ID' })
-  findOne(@Param('id') id: string): Promise<ActivityResponseDto> {
+  findOne(@Param('id') id: string, @Query('clubId', ParseIntPipe) clubId: number): Promise<ActivityResponseDto> {
     try{
-      return this.activitiesService.findOne(+id);
+      return this.activitiesService.findOne(
+        {
+          id:+id,
+          clubId:clubId
+        }
+      );
     } catch (error) {
       throw new NotFoundException(error);
     }
@@ -47,9 +52,9 @@ export class ActivitiesController {
   @Patch(':id')
   @ApiOperation({ summary: 'Actualizar actividad' })
   @ApiBody({ type: UpdateActivityDto })
-  update(@Param('id') id: string, @Body() updateActivityDto: UpdateActivityDto): Promise<ActivityResponseDto> {
+  update(@Param('id') id: string, @Query('clubId', ParseIntPipe) clubId: number, @Body() updateActivityDto: UpdateActivityDto): Promise<ActivityResponseDto> {
     try{
-      return this.activitiesService.update(+id, updateActivityDto);
+      return this.activitiesService.update({id:+id, clubId: clubId}, updateActivityDto);
     } catch (error) {
       throw new InternalServerErrorException(error);
     }
@@ -57,9 +62,9 @@ export class ActivitiesController {
 
   @Delete(':id')
   @ApiOperation({ summary: 'Eliminar actividad' })
-  remove(@Param('id') id: string): Promise<ActivityResponseDto> {
+  remove(@Param('id') id: string, @Query('clubId', ParseIntPipe) clubId: number): Promise<ActivityResponseDto> {
     try{
-      return this.activitiesService.remove(+id);
+      return this.activitiesService.remove({id: +id, clubId: clubId});
     } catch (error) {
       throw new InternalServerErrorException(error);
     }
