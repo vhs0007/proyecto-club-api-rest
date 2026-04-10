@@ -9,6 +9,7 @@ import { MembershipType } from '../membership_type/entities/membership_type.enti
 import { Worker } from '../users/entities/worker.entity';
 import { UserType } from '../users/entities/user.entity';
 import { FacilityResponseDto } from './dto/response/facility-response.dto';
+import { QueryFacilitiesRequestDto } from './dto/request/query-facilities.request.dto';
 
 @Injectable()
 export class FacilitiesService {
@@ -78,17 +79,17 @@ export class FacilitiesService {
     return list.map((r) => this.mapResponseToFacility(r));
   }
 
-  async findOne(id: number): Promise<FacilityResponseDto> {
-    const row = await this.facilitiesRepository.findById(id);
+  async findOne(query: QueryFacilitiesRequestDto): Promise<FacilityResponseDto> {
+    const row = await this.facilitiesRepository.findById(query);
     if (!row) throw new NotFoundException('Facility not found');
     return this.mapResponseToFacility(row);
   }
 
-  async update(id: number, updateFacilityDto: UpdateFacilityDto): Promise<FacilityResponseDto> {
-    const row = await this.facilitiesRepository.findById(id);
+  async update(query: QueryFacilitiesRequestDto, updateFacilityDto: UpdateFacilityDto): Promise<FacilityResponseDto> {
+    const row = await this.facilitiesRepository.findById(query);
     if (!row) throw new NotFoundException('Facility not found');
     const facility = await this.prisma.facilities.findUnique({
-      where: { id },
+      where: { id_clubId: {id: query.id, clubId: query.clubId} },
       select: { clubId: true },
     });
     if (!facility) throw new NotFoundException('Facility not found');
@@ -101,14 +102,14 @@ export class FacilitiesService {
     if (updateFacilityDto.membershipTypeIds !== undefined) {
       await this.ensureMembershipTypes(updateFacilityDto.membershipTypeIds);
     }
-    const updated = await this.facilitiesRepository.update(id, updateFacilityDto);
+    const updated = await this.facilitiesRepository.update(query, updateFacilityDto);
     return this.mapResponseToFacility(updated);
   }
 
-  async remove(id: number): Promise<FacilityResponseDto> {
-    const row = await this.facilitiesRepository.findById(id);
+  async remove(query: QueryFacilitiesRequestDto): Promise<FacilityResponseDto> {
+    const row = await this.facilitiesRepository.findById(query);
     if (!row) throw new NotFoundException('Facility not found');
-    await this.facilitiesRepository.delete(id);
+    await this.facilitiesRepository.delete(query);
     return this.mapResponseToFacility(row);
   }
 }

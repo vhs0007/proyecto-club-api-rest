@@ -40,9 +40,9 @@ export class FacilitiesController {
   @Get(':id')
   @ApiOperation({ summary: 'Obtener instalación por ID' })
   @ApiOkResponse({ description: 'Instalación encontrada' })
-  findOne(@Param('id') id: string): Promise<FacilityResponseDto> {
+  findOne(id: number, @Query('clubId', ParseIntPipe) clubId): Promise<FacilityResponseDto> {
     try{
-      return this.facilitiesService.findOne(+id);
+      return this.facilitiesService.findOne({id: +id, clubId: clubId});
     } catch (error) {
       throw new NotFoundException(error);
     }
@@ -52,9 +52,9 @@ export class FacilitiesController {
   @ApiOperation({ summary: 'Actualizar instalación' })
   @ApiBody({ type: UpdateFacilityDto })
   @ApiOkResponse({ description: 'Instalación actualizada' })
-  update(@Param('id') id: string, @Body() updateFacilityDto: UpdateFacilityDto): Promise<FacilityResponseDto> {
+  update(@Param('id') id: string, @Query('clubId', ParseIntPipe) clubId, @Body() updateFacilityDto: UpdateFacilityDto): Promise<FacilityResponseDto> {
     try{
-      return this.facilitiesService.update(+id, updateFacilityDto);
+      return this.facilitiesService.update({id:+id,clubId: clubId}, updateFacilityDto);
     } catch (error) {
       throw new InternalServerErrorException(error);
     }
@@ -63,9 +63,9 @@ export class FacilitiesController {
   @Delete(':id')
   @ApiOperation({ summary: 'Eliminar instalación' })
   @ApiOkResponse({ description: 'Instalación eliminada' })
-  remove(@Param('id') id: string): Promise<FacilityResponseDto> {
+  remove(@Param('id') id: string, @Query('clubId', ParseIntPipe) clubId): Promise<FacilityResponseDto> {
     try{
-      return this.facilitiesService.remove(+id);
+      return this.facilitiesService.remove({id:+id, clubId: clubId});
     } catch (error) {
       throw new InternalServerErrorException(error);
     }
