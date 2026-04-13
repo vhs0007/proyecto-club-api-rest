@@ -24,6 +24,7 @@ function mapToUserResponseDto(res: UserResponse): UserResponseDto {
   dto.isActive = res.isActive;
   dto.salary = res.salary;
   dto.hoursToWorkPerDay = res.hoursToWorkPerDay;
+  dto.employmentStartDate = res.employmentStartDate;
   dto.startWorkAt = res.startWorkAt;
   dto.endWorkAt = res.endWorkAt;
   dto.weight = res.weight;
