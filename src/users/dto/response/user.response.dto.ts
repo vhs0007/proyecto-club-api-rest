@@ -84,6 +84,11 @@ export class UserResponseDto {
 
   @ApiProperty({ required: false })
   @IsOptional()
+  @IsDate({ message: 'employmentStartDate debe ser una fecha válida' })
+  employmentStartDate?: Date | null;
+
+  @ApiProperty({ required: false })
+  @IsOptional()
   @IsString({ message: 'startWorkAt debe ser un texto' })
   startWorkAt?: string | null;
 
