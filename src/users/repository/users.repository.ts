@@ -43,7 +43,8 @@ export interface IUsersRepository {
   create(createUserDto: CreateUserDto): Promise<UserResponse>;
   findAll(clubId: number): Promise<UserResponse[]>;
   findById(queryUserRequestDto: QueryUserRequestDto): Promise<UserResponse | null>;
-  findByEmail(email: string): Promise<UserResponse | null>;
+  findByEmail(email: string, clubId: number): Promise<UserResponse | null>;
+  findByDocument(document: string, clubId: number): Promise<UserResponse | null>;
   existsTypeId(typeId: number): Promise<boolean>;
   update(id: number, updateUserDto: UpdateUserDto): Promise<UserResponse>;
   delete(queryUserRequestDto: QueryUserRequestDto): Promise<void>;

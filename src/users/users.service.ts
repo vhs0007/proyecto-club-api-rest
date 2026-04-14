@@ -102,8 +102,11 @@ export class UsersService {
 
   async create(createUserDto: CreateUserDto): Promise<UserResponseDto> {
     
+    const existingByDocument = await this.usersRepository.findByDocument(createUserDto.document, createUserDto.clubId);
+    if (existingByDocument) throw new ConflictException('Document already in use');
+
     if (createUserDto.email != null && createUserDto.email.trim() !== '') {
-      const existingByEmail = await this.usersRepository.findByEmail(createUserDto.email);
+      const existingByEmail = await this.usersRepository.findByEmail(createUserDto.email, createUserDto.clubId);
       if (existingByEmail) throw new ConflictException('Email already in use');
     }
 
@@ -154,7 +157,7 @@ export class UsersService {
     const existing = await this.usersRepository.findById({ clubId, userId: id, typeId: updateUserDto.typeId });
     if (!existing) throw new NotFoundException('User not found');
     if (updateUserDto.email != null && updateUserDto.email.trim() !== '') {
-      const byEmail = await this.usersRepository.findByEmail(updateUserDto.email);
+      const byEmail = await this.usersRepository.findByEmail(updateUserDto.email, clubId);
       if (byEmail != null && byEmail.id !== id) throw new ConflictException('Email already in use');
     }
     const updateData = { ...updateUserDto };

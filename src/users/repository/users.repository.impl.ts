@@ -183,8 +183,14 @@ export class UsersRepository implements IUsersRepository {
     return userResponse;
   }
 
-  async findByEmail(email: string): Promise<UserResponse | null> {
-    const user = await this.prisma.users.findFirst({ where: { email } });
+  async findByEmail(email: string, clubId: number): Promise<UserResponse | null> {
+    const user = await this.prisma.users.findFirst({ where: { email, clubId } });
+    if (!user) return null;
+    return mapRow(user);
+  }
+
+  async findByDocument(document: string, clubId: number): Promise<UserResponse | null> {
+    const user = await this.prisma.users.findFirst({ where: { document, clubId } });
     if (!user) return null;
     return mapRow(user);
   }
