@@ -4,7 +4,8 @@ import type { IMembershipRepository, MembershipResponse } from './membership.rep
 import { CreateMembershipDto } from '../dto/request/create-membership.dto';
 import { UpdateMembershipDto } from '../dto/request/update-membership.dto';
 import { MembershipType } from 'src/membership_type/entities/membership_type.entity';
-import { Prisma } from '@prisma/client';
+import { numerator, Prisma } from '@prisma/client';
+import { QueryMembershipRequestDto } from '../dto/request/query-membership.request.dto';
 
 @Injectable()
 export class MembershipRepository implements IMembershipRepository {
@@ -26,13 +27,43 @@ export class MembershipRepository implements IMembershipRepository {
     return row.id;
   }
 
+  private async generateNumerator(clubId: number): Promise<numerator> {
+    const existNumerator = await this.prisma.numerator.findFirst({ where: { name: 'membershipId', clubId } });
+    if (existNumerator) {
+      return await this.prisma.numerator.update({
+        where: { id: existNumerator.id },
+        data: { value: existNumerator.value + 1 },
+      });
+    }
+    const numerator = await this.prisma.numerator.create({
+      data: {
+        name: 'membershipId',
+        clubId,
+        value: 1,
+      },
+    });
+      return numerator;
+  }
+
+
+
   async create(createMembershipDto: CreateMembershipDto): Promise<MembershipResponse> {
-    const typeId = await this.getTypeIdById(createMembershipDto.type);
+    const membershipTypeId = await this.getTypeIdById(createMembershipDto.type);
     const dateCreated = new Date();
     const expirationDate = new Date();
     expirationDate.setDate(expirationDate.getDate() + 30);
+    const numerator = await this.generateNumerator(createMembershipDto.clubId);
+    const id = numerator.value;
     const created = await this.membership.create({
-      data: { typeId, createdAt: dateCreated, userId: createMembershipDto.userId , expiration : expirationDate, clubId: createMembershipDto.clubId},
+      data: {
+        id,
+        membershipTypeId,
+        createdAt: dateCreated,
+        userId: createMembershipDto.userId,
+        userTypeId: createMembershipDto.userTypeId,
+        expiration: expirationDate,
+        clubId: createMembershipDto.clubId,
+      },
       include: { type: true, user: { include: { type: true } } },
     });
     
@@ -41,7 +72,7 @@ export class MembershipRepository implements IMembershipRepository {
   
   private mapToMembershipResponse(row: {
     id: number;
-    typeId: number;
+    membershipTypeId: number;
     expiration: Date;
     type: { id: number; name: string, price: Prisma.Decimal } | null;
     createdAt: Date;
@@ -55,7 +86,7 @@ export class MembershipRepository implements IMembershipRepository {
     };
   }): MembershipResponse {
     const type =
-      row.type != null ? { id: row.type.id, name: row.type.name, price: row.type.price } : { id: row.typeId, name: '', price: new Prisma.Decimal(0) };
+      row.type != null ? { id: row.type.id, name: row.type.name, price: row.type.price } : { id: row.membershipTypeId, name: '', price: new Prisma.Decimal(0) };
     const u = row.user;
     const user = {
       id: u.id,
@@ -76,32 +107,38 @@ export class MembershipRepository implements IMembershipRepository {
     return list.map((row) => this.mapToMembershipResponse(row));
   }
 
-  async findById(id: number): Promise<MembershipResponse | null> {
+  async findById(queryMembershipRequestDto: QueryMembershipRequestDto): Promise<MembershipResponse | null> {
+    const { clubId, id } = queryMembershipRequestDto;
     const row = await this.membership.findUnique({
-      where: { id },
+      where: { id_clubId: { id: id, clubId: clubId } },
       include: { type: true, user: { include: { type: true } } },
     });
     if (!row) return null;
     return this.mapToMembershipResponse(row);
   }
 
-  async update(id: number, updateMembershipDto: UpdateMembershipDto): Promise<MembershipResponse> {
-    const data: { typeId?: number; userId?: number } = {};
+  async update(queryMembershipRequestDto: QueryMembershipRequestDto, updateMembershipDto: UpdateMembershipDto): Promise<MembershipResponse> {
+    const { clubId, id } = queryMembershipRequestDto;
+    const data: { membershipTypeId?: number; userId?: number; userTypeId?: number } = {};
     if (updateMembershipDto.type != null) {
-      data.typeId = await this.getTypeIdById(updateMembershipDto.type);
+      data.membershipTypeId = await this.getTypeIdById(updateMembershipDto.type);
     }
     if (updateMembershipDto.userId != null) {
       data.userId = updateMembershipDto.userId;
     }
+    if (updateMembershipDto.userTypeId != null) {
+      data.userTypeId = updateMembershipDto.userTypeId;
+    }
     const updated = await this.membership.update({
-      where: { id },
+      where: { id_clubId: { id: id, clubId: clubId } },
       data,
       include: { type: true, user: { include: { type: true } } },
     });
     return this.mapToMembershipResponse(updated);
   }
 
-  async delete(id: number): Promise<void> {
-    await this.membership.delete({ where: { id } });
+  async delete(queryMembershipRequestDto: QueryMembershipRequestDto): Promise<void> {
+    const { clubId, id } = queryMembershipRequestDto;
+    await this.membership.delete({ where: { id_clubId: { id: id, clubId: clubId } } });
   }
 }

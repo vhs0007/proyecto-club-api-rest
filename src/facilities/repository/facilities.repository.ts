@@ -1,6 +1,7 @@
 import { FacilityNavigation } from 'src/activities/repository/activitities.repository';
 import { CreateFacilityDto } from '../dto/request/create-facility.dto';
 import { UpdateFacilityDto } from '../dto/request/update-facility.dto';
+import { QueryFacilitiesRequestDto} from '../dto/request/query-facilities.request.dto';
 
 export interface UserTypeNavigation {
   id: number;
@@ -57,7 +58,7 @@ export type FacilityResponse = {
 export interface IFacilitiesRepository {
   create(createFacilityDto: CreateFacilityDto, clubId: number): Promise<FacilityResponse>;
   findAll(clubId: number): Promise<FacilityResponse[]>;
-  findById(id: number): Promise<FacilityResponse | null>;
-  update(id: number, updateFacilityDto: UpdateFacilityDto): Promise<FacilityResponse>;
-  delete(id: number): Promise<void>;
+  findById(query: QueryFacilitiesRequestDto): Promise<FacilityResponse | null>;
+  update(query: QueryFacilitiesRequestDto, updateFacilityDto: UpdateFacilityDto): Promise<FacilityResponse>;
+  delete(query: QueryFacilitiesRequestDto): Promise<void>;
 }

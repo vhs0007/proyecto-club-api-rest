@@ -95,7 +95,13 @@ export class ReportsRepository implements IReportsRepository {
 
   async getSalariesReport(request: SalaryReportRequestDto): Promise<SalaryReportResponseDto> {
     const user: UserFromPrisma | null = await this.prisma.users.findUnique({
-      where: { id: request.userId },
+      where: {
+        id_clubId_typeId: {
+          id: request.userId,
+          clubId: request.clubId,
+          typeId: request.typeId,
+        },
+      },
       include: { type: true },
     });
     if (!user) {

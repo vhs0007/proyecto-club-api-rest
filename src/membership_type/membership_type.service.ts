@@ -4,6 +4,7 @@ import type { MembershipTypeResponseDto } from './dto/response/membership_type-r
 import type { CreateMembershipTypeDto } from './dto/request/create-membership_type.dto';
 import type { UpdateMembershipTypeDto } from './dto/request/update-membership_type.dto';
 import type { UpdateMembershipTypeData } from './repository/membership_type.repository';
+import { QueryMembershipTypeRequestDto } from './dto/request/query-membership_type.request.dto';
 
 
 @Injectable()
@@ -15,31 +16,31 @@ export class MembershipTypeService {
   }
 
    async create(dto: CreateMembershipTypeDto): Promise<MembershipTypeResponseDto> {
-     return this.membershipTypeRepository.create({ name: dto.name, price: dto.price, clubId: dto.clubId });
+     return this.membershipTypeRepository.create({ id: null, name: dto.name, price: dto.price, clubId: dto.clubId });
    }
 
-  async findOne(id: number): Promise<MembershipTypeResponseDto> {
-    const row = await this.membershipTypeRepository.findById(id);
+  async findOne(queryMembershipTypeRequestDto: QueryMembershipTypeRequestDto): Promise<MembershipTypeResponseDto> {
+    const { clubId, id } = queryMembershipTypeRequestDto;
+    const row = await this.membershipTypeRepository.findById({ clubId, id });
     if (!row) throw new NotFoundException('Membership type not found');
     return row;
   }
 
   async update(
-    id: number,
+    queryMembershipTypeRequestDto: QueryMembershipTypeRequestDto,
     updateMembershipTypeDto: UpdateMembershipTypeDto,
   ): Promise<MembershipTypeResponseDto> {
-    await this.findOne(id);
+    await this.findOne(queryMembershipTypeRequestDto);
     const data: UpdateMembershipTypeData = {};
     if (updateMembershipTypeDto.name !== undefined) data.name = updateMembershipTypeDto.name;
     if (updateMembershipTypeDto.price !== undefined) data.price = updateMembershipTypeDto.price;
     if (Object.keys(data).length === 0) {
-      return this.findOne(id);
+      return this.findOne(queryMembershipTypeRequestDto);
     }
-    return this.membershipTypeRepository.update(id, data);
+    return this.membershipTypeRepository.update(queryMembershipTypeRequestDto, data);
   }
 
-  async remove(id: number): Promise<void> {
-    await this.findOne(id);
-    await this.membershipTypeRepository.delete(id);
+  async remove(queryMembershipTypeRequestDto: QueryMembershipTypeRequestDto): Promise<void> {
+    await this.membershipTypeRepository.delete(queryMembershipTypeRequestDto);
   }
 }

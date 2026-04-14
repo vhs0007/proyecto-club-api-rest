@@ -4,6 +4,8 @@ import type { IActivitiesRepository, ActivityResponse, UserNavigation, FacilityN
 import { CreateActivityDto } from '../dto/request/create-activities.dto';
 import { UpdateActivityDto } from '../dto/request/update-activities.dto';
 import { Prisma } from '@prisma/client';
+import { QueryActivitiesRequestDto } from '../dto/request/query-activities.request.dto';
+import { numerator } from '@prisma/client';
 
 type UserFromPrisma = {
   id: number;
@@ -117,8 +119,11 @@ export class ActivitiesRepository implements IActivitiesRepository {
 
   async create(createActivityDto: CreateActivityDto): Promise<ActivityResponse> {
     const { facilityId, isActive, ...rest } = createActivityDto;
+    const numerator = await this.generateNumerator(createActivityDto.clubId);
+    const id = numerator.value;
     const created = await this.prisma.activity.create({
       data: {
+        id,
         ...rest,
         facilityId,
         isActive: isActive ?? true,
@@ -129,6 +134,24 @@ export class ActivitiesRepository implements IActivitiesRepository {
     return this.mapRow(created as ActivityWithRelations);
   }
 
+  private async generateNumerator(clubId: number): Promise<numerator> {
+    const existNumerator = await this.prisma.numerator.findFirst({ where: { name: 'activityId', clubId } });
+    if (existNumerator) {
+      return await this.prisma.numerator.update({
+        where: { id: existNumerator.id },
+        data: { value: existNumerator.value + 1 },
+      });
+    }
+    const numerator = await this.prisma.numerator.create({
+      data: {
+        name: 'activityId',
+        clubId,
+        value: 1,
+      },
+    });
+      return numerator;
+  }
+
   async findAll(clubId: number): Promise<ActivityResponse[]> {
     const list = await this.prisma.activity.findMany({
       where: { clubId },
@@ -137,15 +160,15 @@ export class ActivitiesRepository implements IActivitiesRepository {
     return list.map((row) => this.mapRow(row as ActivityWithRelations));
   }
 
-  async findById(id: number): Promise<ActivityResponse | null> {
+  async findById(query: QueryActivitiesRequestDto): Promise<ActivityResponse | null> {
     const row = await this.prisma.activity.findUnique({
-      where: { id },
+      where: { id_clubId: {id: query.id, clubId: query.clubId} },
       include: ACTIVITY_INCLUDE as { user: true; facility: { include: { responsibleWorkerUser: true; assistantWorkerUser: true } } },
     });
     return row ? this.mapRow(row as ActivityWithRelations) : null;
   }
 
-  async update(id: number, updateActivityDto: UpdateActivityDto): Promise<ActivityResponse> {
+  async update(query: QueryActivitiesRequestDto, updateActivityDto: UpdateActivityDto): Promise<ActivityResponse> {
     const data: Record<string, unknown> = {};
     if (updateActivityDto.name !== undefined) data.name = updateActivityDto.name;
     if (updateActivityDto.type !== undefined) data.type = updateActivityDto.type;
@@ -157,14 +180,14 @@ export class ActivitiesRepository implements IActivitiesRepository {
     if (updateActivityDto.facilityId !== undefined) data.facilityId = updateActivityDto.facilityId;
     if (updateActivityDto.isActive !== undefined) data.isActive = updateActivityDto.isActive;
     const updated = await this.prisma.activity.update({
-      where: { id },
+      where: { id_clubId: {id: query.id, clubId: query.clubId} },
       data,
       include: ACTIVITY_INCLUDE as { user: true; facility: { include: { responsibleWorkerUser: true; assistantWorkerUser: true } } },
     });
     return this.mapRow(updated as ActivityWithRelations);
   }
 
-  async delete(id: number): Promise<void> {
-    await this.prisma.activity.delete({ where: { id } });
+  async delete(query: QueryActivitiesRequestDto): Promise<void> {
+    await this.prisma.activity.delete({ where: { id_clubId: {id: query.id, clubId: query.clubId} } });
   }
 }

@@ -9,6 +9,7 @@ import { Worker } from './entities/worker.entity';
 import { UserType } from './entities/user.entity';
 import type { UserResponse } from './repository/users.repository';
 import { UsersRepository } from './repository/users.repository.impl';
+import { QueryUserRequestDto } from './dto/request/query-user.request.dto';
 
 function mapToUserResponseDto(res: UserResponse): UserResponseDto {
   const dto = new UserResponseDto();
@@ -23,6 +24,7 @@ function mapToUserResponseDto(res: UserResponse): UserResponseDto {
   dto.isActive = res.isActive;
   dto.salary = res.salary;
   dto.hoursToWorkPerDay = res.hoursToWorkPerDay;
+  dto.employmentStartDate = res.employmentStartDate;
   dto.startWorkAt = res.startWorkAt;
   dto.endWorkAt = res.endWorkAt;
   dto.weight = res.weight;
@@ -134,7 +136,6 @@ export class UsersService {
 
     const res = await this.usersRepository.create(dataToCreate);
     return mapToUserResponseDto(res);
-
   }
 
   async findAll(clubId: number): Promise<UserResponseDto[]> {
@@ -142,14 +143,15 @@ export class UsersService {
     return list.map(mapToUserResponseDto);
   }
 
-  async findOne(id: number): Promise<UserResponseDto> {
-    const row = await this.usersRepository.findById(id);
+  async findOne(queryUserRequestDto: QueryUserRequestDto): Promise<UserResponseDto> {
+    const row = await this.usersRepository.findById(queryUserRequestDto);
     if (!row) throw new NotFoundException('User not found');
     return mapToUserResponseDto(row);
   }
 
   async update(id: number, updateUserDto: UpdateUserDto): Promise<UserResponseDto> {
-    const existing = await this.usersRepository.findById(id);
+    const { clubId } = updateUserDto;
+    const existing = await this.usersRepository.findById({ clubId, userId: id, typeId: updateUserDto.typeId });
     if (!existing) throw new NotFoundException('User not found');
     if (updateUserDto.email != null && updateUserDto.email.trim() !== '') {
       const byEmail = await this.usersRepository.findByEmail(updateUserDto.email);
@@ -165,10 +167,10 @@ export class UsersService {
     return mapToUserResponseDto(updated);
   }
 
-  async remove(id: number): Promise<UserResponseDto> {
-    const row = await this.usersRepository.findById(id);
+  async remove(queryUserRequestDto: QueryUserRequestDto): Promise<UserResponseDto> {
+    const row = await this.usersRepository.findById(queryUserRequestDto);
     if (!row) throw new NotFoundException('User not found');
-    await this.usersRepository.delete(id);
+    await this.usersRepository.delete(queryUserRequestDto);
     return mapToUserResponseDto(row);
   }
 }

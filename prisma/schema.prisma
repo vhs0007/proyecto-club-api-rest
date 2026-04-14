@@ -13,48 +13,57 @@ datasource db {
 }
 
 model membership {
-  id       Int            @id @default(autoincrement())
-  type     membership_type @relation(fields: [typeId], references: [id])
-  typeId   Int
+  id       Int            @default(autoincrement())
+  type     membership_type @relation(fields: [membershipTypeId, clubId], references: [id, clubId])
+  membershipTypeId   Int
   userId   Int
+  userTypeId Int
   createdAt DateTime
-  user     users          @relation(fields: [userId], references: [id])
+  user     users          @relation(fields: [userId, clubId, userTypeId], references: [id, clubId, typeId])
   expiration DateTime
   clubId Int
   club clubs @relation(fields: [clubId], references: [id])
+  @@id([id, clubId])
 }
 
 model membership_type {
-  id                    Int                    @id @default(autoincrement())
+  id                    Int                    @default(autoincrement())
   name                  String
   price                 Decimal                @db.Decimal(10, 2) @default(0)
   memberships           membership[]
   facilities_membership facilities_membership[]
   clubId Int
   club clubs @relation(fields: [clubId], references: [id])
+  @@id([id, clubId])
 }
 
 model facilities_membership {
-  id                Int           @id @default(autoincrement())
+  id                Int           @default(autoincrement())
   facilityId        Int
+  clubId Int
+  club clubs @relation(fields: [clubId], references: [id])
   membershipTypeId  Int
-  facility          facilities   @relation(fields: [facilityId], references: [id])
-  type              membership_type @relation(fields: [membershipTypeId], references: [id])
+  facility          facilities   @relation(fields: [facilityId, clubId], references: [id, clubId])
+  type              membership_type @relation(fields: [membershipTypeId, clubId], references: [id, clubId])
+  @@id([id, clubId])
 }
 
 model facilities {
-  id                     Int                    @id @default(autoincrement())
+  id                     Int                    @default(autoincrement())
   type                   String
   capacity               Int
+  responsibleWorkerTypeId Int
+  assistantWorkerTypeId Int?
   responsibleWorker      Int
-  responsibleWorkerUser  users?                 @relation("FacilityResponsible", fields: [responsibleWorker], references: [id])
+  responsibleWorkerUser  users?                 @relation("FacilityResponsible", fields: [responsibleWorker, clubId, responsibleWorkerTypeId], references: [id, clubId, typeId])
   assistantWorker        Int?
-  assistantWorkerUser    users?                 @relation("FacilityAssistant", fields: [assistantWorker], references: [id])
+  assistantWorkerUser    users?                 @relation("FacilityAssistant", fields: [assistantWorker, clubId, assistantWorkerTypeId], references: [id, clubId, typeId])
   isActive               Boolean
   activities             activity[]
   facilities_membership  facilities_membership[]
   clubId Int
   club clubs @relation(fields: [clubId], references: [id])
+  @@id([id, clubId])
 }
 
 model activity {
@@ -70,20 +79,22 @@ model activity {
   facility: Facility;
   isActive: boolean;
   */
-  id Int @id @default(autoincrement())
+  id Int @default(autoincrement())
   name String
   type String
   date DateTime
   hourStart String
   hourEnd String
   userId Int
-  user     users     @relation(fields: [userId], references: [id])
+  userTypeId Int
+  user     users     @relation(fields: [userId, clubId, userTypeId], references: [id, clubId, typeId])
   cost Decimal @db.Decimal(10, 2)
   facilityId Int
-  facility facilities @relation(fields: [facilityId], references: [id])
+  facility facilities @relation(fields: [facilityId, clubId], references: [id, clubId])
   isActive Boolean
   clubId Int
   club clubs @relation(fields: [clubId], references: [id])
+  @@id([id, clubId])
 }
 
 model user_type {
@@ -120,9 +131,9 @@ model users {
   */
 
   
-  id Int @id @default(autoincrement())
+  id Int @default(autoincrement())
   name String
-  document String @unique
+  document String
   typeId Int
   type user_type @relation(fields: [typeId], references: [id])
   email String?
@@ -150,8 +161,11 @@ model users {
   medications String?
   medicalConditions String?
   time_entries time_entries[]
-  clubId Int
+  clubId Int 
   club clubs @relation(fields: [clubId], references: [id])
+  @@id([id, clubId, typeId])
+  @@unique([clubId, email])
+  @@unique([clubId, document])
 }
 
 model time_entries {
@@ -160,7 +174,7 @@ model time_entries {
   clubId Int
   userDocument String
   club clubs @relation(fields: [clubId], references: [id])
-  user users @relation(fields: [userDocument], references: [document])
+  user users @relation(fields: [userDocument, clubId], references: [document, clubId])
   clockIn DateTime
   clockOut DateTime?
 }
@@ -181,6 +195,8 @@ model clubs{
   memberships membership[]
   membership_types membership_type[]
   plugins_clubs plugins_clubs[]
+  numerators numerator[]
+  facilities_membership facilities_membership[]
 }
 
 model plugins {
@@ -196,4 +212,12 @@ model plugins_clubs {
   clubId Int
   plugin plugins @relation(fields: [pluginId], references: [id])
   club clubs @relation(fields: [clubId], references: [id])
+}
+
+model numerator{
+  id Int @id @default(autoincrement())
+  name String
+  clubId Int
+  club clubs @relation(fields: [clubId], references: [id])
+  value Int
 }

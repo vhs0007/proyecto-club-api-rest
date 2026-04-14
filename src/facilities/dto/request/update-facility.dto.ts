@@ -36,4 +36,9 @@ export class UpdateFacilityDto {
   @IsNumber({}, { each: true, message: 'Cada id de tipo de membresía debe ser un número' })
   @Min(1, { each: true, message: 'Cada id de tipo de membresía debe ser al menos 1' })
   membershipTypeIds?: number[];
+
+  @ApiProperty({ example: 1, description: 'Id del club', required: false })
+  @IsNumber({}, { message: 'clubId debe ser un número' })
+  @Min(1, { message: 'clubId debe ser al menos 1' })
+  clubId: number;
 }

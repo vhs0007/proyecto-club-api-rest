@@ -5,6 +5,7 @@ import { ActivityResponseDto } from './dto/response/activity-response.dto';
 import type { ActivityResponse } from './repository/activitities.repository';
 import { ActivitiesRepository } from './repository/activities.repository.impl';
 import { PrismaService } from '../prisma/prisma.service';
+import {QueryActivitiesRequestDto} from './dto/request/query-activities.request.dto';
 
 @Injectable()
 export class ActivitiesService {
@@ -35,9 +36,17 @@ export class ActivitiesService {
   }
 
   async create(createActivityDto: CreateActivityDto): Promise<ActivityResponseDto> {
-    const user = await this.prisma.users.findUnique({ where: { id: createActivityDto.userId } });
+    const user = await this.prisma.users.findUnique({
+      where: {
+        id_clubId_typeId: {
+          id: createActivityDto.userId,
+          clubId: createActivityDto.clubId,
+          typeId: createActivityDto.userTypeId,
+        },
+      },
+    });
     if (!user) throw new BadRequestException('User not found');
-    const facility = await this.prisma.facilities.findUnique({ where: { id: createActivityDto.facilityId } });
+    const facility = await this.prisma.facilities.findUnique({ where: { id_clubId: {id: createActivityDto.facilityId, clubId: createActivityDto.clubId} } });
     if (!facility) throw new BadRequestException('Facility not found');
     if (this.toMinutes(createActivityDto.hourStart) >= this.toMinutes(createActivityDto.hourEnd)) {
       throw new BadRequestException('hourStart must be before hourEnd');
@@ -51,21 +60,29 @@ export class ActivitiesService {
     return list.map((row) => this.toDto(row));
   }
 
-  async findOne(id: number): Promise<ActivityResponseDto> {
-    const row = await this.activitiesRepository.findById(id);
+  async findOne(query: QueryActivitiesRequestDto): Promise<ActivityResponseDto> {
+    const row = await this.activitiesRepository.findById(query);
     if (!row) throw new NotFoundException('Activity not found');
     return this.toDto(row);
   }
 
-  async update(id: number, updateActivityDto: UpdateActivityDto): Promise<ActivityResponseDto> {
-    const row = await this.activitiesRepository.findById(id);
+  async update(query: QueryActivitiesRequestDto, updateActivityDto: UpdateActivityDto): Promise<ActivityResponseDto> {
+    const row = await this.activitiesRepository.findById(query);
     if (!row) throw new NotFoundException('Activity not found');
     if (updateActivityDto.userId !== undefined) {
-      const user = await this.prisma.users.findUnique({ where: { id: updateActivityDto.userId } });
+      const user = await this.prisma.users.findUnique({
+        where: {
+          id_clubId_typeId: {
+            id: updateActivityDto.userId,
+            clubId: row.clubId,
+            typeId: updateActivityDto.userTypeId,
+          },
+        },
+      });
       if (!user) throw new BadRequestException('User not found');
     }
     if (updateActivityDto.facilityId !== undefined) {
-      const facility = await this.prisma.facilities.findUnique({ where: { id: updateActivityDto.facilityId } });
+      const facility = await this.prisma.facilities.findUnique({ where: { id_clubId: {id: updateActivityDto.facilityId, clubId: query.clubId} } });
       if (!facility) throw new BadRequestException('Facility not found');
     }
     const hourStart = updateActivityDto.hourStart !== undefined ? updateActivityDto.hourStart : row.hourStart;
@@ -73,14 +90,14 @@ export class ActivitiesService {
     if (this.toMinutes(hourStart) >= this.toMinutes(hourEnd)) {
       throw new BadRequestException('hourStart must be before hourEnd');
     }
-    const result = await this.activitiesRepository.update(id, updateActivityDto);
+    const result = await this.activitiesRepository.update(query, updateActivityDto);
     return this.toDto(result);
   }
 
-  async remove(id: number): Promise<ActivityResponseDto> {
-    const row = await this.activitiesRepository.findById(id);
+  async remove(query: QueryActivitiesRequestDto): Promise<ActivityResponseDto> {
+    const row = await this.activitiesRepository.findById(query);
     if (!row) throw new NotFoundException('Activity not found');
-    await this.activitiesRepository.delete(id);
+    await this.activitiesRepository.delete(query);
     return this.toDto(row);
   }
 }

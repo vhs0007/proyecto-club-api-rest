@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, InternalServerErrorException, NotFoundException, Query } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, InternalServerErrorException, NotFoundException, Query, ParseIntPipe } from '@nestjs/common';
 import { MembershipService } from './membership.service';
 import { CreateMembershipDto } from './dto/request/create-membership.dto';
 import { UpdateMembershipDto } from './dto/request/update-membership.dto';
@@ -37,9 +37,9 @@ export class MembershipController {
 
   @ApiOperation({ summary: 'Obtener membresía por ID' })
   @Get(':id')
-  findOne(@Param('id') id: string): Promise<MembershipResponseDto> {
+  findOne(@Param('id') id: string, @Query('clubId', ParseIntPipe) clubId: number): Promise<MembershipResponseDto> {
     try{
-      return this.membershipService.findOne(+id);
+      return this.membershipService.findOne({ clubId, id: +id });
     } catch (error) {
       throw new NotFoundException(error);
     }
@@ -48,9 +48,9 @@ export class MembershipController {
   @ApiOperation({ summary: 'Actualizar membresía' })
   @Patch(':id')
   @ApiBody({ type: UpdateMembershipDto })
-  update(@Param('id') id: string, @Body() updateMembershipDto: UpdateMembershipDto): Promise<MembershipResponseDto> {
+  update(@Param('id') id: string, @Query('clubId', ParseIntPipe) clubId: number, @Body() updateMembershipDto: UpdateMembershipDto): Promise<MembershipResponseDto> {
     try{
-      return this.membershipService.update(+id, updateMembershipDto);
+      return this.membershipService.update({ clubId, id: +id }, updateMembershipDto);
     } catch (error) {
       throw new InternalServerErrorException(error);
     }
@@ -58,9 +58,9 @@ export class MembershipController {
 
   @ApiOperation({ summary: 'Eliminar membresía' })
   @Delete(':id')
-  remove(@Param('id') id: string): Promise<MembershipResponseDto> {
+  remove(@Param('id') id: string, @Query('clubId', ParseIntPipe) clubId: number): Promise<MembershipResponseDto> {
     try{
-      return this.membershipService.remove(+id);
+      return this.membershipService.remove({ clubId, id: +id });
     } catch (error) {
       throw new InternalServerErrorException(error);
     }

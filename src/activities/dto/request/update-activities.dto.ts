@@ -51,4 +51,9 @@ export class UpdateActivityDto {
   @IsOptional()
   @IsString({ message: 'date debe ser un texto' })
   date: string;
+
+  @ApiProperty({ example: 1, description: 'Id del tipo de usuario' })
+  @IsNumber({}, { message: 'userTypeId debe ser un número' })
+  @Min(1, { message: 'userTypeId debe ser al menos 1' })
+  userTypeId: number;
 }
