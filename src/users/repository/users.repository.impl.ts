@@ -17,7 +17,7 @@ interface UserRow {
   type?: UserTypeResponseDto;
   email: string | null;
   password: string | null;
-  membership?: membershipNavigation[];
+  membership?: membershipNavigation;
   createdAt: Date;
   deletedAt: Date | null;
   isActive: boolean;
@@ -63,6 +63,16 @@ function mapMembership(row: MembershipWithTypeRow): membershipNavigation {
     createdAt: row.createdAt,
     membershipType,
   };
+}
+
+function getLastMembership(memberships: MembershipWithTypeRow[]): membershipNavigation | undefined {
+  if (memberships.length === 0) return undefined;
+
+  const latest = memberships.reduce((current, item) =>
+    item.createdAt > current.createdAt ? item : current,
+  );
+
+  return mapMembership(latest);
 }
 
 function mapRow(row: UserRow): UserResponse {
@@ -139,67 +149,12 @@ export class UsersRepository implements IUsersRepository {
     if (createUserDto.allergies != null) data.allergies = createUserDto.allergies;
     if (createUserDto.medications != null) data.medications = createUserDto.medications;
     if (createUserDto.medicalConditions != null) data.medicalConditions = createUserDto.medicalConditions;
-
-    if (createUserDto.typeId === UserType.MEMBER) {
-
-      const existNumerator: numerator | null = await this.prisma.numerator.findFirst({ where: { name: 'memberId', clubId: createUserDto.clubId } });
-
-      let updatedNumerator: numerator | null = null;
-
-      if (existNumerator) {
-        updatedNumerator = await this.prisma.numerator.update({
-          where: { id: existNumerator.id },
-          data: { value: existNumerator.value + 1 },
-        });
-      } else {
-        updatedNumerator = await this.createNumerator('memberId', createUserDto.clubId);
-      }
-
-      data.id = updatedNumerator.value;
-      const created = await this.prisma.users.create({ data, include: { type: true, memberships: { include: { type: true } } } });
-      const userResponse = mapRow(created);
-      userResponse.membership = created.memberships.map((membership) => mapMembership(membership));
-      return userResponse;
-
-    } else if (createUserDto.typeId === UserType.ATHLETE) {
-
-      const existNumerator: numerator | null = await this.prisma.numerator.findFirst({ where: { name: 'athleteId', clubId: createUserDto.clubId } });
-      let updatedNumerator: numerator | null = null;
-      if (existNumerator) {
-        updatedNumerator = await this.prisma.numerator.update({
-          where: { id: existNumerator.id },
-          data: { value: existNumerator.value + 1 },
-        });
-      } else {
-        updatedNumerator = await this.createNumerator('athleteId', createUserDto.clubId);
-      }
-      data.id = updatedNumerator.value;
-      const created = await this.prisma.users.create({ data, include: { type: true, memberships: { include: { type: true } } } });
-      const userResponse = mapRow(created);
-      userResponse.membership = created.memberships.map((membership) => mapMembership(membership));
-      return userResponse;
-
-    } else if (createUserDto.typeId === UserType.WORKER) {
-
-      const existNumerator: numerator | null = await this.prisma.numerator.findFirst({ where: { name: 'adminId', clubId: createUserDto.clubId } });
-      let updatedNumerator: numerator | null = null;
-      if (existNumerator) {
-        updatedNumerator = await this.prisma.numerator.update({
-          where: { id: existNumerator.id },
-          data: { value: existNumerator.value + 1 },
-        });
-      } else {
-        updatedNumerator = await this.createNumerator('adminId', createUserDto.clubId);
-      }
-      data.id = updatedNumerator.value;
-      const created = await this.prisma.users.create({ data, include: { type: true, memberships: { include: { type: true } } } });
-      const userResponse = mapRow(created);
-      userResponse.membership = created.memberships.map((membership) => mapMembership(membership));
-      return userResponse;
-
-    } else {
-      throw new BadRequestException('Invalid typeId');
-    }
+   
+    const created = await this.prisma.users.create({ data, include: { type: true, memberships: { include: { type: true } } } });
+    const userResponse = mapRow(created);
+    userResponse.membership = getLastMembership(created.memberships);
+    return userResponse;
+    //te prometo que fue necesario 
   }
 
   async findAll(clubId: number): Promise<UserResponse[]> {
@@ -210,7 +165,7 @@ export class UsersRepository implements IUsersRepository {
 
     const usersConMembership = users.map(user => {
       const userResponse = mapRow(user);
-      userResponse.membership = user.memberships.map((membership) => mapMembership(membership));
+      userResponse.membership = getLastMembership(user.memberships);
       return userResponse;
     });
     return usersConMembership;
@@ -224,7 +179,7 @@ export class UsersRepository implements IUsersRepository {
     });
     if (!user) return null;
     const userResponse = mapRow(user);
-    userResponse.membership = user.memberships.map((membership) => mapMembership(membership));
+    userResponse.membership = getLastMembership(user.memberships);
     return userResponse;
   }
 
@@ -247,7 +202,7 @@ export class UsersRepository implements IUsersRepository {
     });
     const lastMembership = await this.prisma.membership.findFirst({ where: { userId: id, clubId: updateUserDto.clubId }, orderBy: { createdAt: 'desc' } });
     const userResponse = mapRow(updated);
-    userResponse.membership = updated.memberships.map((membership) => mapMembership(membership));
+    userResponse.membership = getLastMembership(updated.memberships);
     return userResponse;
   }
 

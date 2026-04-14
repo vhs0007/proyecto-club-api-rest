@@ -32,9 +32,9 @@ export class UserResponseDto {
   @IsOptional()
   type?: UserTypeResponseDto;
 
-  @ApiProperty({ description: 'Membresía del usuario (navegación)' })
+  @ApiProperty({ description: 'Ultima Membresía del usuario (navegación)' })
   @IsOptional()
-  membership?: membershipNavigation[] | undefined;
+  membership?: membershipNavigation | undefined;
 
   @ApiProperty({ required: false })
   @IsOptional()
