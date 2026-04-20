@@ -41,6 +41,10 @@ export class AuthService {
       accessToken,
       role: roleName,
       clubId: loginRequest.clubId,
+      userId: user.id,
+      type: user.typeId,
+      email: user.email ?? undefined,
+      document: user.document,
     };
   }
 }
