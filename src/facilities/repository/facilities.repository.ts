@@ -1,7 +1,7 @@
-import { FacilityNavigation } from 'src/activities/repository/activitities.repository';
 import { CreateFacilityDto } from '../dto/request/create-facility.dto';
 import { UpdateFacilityDto } from '../dto/request/update-facility.dto';
 import { QueryFacilitiesRequestDto} from '../dto/request/query-facilities.request.dto';
+import { FacilityResponseDto } from '../dto/response/facility-response.dto';
 
 export interface UserTypeNavigation {
   id: number;
@@ -44,21 +44,10 @@ export interface MembershipTypeNavigation {
   price: number;
 }
 
-export type FacilityResponse = {
-  id: number;
-  type: string;
-  capacity: number;
-  responsibleWorker: WorkerNavigation;
-  assistantWorker: WorkerNavigation | null;
-  isActive: boolean;
-  activities: ActivitiesNavigation[];
-  membershipTypes: MembershipTypeNavigation[];
-};
-
 export interface IFacilitiesRepository {
-  create(createFacilityDto: CreateFacilityDto, clubId: number): Promise<FacilityResponse>;
-  findAll(clubId: number): Promise<FacilityResponse[]>;
-  findById(query: QueryFacilitiesRequestDto): Promise<FacilityResponse | null>;
-  update(query: QueryFacilitiesRequestDto, updateFacilityDto: UpdateFacilityDto): Promise<FacilityResponse>;
+  create(createFacilityDto: CreateFacilityDto, clubId: number): Promise<FacilityResponseDto>;
+  findAll(clubId: number): Promise<FacilityResponseDto[]>;
+  findById(query: QueryFacilitiesRequestDto): Promise<FacilityResponseDto | null>;
+  update(query: QueryFacilitiesRequestDto, updateFacilityDto: UpdateFacilityDto): Promise<FacilityResponseDto>;
   delete(query: QueryFacilitiesRequestDto): Promise<void>;
 }

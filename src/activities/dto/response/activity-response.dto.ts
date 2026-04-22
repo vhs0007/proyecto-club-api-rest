@@ -21,7 +21,7 @@ export class ActivityResponseDto {
   date: Date;
 
   @ApiProperty({ example: 1, description: 'Usuario' })
-  user: UserNavigation;
+  user: UserNavigation | null;
 
   @ApiProperty({ example: 100, description: 'Costo de la actividad' })
   cost: number;
@@ -32,6 +32,6 @@ export class ActivityResponseDto {
   @ApiProperty({ example: true, description: '¿Está activa la actividad?' })
   isActive: boolean;
 
-  @ApiProperty({ example: '1234567890', description: 'Documento del usuario' })
-  document: string;
+  @ApiProperty({ example: 1, description: 'ID del club' })
+  clubId: number;
 }

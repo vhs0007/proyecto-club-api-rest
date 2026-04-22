@@ -2,7 +2,6 @@ import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, InternalS
 import { MembershipService } from './membership.service';
 import { CreateMembershipDto } from './dto/request/create-membership.dto';
 import { UpdateMembershipDto } from './dto/request/update-membership.dto';
-import { Membership } from './entities/membership.entity';
 import { ApiBearerAuth, ApiOperation, ApiBody, ApiTags } from '@nestjs/swagger';
 import { AuthGuard } from '../auth/guards/jwt-auth.guard';
 import { MembershipResponseDto } from './dto/response/membership-response.dto';

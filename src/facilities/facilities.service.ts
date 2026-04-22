@@ -1,13 +1,8 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { CreateFacilityDto } from './dto/request/create-facility.dto';
 import { UpdateFacilityDto } from './dto/request/update-facility.dto';
-import { Facility } from './entities/facility.entity';
 import { FacilitiesRepository } from './repository/facilities.repository.impl';
-import type { FacilityResponse, WorkerNavigation } from './repository/facilities.repository';
 import { PrismaService } from '../prisma/prisma.service';
-import { MembershipType } from '../membership_type/entities/membership_type.entity';
-import { Worker } from '../users/entities/worker.entity';
-import { UserType } from '../users/entities/user.entity';
 import { FacilityResponseDto } from './dto/response/facility-response.dto';
 import { QueryFacilitiesRequestDto } from './dto/request/query-facilities.request.dto';
 
@@ -17,21 +12,6 @@ export class FacilitiesService {
     private readonly facilitiesRepository: FacilitiesRepository,
     private readonly prisma: PrismaService,
   ) {}
-
-
-  private mapResponseToFacility(res: FacilityResponse): FacilityResponseDto {
-
-    return {
-      id: res.id,
-      type: res.type,
-      capacity: res.capacity,
-      responsibleWorker: res.responsibleWorker,
-      assistantWorker: res.assistantWorker,
-      isActive: res.isActive ?? true,
-      membershipTypes: res.membershipTypes,
-      activities: res.activities,
-    };
-  }
 
   private async ensureWorker(userId: number, clubId: number, field: string): Promise<void> {
     const user = await this.prisma.users.findUnique({
@@ -71,18 +51,18 @@ export class FacilitiesService {
     }
     await this.ensureMembershipTypes(createFacilityDto.membershipTypeIds);
     const res = await this.facilitiesRepository.create(createFacilityDto);
-    return this.mapResponseToFacility(res);
+    return res;
   }
 
   async findAll(clubId: number): Promise<FacilityResponseDto[]> {
     const list = await this.facilitiesRepository.findAll(clubId);
-    return list.map((r) => this.mapResponseToFacility(r));
+    return list;
   }
 
   async findOne(query: QueryFacilitiesRequestDto): Promise<FacilityResponseDto> {
     const row = await this.facilitiesRepository.findById(query);
     if (!row) throw new NotFoundException('Facility not found');
-    return this.mapResponseToFacility(row);
+    return row;
   }
 
   async update(query: QueryFacilitiesRequestDto, updateFacilityDto: UpdateFacilityDto): Promise<FacilityResponseDto> {
@@ -103,13 +83,13 @@ export class FacilitiesService {
       await this.ensureMembershipTypes(updateFacilityDto.membershipTypeIds);
     }
     const updated = await this.facilitiesRepository.update(query, updateFacilityDto);
-    return this.mapResponseToFacility(updated);
+    return updated;
   }
 
   async remove(query: QueryFacilitiesRequestDto): Promise<FacilityResponseDto> {
     const row = await this.facilitiesRepository.findById(query);
     if (!row) throw new NotFoundException('Facility not found');
     await this.facilitiesRepository.delete(query);
-    return this.mapResponseToFacility(row);
+    return row;
   }
 }

@@ -3,7 +3,6 @@ import { ApiTags, ApiOperation, ApiBearerAuth, ApiOkResponse, ApiCreatedResponse
 import { FacilitiesService } from './facilities.service';
 import { CreateFacilityDto } from './dto/request/create-facility.dto';
 import { UpdateFacilityDto } from './dto/request/update-facility.dto';
-import { Facility } from './entities/facility.entity';
 import { AuthGuard } from '../auth/guards/jwt-auth.guard';
 import { FacilityResponseDto } from './dto/response/facility-response.dto';
 

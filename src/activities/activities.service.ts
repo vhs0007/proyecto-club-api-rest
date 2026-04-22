@@ -2,7 +2,6 @@ import { BadRequestException, Injectable, NotFoundException } from '@nestjs/comm
 import { CreateActivityDto } from './dto/request/create-activities.dto';
 import { UpdateActivityDto } from './dto/request/update-activities.dto';
 import { ActivityResponseDto } from './dto/response/activity-response.dto';
-import type { ActivityResponse } from './repository/activitities.repository';
 import { ActivitiesRepository } from './repository/activities.repository.impl';
 import { PrismaService } from '../prisma/prisma.service';
 import {QueryActivitiesRequestDto} from './dto/request/query-activities.request.dto';
@@ -19,21 +18,6 @@ export class ActivitiesService {
     return (hh * 60) + mm;
   }
 
-  private toDto(row: ActivityResponse): ActivityResponseDto {
-    return{
-      id: row.id,
-      name: row.name,
-      type: row.type,
-      hourStart: row.hourStart,
-      hourEnd: row.hourEnd,
-      date: row.date,
-      user: row.user,
-      cost: row.cost,
-      facility: row.facility,
-      isActive: row.isActive,
-      document: row.document,
-    }
-  }
 
   async create(createActivityDto: CreateActivityDto): Promise<ActivityResponseDto> {
     const user = await this.prisma.users.findUnique({
@@ -52,18 +36,18 @@ export class ActivitiesService {
       throw new BadRequestException('hourStart must be before hourEnd');
     }
     const result = await this.activitiesRepository.create(createActivityDto);
-    return this.toDto(result);
+    return result;
   }
 
   async findAll(clubId: number): Promise<ActivityResponseDto[]> {
     const list = await this.activitiesRepository.findAll(clubId);
-    return list.map((row) => this.toDto(row));
+    return list;
   }
 
   async findOne(query: QueryActivitiesRequestDto): Promise<ActivityResponseDto> {
     const row = await this.activitiesRepository.findById(query);
     if (!row) throw new NotFoundException('Activity not found');
-    return this.toDto(row);
+    return row;
   }
 
   async update(query: QueryActivitiesRequestDto, updateActivityDto: UpdateActivityDto): Promise<ActivityResponseDto> {
@@ -91,13 +75,13 @@ export class ActivitiesService {
       throw new BadRequestException('hourStart must be before hourEnd');
     }
     const result = await this.activitiesRepository.update(query, updateActivityDto);
-    return this.toDto(result);
+    return result;
   }
 
   async remove(query: QueryActivitiesRequestDto): Promise<ActivityResponseDto> {
     const row = await this.activitiesRepository.findById(query);
     if (!row) throw new NotFoundException('Activity not found');
     await this.activitiesRepository.delete(query);
-    return this.toDto(row);
+    return row;
   }
 }

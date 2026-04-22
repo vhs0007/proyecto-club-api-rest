@@ -1,4 +1,4 @@
-import { membershipTypeNavigation, userNavigation } from "src/membership/repository/membership.repository";
+import { membershipTypeNavigation, userNavigation } from "../../repository/membership.repository";
 
 export class MembershipResponseDto {
   id: number;

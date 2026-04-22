@@ -1,11 +1,12 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { numerator, Prisma } from '@prisma/client';
 import { PrismaService } from '../../prisma/prisma.service';
-import type { IFacilitiesRepository, FacilityResponse, MembershipTypeNavigation } from './facilities.repository';
+import type { IFacilitiesRepository, MembershipTypeNavigation } from './facilities.repository';
 import { CreateFacilityDto } from '../dto/request/create-facility.dto';
 import { UpdateFacilityDto } from '../dto/request/update-facility.dto';
 import type { WorkerNavigation, UserTypeNavigation, UserNavigation, ActivitiesNavigation } from './facilities.repository';
 import { QueryFacilitiesRequestDto } from '../dto/request/query-facilities.request.dto';
+import { FacilityResponseDto } from '../dto/response/facility-response.dto';
 
 type FacilityCreateResult = Prisma.facilitiesGetPayload<{
   include: {
@@ -16,57 +17,10 @@ type FacilityCreateResult = Prisma.facilitiesGetPayload<{
   };
 }>;
 
-type UserTypeFromPrisma = {
-  id: number;
-  name: string;
-};
-type WorkerFromPrisma = {
-  id: number;
-  name: string;
-  type: UserTypeFromPrisma;
-  typeId: number;
-  email: string | null;
-  password: string | null;
-  createdAt: Date;
-  deletedAt: Date | null;
-  isActive: boolean;
-};
-type UserFromPrisma = {
-  id: number;
-  name: string;
-  type: UserTypeFromPrisma;
-  typeId: number;
-  email: string | null;
-  password: string | null;
-  createdAt: Date;
-  deletedAt: Date | null;
-  isActive: boolean;
-};
-
-type ActivityFromPrisma = {
-  id: number;
-  name: string;
-  type: string;
-  date: Date;
-  hourStart: string;
-  hourEnd: string;
-  userId: number;
-  user: UserFromPrisma;
-  cost: number;
-  isActive: boolean;
-};
-
 type MembershipTypeFromPrisma = {
   id: number;
   name: string;
   price: Prisma.Decimal;
-};
-
-type FacilityMembershipFromPrisma = {
-  id: number;
-  facilityId: number;
-  membershipTypeId: number;
-  type: MembershipTypeFromPrisma;
 };
 
 const FACILITY_INCLUDE = {
@@ -100,29 +54,6 @@ const FACILITY_INCLUDE = {
 export class FacilitiesRepository implements IFacilitiesRepository {
   constructor(private readonly prisma: PrismaService) {}
 
-  private workerPrismaToInterface(worker: WorkerFromPrisma): WorkerNavigation {
-    return {
-      id: worker.id,
-      name: worker.name,
-      type: worker.type,
-      email: worker.email,
-      password: worker.password,
-      createdAt: worker.createdAt,
-      deletedAt: worker.deletedAt,
-      isActive: worker.isActive,
-    };
-  }
-  private userPrismaToInterface(user: UserFromPrisma): UserNavigation {
-    return {
-      id: user.id,
-      name: user.name,
-      type: user.type,
-      email: user.email,
-      createdAt: user.createdAt,
-      deletedAt: user.deletedAt,
-      isActive: user.isActive,
-    };
-  }
   private activityPrismaToInterface(activity: FacilityCreateResult['activities'][number]): ActivitiesNavigation {
     return {
       id: activity.id,
@@ -131,7 +62,7 @@ export class FacilitiesRepository implements IFacilitiesRepository {
       date: activity.date,
       hourStart: activity.hourStart,
       hourEnd: activity.hourEnd,
-      user: this.userPrismaToInterface(activity.user),
+      user: activity.user,
       cost: Number(activity.cost),
       isActive: activity.isActive,
     };
@@ -158,20 +89,20 @@ export class FacilitiesRepository implements IFacilitiesRepository {
     };
   }
 
-  private mapRow(row: FacilityCreateResult): FacilityResponse {
+  private mapRow(row: FacilityCreateResult): FacilityResponseDto {
     return {
       id: row.id,
       type: row.type,
       capacity: row.capacity,
-      responsibleWorker: row.responsibleWorkerUser ? this.workerPrismaToInterface(row.responsibleWorkerUser) : this.stubWorker(row.responsibleWorker),
-      assistantWorker: row.assistantWorkerUser ? this.workerPrismaToInterface(row.assistantWorkerUser) : row.assistantWorker != null ? this.stubWorker(row.assistantWorker) : null,
+      responsibleWorker: row.responsibleWorkerUser ? row.responsibleWorkerUser : this.stubWorker(row.responsibleWorker),
+      assistantWorker: row.assistantWorkerUser ? row.assistantWorkerUser : row.assistantWorker != null ? this.stubWorker(row.assistantWorker) : null,
       isActive: row.isActive,
       activities: row.activities ? row.activities.map((activity) => this.activityPrismaToInterface(activity)) : [],
       membershipTypes: row.facilities_membership?.map((fm) => this.membershipTypePrismaToInterface(fm.type)) ?? [],
     };
   }
 
-  async create(createFacilityDto: CreateFacilityDto): Promise<FacilityResponse> {
+  async create(createFacilityDto: CreateFacilityDto): Promise<FacilityResponseDto> {
     const { responsibleWorker, assistantWorker, membershipTypeIds, id: _id, ...rest } = createFacilityDto;
     const numerator = await this.generateNumerator(createFacilityDto.clubId);
     const id = numerator.value;
@@ -219,7 +150,7 @@ export class FacilitiesRepository implements IFacilitiesRepository {
       return numerator;
   }
   
-  async findAll(clubId: number): Promise<FacilityResponse[]> {
+  async findAll(clubId: number): Promise<FacilityResponseDto[]> {
     const list = await this.prisma.facilities.findMany({
       where: { clubId },
       include: FACILITY_INCLUDE as { responsibleWorkerUser: { include: { type: true } }, assistantWorkerUser: { include: { type: true } }, activities: { include: { user: { include: { type: true } } } }, facilities_membership: { include: { type: true } } },
@@ -227,7 +158,7 @@ export class FacilitiesRepository implements IFacilitiesRepository {
     return list.map((row) => this.mapRow(row));
   }
 
-  async findById(query: QueryFacilitiesRequestDto): Promise<FacilityResponse | null> {
+  async findById(query: QueryFacilitiesRequestDto): Promise<FacilityResponseDto | null> {
     const row = await this.prisma.facilities.findUnique({
       where: { id_clubId: {id: query.id, clubId: query.clubId}},
       include: FACILITY_INCLUDE as { responsibleWorkerUser: { include: { type: true } }, assistantWorkerUser: { include: { type: true } }, activities: { include: { user: { include: { type: true } } } }, facilities_membership: { include: { type: true } } },
@@ -236,7 +167,7 @@ export class FacilitiesRepository implements IFacilitiesRepository {
   }
 
 
-  async update(query: QueryFacilitiesRequestDto, updateFacilityDto: UpdateFacilityDto): Promise<FacilityResponse> {
+  async update(query: QueryFacilitiesRequestDto, updateFacilityDto: UpdateFacilityDto): Promise<FacilityResponseDto> {
     const data: Record<string, unknown> = {};
     if (updateFacilityDto.type !== undefined) data.type = updateFacilityDto.type;
     if (updateFacilityDto.capacity !== undefined) data.capacity = updateFacilityDto.capacity;
