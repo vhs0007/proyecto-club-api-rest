@@ -1,10 +1,5 @@
 import { QueryMembershipTypeRequestDto } from "../dto/request/query-membership_type.request.dto";
-
-export interface MembershipTypeResponse {
-  id: number;
-  name: string;
-  price: number;
-}
+import { MembershipTypeResponseDto } from "../dto/response/membership_type-response.dto";
 
 export interface UpdateMembershipTypeData {
   name?: string;
@@ -12,9 +7,9 @@ export interface UpdateMembershipTypeData {
 }
 
 export interface IMembershipTypeRepository {
-  findAll(clubId: number): Promise<MembershipTypeResponse[]>;
-  findById(queryMembershipTypeRequestDto: QueryMembershipTypeRequestDto): Promise<MembershipTypeResponse | null>;
-  create(data: { name: string; price: number; clubId: number }): Promise<MembershipTypeResponse>;
-  update(queryMembershipTypeRequestDto: QueryMembershipTypeRequestDto, data: UpdateMembershipTypeData): Promise<MembershipTypeResponse>;
+  findAll(clubId: number): Promise<MembershipTypeResponseDto[]>;
+  findById(queryMembershipTypeRequestDto: QueryMembershipTypeRequestDto): Promise<MembershipTypeResponseDto | null>;
+  create(data: { name: string; price: number; clubId: number }): Promise<MembershipTypeResponseDto>;
+  update(queryMembershipTypeRequestDto: QueryMembershipTypeRequestDto, data: UpdateMembershipTypeData): Promise<MembershipTypeResponseDto>;
   delete(queryMembershipTypeRequestDto: QueryMembershipTypeRequestDto): Promise<void>;
 }

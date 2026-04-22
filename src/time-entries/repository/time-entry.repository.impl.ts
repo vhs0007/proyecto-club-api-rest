@@ -1,9 +1,9 @@
 import { Injectable, NotFoundException } from "@nestjs/common";
 import { PrismaService } from "../../prisma/prisma.service";
-import { ITimeEntryRepository, TimeEntryResponse, userTypeNavigation, userNavigation } from "./time-entry.repository";
-import { TimeEntry } from "../entities/time-entry.entity";
-import { CreateTimeEntryDto } from "../dto/create-time-entry.dto";
-import { UpdateTimeEntryDto } from "../dto/update-time-entry.dto";
+import { ITimeEntryRepository, userTypeNavigation, userNavigation } from "./time-entry.repository";
+import { CreateTimeEntryDto } from "../dto/request/create-time-entry.dto";
+import { UpdateTimeEntryDto } from "../dto/request/update-time-entry.dto";
+import { TimeEntryResponseDto } from "../dto/response/time-entry.response.dto";
 
 
 @Injectable()
@@ -29,22 +29,22 @@ export class TimeEntryRepository implements ITimeEntryRepository {
     clockIn: Date;
     clockOut?: Date | null;
     user: userNavigation;
-  }): TimeEntryResponse {
+  }): TimeEntryResponseDto {
     return { id: row.id, clubId: row.clubId, user: this.mapToUserNavigation(row.user), userDocument: row.userDocument, clockIn: row.clockIn, clockOut: row.clockOut };
   }
 
-  async findAll(clubId: number): Promise<TimeEntryResponse[]> {
+  async findAll(clubId: number): Promise<TimeEntryResponseDto[]> {
     const list = await this.prisma.time_entries.findMany({ where: { clubId }, include: { user: { include: { type: true } } } });
     return list.map((row) => this.mapToTimeEntryResponse(row));
   }
   
-  async findOne(id: number): Promise<TimeEntryResponse> {
+  async findOne(id: number): Promise<TimeEntryResponseDto> {
     const row = await this.prisma.time_entries.findUnique({ where: { id }, include: { user: { include: { type: true } } } });
     if (!row) throw new NotFoundException('Time entry not found');
     return this.mapToTimeEntryResponse(row);
   } 
 
-  async create(timeEntry: CreateTimeEntryDto): Promise<TimeEntryResponse> {
+  async create(timeEntry: CreateTimeEntryDto): Promise<TimeEntryResponseDto> {
     const clockIn = new Date();
     const created = await this.prisma.time_entries.create({
       data: {
@@ -58,7 +58,7 @@ export class TimeEntryRepository implements ITimeEntryRepository {
   return this.mapToTimeEntryResponse(created);
   }
 
-  async update(id: number, timeEntry: UpdateTimeEntryDto): Promise<TimeEntryResponse> {
+  async update(id: number, timeEntry: UpdateTimeEntryDto): Promise<TimeEntryResponseDto> {
     const data: { clockOut?: Date | null } = {};
     if (timeEntry.clockOut != null) {
       data.clockOut = new Date(timeEntry.clockOut);

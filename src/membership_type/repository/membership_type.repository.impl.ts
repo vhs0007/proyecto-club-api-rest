@@ -3,10 +3,10 @@ import { PrismaService } from '../../prisma/prisma.service';
 import { numerator } from '@prisma/client';
 import type {
   IMembershipTypeRepository,
-  MembershipTypeResponse,
   UpdateMembershipTypeData,
 } from './membership_type.repository';
 import { QueryMembershipTypeRequestDto } from '../dto/request/query-membership_type.request.dto';
+import { MembershipTypeResponseDto } from '../dto/response/membership_type-response.dto';
 
 @Injectable()
 export class MembershipTypeRepository implements IMembershipTypeRepository {
@@ -37,7 +37,7 @@ export class MembershipTypeRepository implements IMembershipTypeRepository {
     return numerator;
   }
 
-  async findAll(clubId: number): Promise<MembershipTypeResponse[]> {
+  async findAll(clubId: number): Promise<MembershipTypeResponseDto[]> {
     const list = await this.prisma.membership_type.findMany({ where: { clubId }});
     return list.map((row) => ({
       id: row.id,
@@ -46,7 +46,7 @@ export class MembershipTypeRepository implements IMembershipTypeRepository {
     }));
   }
 
-  async findById(queryMembershipTypeRequestDto: QueryMembershipTypeRequestDto): Promise<MembershipTypeResponse | null> {
+  async findById(queryMembershipTypeRequestDto: QueryMembershipTypeRequestDto): Promise<MembershipTypeResponseDto | null> {
     const { clubId, id } = queryMembershipTypeRequestDto;
     const row = await this.prisma.membership_type.findUnique({ where: { id_clubId: { id: id, clubId: clubId } }});
     if (!row) return null;
@@ -57,14 +57,14 @@ export class MembershipTypeRepository implements IMembershipTypeRepository {
     };
   }
 
-   async create(data: { id: number | null; name: string; price: number; clubId: number }): Promise<MembershipTypeResponse> {
+   async create(data: { id: number | null; name: string; price: number; clubId: number }): Promise<MembershipTypeResponseDto> {
     const numerator = await this.generateNumerator(data.clubId);
     data.id = numerator.value;
      const row = await this.prisma.membership_type.create({ data: { id: data.id, name: data.name, price: data.price, clubId: data.clubId } });
      return { id: row.id, name: row.name, price: this.toNumber(row.price) };
    }
 
-  async update(queryMembershipTypeRequestDto: QueryMembershipTypeRequestDto, data: UpdateMembershipTypeData): Promise<MembershipTypeResponse> {
+  async update(queryMembershipTypeRequestDto: QueryMembershipTypeRequestDto, data: UpdateMembershipTypeData): Promise<MembershipTypeResponseDto> {
     const { clubId, id } = queryMembershipTypeRequestDto;
     const updateData: { name?: string; price?: number } = {};
     if (data.name !== undefined) updateData.name = data.name;

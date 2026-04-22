@@ -3,42 +3,12 @@ import * as bcrypt from 'bcrypt';
 import { UserResponseDto } from './dto/response/user.response.dto';
 import { CreateUserDto } from './dto/request/create-user.request.dto';
 import { UpdateUserDto } from './dto/request/update-user.request.dto';
-import { Athlete, Gender } from './entities/athlete.entity';
-import { Member, MemberRole } from './entities/member.entity';
+import { Athlete } from './entities/athlete.entity';
+import { Member } from './entities/member.entity';
 import { Worker } from './entities/worker.entity';
 import { UserType } from './entities/user.entity';
-import type { UserResponse } from './repository/users.repository';
 import { UsersRepository } from './repository/users.repository.impl';
 import { QueryUserRequestDto } from './dto/request/query-user.request.dto';
-
-function mapToUserResponseDto(res: UserResponse): UserResponseDto {
-  const dto = new UserResponseDto();
-  dto.id = res.id;
-  dto.name = res.name;
-  dto.typeId = res.typeId;
-  dto.type = res.type;
-  dto.email = res.email;
-  dto.membership = res.membership;
-  dto.createdAt = res.createdAt;
-  dto.deletedAt = res.deletedAt;
-  dto.isActive = res.isActive;
-  dto.salary = res.salary;
-  dto.hoursToWorkPerDay = res.hoursToWorkPerDay;
-  dto.employmentStartDate = res.employmentStartDate;
-  dto.startWorkAt = res.startWorkAt;
-  dto.endWorkAt = res.endWorkAt;
-  dto.weight = res.weight;
-  dto.height = res.height;
-  dto.gender = res.gender;
-  dto.birthDate = res.birthDate;
-  dto.diet = res.diet;
-  dto.trainingPlan = res.trainingPlan;
-  dto.medicalHistory = res.medicalHistory;
-  dto.allergies = res.allergies;
-  dto.medications = res.medications;
-  dto.medicalConditions = res.medicalConditions;
-  return dto;
-}
 
 const SALT_ROUNDS = 10;
 
@@ -47,54 +17,6 @@ async function hashPassword(plainPassword: string): Promise<string> {
 }
 
 export type UserEntity = Member | Athlete | Worker;
-
-function mapResponseToUser(res: UserResponse): UserEntity {
-  const base = {
-    id: res.id,
-    name: res.name,
-    createdAt: res.createdAt,
-    email: res.email,
-    password: res.password,
-    updatedAt: null as Date | null,
-    deletedAt: res.deletedAt,
-    isActive: res.isActive,
-  };
-
-  if (res.typeId === UserType.WORKER) {
-    return new Worker({
-      ...base,
-      type: UserType.WORKER,
-      salary: res.salary ?? 0,
-      hoursToWorkPerDay: res.hoursToWorkPerDay,
-      startWorkAt: res.startWorkAt ?? '',
-      endWorkAt: res.endWorkAt ?? '',
-    });
-  }
-
-  if (res.typeId === UserType.ATHLETE) {
-    return new Athlete({
-      ...base,
-      type: UserType.ATHLETE,
-      role: MemberRole.ATHLETE,
-      weight: res.weight ?? 0,
-      height: res.height ?? 0,
-      gender: (res.gender as Gender) ?? Gender.MALE,
-      birthDate: res.birthDate ?? new Date(),
-      diet: res.diet,
-      trainingPlan: res.trainingPlan,
-      medicalHistory: res.medicalHistory,
-      allergies: res.allergies,
-      medications: res.medications,
-      medicalConditions: res.medicalConditions,
-    });
-  }
-
-  return new Member({
-    ...base,
-    type: UserType.MEMBER,
-    role: MemberRole.Standard,
-  });
-}
 
 @Injectable()
 export class UsersService {
@@ -117,7 +39,7 @@ export class UsersService {
       
       if (createUserDto.gender != null && createUserDto.gender.trim() !== '') {
         const g = createUserDto.gender.toLowerCase();
-        if (g !== 'male' && g !== 'female') throw new BadRequestException('gender must be male or female');
+        if (g !== 'masculino' && g !== 'femenino') throw new BadRequestException('gender must be masculino or femenino');
       }
 
       if (createUserDto.birthDate != null) {
@@ -138,18 +60,18 @@ export class UsersService {
     }
 
     const res = await this.usersRepository.create(dataToCreate);
-    return mapToUserResponseDto(res);
+    return res;
   }
 
   async findAll(clubId: number): Promise<UserResponseDto[]> {
     const list = await this.usersRepository.findAll(clubId);
-    return list.map(mapToUserResponseDto);
+    return list;
   }
 
   async findOne(queryUserRequestDto: QueryUserRequestDto): Promise<UserResponseDto> {
     const row = await this.usersRepository.findById(queryUserRequestDto);
     if (!row) throw new NotFoundException('User not found');
-    return mapToUserResponseDto(row);
+    return row;
   }
 
   async update(id: number, updateUserDto: UpdateUserDto): Promise<UserResponseDto> {
@@ -167,13 +89,13 @@ export class UsersService {
       delete updateData.password;
     }
     const updated = await this.usersRepository.update(id, updateData);
-    return mapToUserResponseDto(updated);
+    return updated;
   }
 
   async remove(queryUserRequestDto: QueryUserRequestDto): Promise<UserResponseDto> {
     const row = await this.usersRepository.findById(queryUserRequestDto);
     if (!row) throw new NotFoundException('User not found');
     await this.usersRepository.delete(queryUserRequestDto);
-    return mapToUserResponseDto(row);
+    return row;
   }
 }

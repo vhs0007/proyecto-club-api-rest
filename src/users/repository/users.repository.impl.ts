@@ -1,14 +1,14 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { numerator, Prisma } from '@prisma/client';
 import { PrismaService } from '../../prisma/prisma.service';
-import type { IUsersRepository, UserResponse } from './users.repository';
+import type { IUsersRepository } from './users.repository';
 import { UpdateUserDto } from '../dto/request/update-user.request.dto';
 import { CreateUserDto } from '../dto/request/create-user.request.dto';
 import { UserTypeResponseDto } from '../../user_type/dto/response/user-type-response.dto';
 import { membershipNavigation } from './users.repository';
 import { MembershipTypeResponseDto } from 'src/membership_type/dto/response/membership_type-response.dto';
-import { UserType } from '../entities/user.entity';
 import { QueryUserRequestDto } from '../dto/request/query-user.request.dto';
+import { UserResponseDto } from '../dto/response/user.response.dto';
 
 interface UserRow {
   id: number;
@@ -36,6 +36,7 @@ interface UserRow {
   allergies: string | null;
   medications: string | null;
   medicalConditions: string | null;
+  document: string;
 }
 
 type MembershipWithTypeRow = {
@@ -75,7 +76,7 @@ function getLastMembership(memberships: MembershipWithTypeRow[]): membershipNavi
   return mapMembership(latest);
 }
 
-function mapRow(row: UserRow): UserResponse {
+function mapRow(row: UserRow): UserResponseDto {
   const type = row.type ? new UserTypeResponseDto() : undefined;
   if (type) {
     type.id = row.type?.id ?? 0;
@@ -106,6 +107,7 @@ function mapRow(row: UserRow): UserResponse {
     allergies: row.allergies,
     medications: row.medications,
     medicalConditions: row.medicalConditions,
+    document: row.document,
   };
 }
 
@@ -124,7 +126,7 @@ export class UsersRepository implements IUsersRepository {
     return numerator;
   }
 
-  async create(createUserDto: CreateUserDto): Promise<UserResponse> {
+  async create(createUserDto: CreateUserDto): Promise<UserResponseDto> {
     const data: Prisma.usersUncheckedCreateInput = {
       name: createUserDto.name,
       typeId: createUserDto.typeId,
@@ -157,7 +159,7 @@ export class UsersRepository implements IUsersRepository {
     //te prometo que fue necesario 
   }
 
-  async findAll(clubId: number): Promise<UserResponse[]> {
+  async findAll(clubId: number): Promise<UserResponseDto[]> {
     const users = await this.prisma.users.findMany({
       where: { clubId },
       include: { type: true, memberships: { include: { type: true } } },
@@ -171,7 +173,7 @@ export class UsersRepository implements IUsersRepository {
     return usersConMembership;
   }
 
-  async findById(queryUserRequestDto: QueryUserRequestDto): Promise<UserResponse | null> {
+  async findById(queryUserRequestDto: QueryUserRequestDto): Promise<UserResponseDto | null> {
     const { clubId, userId, typeId } = queryUserRequestDto;
     const user = await this.prisma.users.findUnique({
       where: { id_clubId_typeId: { id: userId, clubId, typeId } },
@@ -183,13 +185,13 @@ export class UsersRepository implements IUsersRepository {
     return userResponse;
   }
 
-  async findByEmail(email: string, clubId: number): Promise<UserResponse | null> {
+  async findByEmail(email: string, clubId: number): Promise<UserResponseDto | null> {
     const user = await this.prisma.users.findFirst({ where: { email, clubId } });
     if (!user) return null;
     return mapRow(user);
   }
 
-  async findByDocument(document: string, clubId: number): Promise<UserResponse | null> {
+  async findByDocument(document: string, clubId: number): Promise<UserResponseDto | null> {
     const user = await this.prisma.users.findFirst({ where: { document, clubId } });
     if (!user) return null;
     return mapRow(user);
@@ -200,13 +202,12 @@ export class UsersRepository implements IUsersRepository {
     return row != null;
   }
 
-  async update(id: number, updateUserDto: UpdateUserDto): Promise<UserResponse> {
+  async update(id: number, updateUserDto: UpdateUserDto): Promise<UserResponseDto> {
     const updated = await this.prisma.users.update({
       where: { id_clubId_typeId: { id, clubId: updateUserDto.clubId, typeId: updateUserDto.typeId } },
       data: updateUserDto as Prisma.usersUncheckedUpdateInput,
       include: { type: true , memberships: { include: { type: true } } },
     });
-    const lastMembership = await this.prisma.membership.findFirst({ where: { userId: id, clubId: updateUserDto.clubId }, orderBy: { createdAt: 'desc' } });
     const userResponse = mapRow(updated);
     userResponse.membership = getLastMembership(updated.memberships);
     return userResponse;

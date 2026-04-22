@@ -1,14 +1,6 @@
-import { CreateTimeEntryDto } from "../dto/create-time-entry.dto";
-import { UpdateTimeEntryDto } from "../dto/update-time-entry.dto";
-
-export interface TimeEntryResponse {
-  id: number;
-  clubId: number;
-  user: userNavigation;
-  userDocument: string;
-  clockIn: Date;
-  clockOut?: Date | null;
-}
+import { CreateTimeEntryDto } from "../dto/request/create-time-entry.dto";
+import { UpdateTimeEntryDto } from "../dto/request/update-time-entry.dto";
+import { TimeEntryResponseDto } from "../dto/response/time-entry.response.dto";
 
 export interface userNavigation{
     id: number;
@@ -25,8 +17,8 @@ export interface userTypeNavigation{
 }
 
 export interface ITimeEntryRepository {
-  findAll(clubId: number): Promise<TimeEntryResponse[]>;
-  findOne(id: number): Promise<TimeEntryResponse>;
-  create(timeEntry: CreateTimeEntryDto): Promise<TimeEntryResponse>;
-  update(id: number, timeEntry: UpdateTimeEntryDto): Promise<TimeEntryResponse>;
+  findAll(clubId: number): Promise<TimeEntryResponseDto[]>;
+  findOne(id: number): Promise<TimeEntryResponseDto>;
+  create(timeEntry: CreateTimeEntryDto): Promise<TimeEntryResponseDto>;
+  update(id: number, timeEntry: UpdateTimeEntryDto): Promise<TimeEntryResponseDto>;
 }
