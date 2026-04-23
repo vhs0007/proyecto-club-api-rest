@@ -116,14 +116,16 @@ export class UsersRepository implements IUsersRepository {
   constructor(private readonly prisma: PrismaService) {}
 
   private async createNumerator(name: string, clubId: number): Promise<numerator> {
-    const numerator = await this.prisma.numerator.create({
-      data: {
-        name,
-        clubId,
-        value: 1,
-      },
+    const existNumerator = await this.prisma.numerator.findFirst({ where: { name, clubId } });
+    if (existNumerator) {
+      return await this.prisma.numerator.update({
+        where: { id: existNumerator.id },
+        data: { value: existNumerator.value + 1 },
+      });
+    }
+    return await this.prisma.numerator.create({
+      data: { name, clubId, value: 1 },
     });
-    return numerator;
   }
 
   async create(createUserDto: CreateUserDto): Promise<UserResponseDto> {
