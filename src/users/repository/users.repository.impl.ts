@@ -128,12 +128,15 @@ export class UsersRepository implements IUsersRepository {
 
   async create(createUserDto: CreateUserDto): Promise<UserResponseDto> {
     const data: Prisma.usersUncheckedCreateInput = {
+      id: 0,
       name: createUserDto.name,
       typeId: createUserDto.typeId,
       isActive: createUserDto.isActive,
       clubId: createUserDto.clubId,
       document: createUserDto.document,
     };
+    const numerator = await this.createNumerator('userId', createUserDto.clubId);
+    data.id = numerator.value;
     if (createUserDto.email != null) data.email = createUserDto.email;
     if (createUserDto.password != null) data.password = createUserDto.password;
     if (createUserDto.salary != null) data.salary = createUserDto.salary;
