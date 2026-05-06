@@ -3,55 +3,112 @@ import { PrismaService } from '../../prisma/prisma.service';
 import type { IActivitiesRepository, UserNavigation, FacilityNavigation } from './activitities.repository';
 import { CreateActivityDto } from '../dto/request/create-activities.dto';
 import { UpdateActivityDto } from '../dto/request/update-activities.dto';
-import { Prisma } from '@prisma/client';
 import { QueryActivitiesRequestDto } from '../dto/request/query-activities.request.dto';
 import { numerator } from '@prisma/client';
 import { ActivityResponseDto } from '../dto/response/activity-response.dto';
 
-const ACTIVITY_INCLUDE = {
-  user: true,
-  facility: {
-    include: {
-      responsibleWorkerUser: true,
-      assistantWorkerUser: true,
-    },
-  },
-} as const;
+/**
+ * Shape mínimo que leemos de Prisma con `ACTIVITY_QUERY_INCLUDE`.
+ * Prisma devuelve más columnas; aquí solo lo que usa este repo.
+ */
 
+interface UserPlainRow {
+  id: number;
+  name: string;
+  typeId: number;
+  email: string | null;
+  createdAt: Date;
+  deletedAt: Date | null;
+  isActive: boolean;
+  document: string;
+}
 
-interface ActivityResult {
+interface FacilityWorkerLinkRow {
+  id: number;
+  user: UserPlainRow;
+}
+
+interface FacilityNestedRow {
+  id: number;
+  type: string;
+  capacity: number;
+  isActive: boolean;
+  ResponsibleWorkerUserId: number;
+  user: UserPlainRow | null;
+  facility_workers: FacilityWorkerLinkRow[];
+}
+
+interface ActivityQueryRow {
   id: number;
   name: string;
   type: string;
+  date: Date;
   hourStart: string;
   hourEnd: string;
-  cost: Prisma.Decimal;
+  cost: { toNumber(): number };
   isActive: boolean;
-  facility: FacilityNavigation;
   clubId: number;
-  date: Date;
-  user: UserNavigation | null;
+  user: UserPlainRow | null;
+  facility: FacilityNestedRow;
 }
+
+const ACTIVITY_QUERY_INCLUDE = {
+  user: true,
+  facility: {
+    include: {
+      user: true,
+      facility_workers: { include: { user: true } },
+    },
+  },
+};
 
 @Injectable()
 export class ActivitiesRepository implements IActivitiesRepository {
   constructor(private readonly prisma: PrismaService) {}
 
-  private activityPrismaToInterface(activity: ActivityResult): ActivityResponseDto {
+  private userToNav(user: UserPlainRow): UserNavigation {
     return {
-      id: activity.id,
-      name: activity.name,
-      type: activity.type,
-      hourStart: activity.hourStart,
-      hourEnd: activity.hourEnd,
-      date: activity.date,
-      user: activity.user,
-      cost: activity.cost.toNumber(),
-      isActive: activity.isActive,
-      facility: activity.facility,
-      clubId: activity.clubId,
-    }
-  };
+      id: user.id,
+      name: user.name,
+      typeId: user.typeId,
+      email: user.email,
+      createdAt: user.createdAt,
+      deletedAt: user.deletedAt,
+      isActive: user.isActive,
+      document: user.document,
+    };
+  }
+
+  private mapFacility(facility: FacilityNestedRow): FacilityNavigation {
+    const assistants = facility.facility_workers
+      .filter((fw) => fw.user.id !== facility.ResponsibleWorkerUserId)
+      .map((fw) => this.userToNav(fw.user));
+
+    return {
+      id: facility.id,
+      type: facility.type,
+      capacity: facility.capacity,
+      isActive: facility.isActive,
+      responsibleWorker: facility.user ? this.userToNav(facility.user) : null,
+      assistantWorkers: assistants.length > 0 ? assistants : null,
+    };
+  }
+
+  private mapRow(row: ActivityQueryRow): ActivityResponseDto {
+    return {
+      id: row.id,
+      name: row.name,
+      type: row.type,
+      hourStart: row.hourStart,
+      hourEnd: row.hourEnd,
+      date: row.date,
+      user: row.user ? this.userToNav(row.user) : null,
+      cost: row.cost.toNumber(),
+      isActive: row.isActive,
+      facility: this.mapFacility(row.facility),
+      clubId: row.clubId,
+    };
+  }
 
   async create(createActivityDto: CreateActivityDto): Promise<ActivityResponseDto> {
     const { facilityId, isActive, ...rest } = createActivityDto;
@@ -65,34 +122,10 @@ export class ActivitiesRepository implements IActivitiesRepository {
         isActive: isActive ?? true,
         clubId: createActivityDto.clubId,
       },
-      include: ACTIVITY_INCLUDE as { user: true; facility: { include: { responsibleWorkerUser: true; assistantWorkerUser: true } } },
+      include: ACTIVITY_QUERY_INCLUDE,
     });
 
-    const facilityResult: FacilityNavigation = {
-      id: created.facility.id,
-      type: created.facility.type,
-      capacity: created.facility.capacity,
-      responsibleWorker: created.facility.responsibleWorkerUser,
-      assistantWorker: created.facility.assistantWorkerUser,
-      isActive: created.facility.isActive,
-    };
-
-    const activityResult: ActivityResult = {
-      id: created.id,
-      name: created.name,
-      type: created.type,
-      hourStart: created.hourStart,
-      hourEnd: created.hourEnd,
-      cost: created.cost,
-      isActive: created.isActive,
-      facility: facilityResult,
-      clubId: created.clubId,
-      date: created.date,
-      user: created.user,
-    };
-
-    const activity: ActivityResponseDto = this.activityPrismaToInterface(activityResult);
-    return activity;
+    return this.mapRow(created);
   }
 
   private async generateNumerator(clubId: number): Promise<numerator> {
@@ -110,68 +143,23 @@ export class ActivitiesRepository implements IActivitiesRepository {
         value: 1,
       },
     });
-      return numerator;
+    return numerator;
   }
 
   async findAll(clubId: number): Promise<ActivityResponseDto[]> {
     const list = await this.prisma.activity.findMany({
       where: { clubId },
-      include: ACTIVITY_INCLUDE as { user: true; facility: { include: { responsibleWorkerUser: true; assistantWorkerUser: true } } },
+      include: ACTIVITY_QUERY_INCLUDE,
     });
-    const activityResults: ActivityResult[] = list.map((row): ActivityResult => ({
-      id: row.id,
-      name: row.name,
-      type: row.type,
-      hourStart: row.hourStart,
-      hourEnd: row.hourEnd,
-      cost: row.cost,
-      isActive: row.isActive,
-      facility: {
-        id: row.facility.id,
-        type: row.facility.type,
-        capacity: row.facility.capacity,
-        responsibleWorker: row.facility.responsibleWorkerUser,
-        assistantWorker: row.facility.assistantWorkerUser,
-        isActive: row.facility.isActive,
-      },
-      clubId: row.clubId,
-      date: row.date,
-      user: row.user,
-    }));
-    const activities: ActivityResponseDto[] = activityResults.map((activityResult) => this.activityPrismaToInterface(activityResult));
-    return activities;
+    return list.map((row) => this.mapRow(row));
   }
 
   async findById(query: QueryActivitiesRequestDto): Promise<ActivityResponseDto | null> {
     const row = await this.prisma.activity.findUnique({
-      where: { id_clubId: {id: query.id, clubId: query.clubId} },
-      include: ACTIVITY_INCLUDE as { user: true; facility: { include: { responsibleWorkerUser: true; assistantWorkerUser: true } } },
+      where: { id_clubId: { id: query.id, clubId: query.clubId } },
+      include: ACTIVITY_QUERY_INCLUDE,
     });
-    if (!row) return null;
-
-    const activityResult: ActivityResult = {
-      id: row.id,
-      name: row.name,
-      type: row.type,
-      hourStart: row.hourStart,
-      hourEnd: row.hourEnd,
-      cost: row.cost,
-      isActive: row.isActive,
-      facility: {
-        id: row.facility.id,
-        type: row.facility.type,
-        capacity: row.facility.capacity,
-        responsibleWorker: row.facility.responsibleWorkerUser,
-        assistantWorker: row.facility.assistantWorkerUser,
-        isActive: row.facility.isActive,
-      },
-      clubId: row.clubId,
-      date: row.date,
-      user: row.user,
-    };
-
-    const activity: ActivityResponseDto = this.activityPrismaToInterface(activityResult);
-    return activity;
+    return row ? this.mapRow(row) : null;
   }
 
   async update(query: QueryActivitiesRequestDto, updateActivityDto: UpdateActivityDto): Promise<ActivityResponseDto> {
@@ -186,37 +174,15 @@ export class ActivitiesRepository implements IActivitiesRepository {
     if (updateActivityDto.facilityId !== undefined) data.facilityId = updateActivityDto.facilityId;
     if (updateActivityDto.isActive !== undefined) data.isActive = updateActivityDto.isActive;
     const updated = await this.prisma.activity.update({
-      where: { id_clubId: {id: query.id, clubId: query.clubId} },
+      where: { id_clubId: { id: query.id, clubId: query.clubId } },
       data,
-      include: ACTIVITY_INCLUDE as { user: true; facility: { include: { responsibleWorkerUser: true; assistantWorkerUser: true } } },
+      include: ACTIVITY_QUERY_INCLUDE,
     });
-    
-    const activityResult: ActivityResult = {
-      id: updated.id,
-      name: updated.name,
-      type: updated.type,
-      hourStart: updated.hourStart,
-      hourEnd: updated.hourEnd,
-      cost: updated.cost,
-      isActive: updated.isActive,
-      facility: {
-        id: updated.facility.id,
-        type: updated.facility.type,
-        capacity: updated.facility.capacity,
-        responsibleWorker: updated.facility.responsibleWorkerUser,
-        assistantWorker: updated.facility.assistantWorkerUser,
-        isActive: updated.facility.isActive,
-      },
-      clubId: updated.clubId,
-      date: updated.date,
-      user: updated.user,
-    };
 
-    const activity: ActivityResponseDto = this.activityPrismaToInterface(activityResult);
-    return activity;
+    return this.mapRow(updated);
   }
 
   async delete(query: QueryActivitiesRequestDto): Promise<void> {
-    await this.prisma.activity.delete({ where: { id_clubId: {id: query.id, clubId: query.clubId} } });
+    await this.prisma.activity.delete({ where: { id_clubId: { id: query.id, clubId: query.clubId } } });
   }
 }

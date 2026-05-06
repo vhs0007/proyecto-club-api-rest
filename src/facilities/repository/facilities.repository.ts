@@ -7,16 +7,6 @@ export interface UserTypeNavigation {
   id: number;
   name: string;
 };
-export interface WorkerNavigation {
-  id: number;
-  name: string;
-  type: UserTypeNavigation;
-  email: string | null;
-  password: string | null;
-  createdAt: Date;
-  deletedAt: Date | null;
-  isActive: boolean;
-};
 
 export interface UserNavigation {
   id: number;

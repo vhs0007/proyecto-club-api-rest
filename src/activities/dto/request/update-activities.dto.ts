@@ -24,7 +24,11 @@ export class UpdateActivityDto {
   @Matches(/^([01]\d|2[0-3]):([0-5]\d)$/, { message: 'hourEnd debe tener formato HH:mm' })
   hourEnd?: string;
 
-  @ApiProperty({ example: 1, required: false })
+  @ApiProperty({
+    example: 1,
+    required: false,
+    description: 'Usuario que reserva la actividad; usar junto con userTypeId',
+  })
   @IsOptional()
   @IsNumber({}, { message: 'userId debe ser un número' })
   @Min(1, { message: 'userId debe ser al menos 1' })
@@ -52,7 +56,10 @@ export class UpdateActivityDto {
   @IsString({ message: 'date debe ser un texto' })
   date: string;
 
-  @ApiProperty({ example: 1, description: 'Id del tipo de usuario' })
+  @ApiProperty({
+    example: 1,
+    description: 'Tipo del usuario que reserva (requerido si cambia userId)',
+  })
   @IsNumber({}, { message: 'userTypeId debe ser un número' })
   @Min(1, { message: 'userTypeId debe ser al menos 1' })
   userTypeId: number;

@@ -1,6 +1,15 @@
 import { ApiProperty } from '@nestjs/swagger';
-import type { ActivitiesNavigation, WorkerNavigation, MembershipTypeNavigation } from '../../repository/facilities.repository';
+import type { ActivitiesNavigation, UserNavigation, MembershipTypeNavigation } from '../../repository/facilities.repository';
 
+const userNavExample = {
+  id: 1,
+  name: 'Juan Perez',
+  type: { id: 1, name: 'Entrenador' },
+  email: 'juan.perez@example.com',
+  createdAt: '2026-01-01',
+  deletedAt: null,
+  isActive: true,
+};
 
 export class FacilityResponseDto {
   @ApiProperty({ example: 1, description: 'ID de la instalación' })
@@ -9,14 +18,37 @@ export class FacilityResponseDto {
   type: string;
   @ApiProperty({ example: 100, description: 'Capacidad de la instalación' })
   capacity: number;
-  @ApiProperty({ example: { id: 1, name: 'Juan Perez', typeId: 1, email: 'juan.perez@example.com', password: '123456', createdAt: '2026-01-01', deletedAt: null, isActive: true }, description: 'Trabajador responsable' })
-  responsibleWorker: WorkerNavigation;
-  @ApiProperty({ example: { id: 2, name: 'Maria Lopez', typeId: 1, email: 'maria.lopez@example.com', password: '123456', createdAt: '2026-01-01', deletedAt: null, isActive: true }, description: 'Trabajador asistente' })
-  assistantWorker: WorkerNavigation | null;
+  @ApiProperty({
+    example: userNavExample,
+    nullable: true,
+    description: 'Trabajador responsable',
+  })
+  responsibleWorker: UserNavigation | null;
+  @ApiProperty({
+    example: [userNavExample],
+    nullable: true,
+    description: 'Trabajadores asistentes (excluye al responsable); null si no hay ninguno',
+  })
+  assistantWorkers: UserNavigation[] | null;
   @ApiProperty({ example: true, description: 'Estado de la instalación' })
   isActive: boolean;
-  @ApiProperty({ example: [{ id: 1, name: 'Actividad 1', type: 'Tipo 1', startAt: '2026-01-01', endAt: '2026-01-01', user: { id: 1, name: 'Juan Perez', typeId: 1, email: 'juan.perez@example.com', password: '123456', createdAt: '2026-01-01', deletedAt: null, isActive: true }, cost: 100, facility: { id: 1, name: 'Gimnasio', type: 'Tipo 1', capacity: 100, responsibleWorker: { id: 1, name: 'Juan Perez', typeId: 1, email: 'juan.perez@example.com', password: '123456', createdAt: '2026-01-01', deletedAt: null, isActive: true }, assistantWorker: null, isActive: true }, isActive: true }], description: 'Actividades' })
+  @ApiProperty({
+    example: [
+      {
+        id: 1,
+        name: 'Actividad 1',
+        type: 'Tipo 1',
+        date: '2026-01-01',
+        hourStart: '09:00',
+        hourEnd: '10:00',
+        user: userNavExample,
+        cost: 100,
+        isActive: true,
+      },
+    ],
+    description: 'Actividades',
+  })
   activities: ActivitiesNavigation[];
-  @ApiProperty({ example: [{ id: 1, name: 'Membresía 1' }], description: 'Membresías' })
+  @ApiProperty({ example: [{ id: 1, name: 'Membresía 1', price: 99.99 }], description: 'Membresías' })
   membershipTypes: MembershipTypeNavigation[];
 }

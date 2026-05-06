@@ -20,7 +20,10 @@ export class CreateActivityDto {
   @Matches(/^([01]\d|2[0-3]):([0-5]\d)$/, { message: 'hourStart debe tener formato HH:mm' })
   hourStart: string;
 
-  @ApiProperty({ example: 1, description: 'Id del usuario' })
+  @ApiProperty({
+    example: 1,
+    description: 'Id del usuario que reserva la actividad (socio/miembro), no del instructor',
+  })
   @IsNumber({}, { message: 'userId debe ser un número' })
   @Min(1, { message: 'userId debe ser al menos 1' })
   userId: number;
@@ -49,7 +52,10 @@ export class CreateActivityDto {
   @IsDate({ message: 'date debe ser una fecha válida' })
   date: Date;
   
-  @ApiProperty({ example: 1, description: 'Id del tipo de usuario' })
+  @ApiProperty({
+    example: 1,
+    description: 'Tipo del usuario que reserva (clave compuesta con userId y clubId)',
+  })
   @IsNumber({}, { message: 'userTypeId debe ser un número' })
   @Min(1, { message: 'userTypeId debe ser al menos 1' })
   userTypeId: number;

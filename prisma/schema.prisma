@@ -34,6 +34,7 @@ model membership_type {
   facilities_membership facilities_membership[]
   clubId Int
   club clubs @relation(fields: [clubId], references: [id])
+  scheduled_activities_membership_types scheduled_activities_membership_types[]
   @@id([id, clubId])
 }
 
@@ -52,18 +53,29 @@ model facilities {
   id                     Int                    @default(autoincrement())
   type                   String
   capacity               Int
-  responsibleWorkerTypeId Int
-  assistantWorkerTypeId Int?
-  responsibleWorker      Int
-  responsibleWorkerUser  users?                 @relation("FacilityResponsible", fields: [responsibleWorker, clubId, responsibleWorkerTypeId], references: [id, clubId, typeId])
-  assistantWorker        Int?
-  assistantWorkerUser    users?                 @relation("FacilityAssistant", fields: [assistantWorker, clubId, assistantWorkerTypeId], references: [id, clubId, typeId])
   isActive               Boolean
   activities             activity[]
   facilities_membership  facilities_membership[]
+  facility_workers facility_workers[]
+  ResponsibleWorkerTypeId Int
+  ResponsibleWorkerUserId Int
+  user users @relation(fields: [ResponsibleWorkerUserId, clubId, ResponsibleWorkerTypeId], references: [id, clubId, typeId])
+  scheduled_activities scheduled_activities[]
   clubId Int
   club clubs @relation(fields: [clubId], references: [id])
   @@id([id, clubId])
+}
+
+model facility_workers{
+  id Int @default(autoincrement())
+  clubId Int
+  club clubs @relation(fields: [clubId], references: [id])
+  facilityId Int
+  facility facilities @relation(fields: [facilityId, clubId], references: [id, clubId])
+  userId Int
+  userTypeId Int
+  user users @relation(fields: [userId, clubId, userTypeId], references: [id, clubId, typeId])
+  @@id([id, facilityId, userId, clubId, userTypeId])
 }
 
 model activity {
@@ -143,8 +155,8 @@ model users {
   isActive Boolean
   memberships              membership[]
   activities               activity[]
-  facilitiesAsResponsible  facilities[] @relation("FacilityResponsible")
-  facilitiesAsAssistant    facilities[] @relation("FacilityAssistant")
+  facility_workers facility_workers[]
+  facilities facilities[]
   salary Decimal? @db.Decimal(10, 2)
   hoursToWorkPerDay Int?
   employmentStartDate DateTime?
@@ -161,8 +173,11 @@ model users {
   medications String?
   medicalConditions String?
   time_entries time_entries[]
+  scheduledActivityId Int?
   clubId Int 
   club clubs @relation(fields: [clubId], references: [id])
+  scheduled_activities_assistant_workers scheduled_activities_assistant_workers[]
+  scheduled_activities_members scheduled_activities_members[]
   @@id([id, clubId, typeId])
   @@unique([clubId, email])
   @@unique([clubId, document])
@@ -197,6 +212,13 @@ model clubs{
   plugins_clubs plugins_clubs[]
   numerators numerator[]
   facilities_membership facilities_membership[]
+  facility_workers facility_workers[]
+  scheduled_activities scheduled_activities[]
+  scheduled_activities_assistant_workers scheduled_activities_assistant_workers[]
+  scheduled_activities_membership_types scheduled_activities_membership_types[]
+  scheduled_activities_members scheduled_activities_members[]
+  working_days working_days[]
+  datetime_scheduled_activities datetime_scheduled_activities[]
 }
 
 model plugins {
@@ -221,3 +243,77 @@ model numerator{
   club clubs @relation(fields: [clubId], references: [id])
   value Int
 }
+
+model scheduled_activities {
+  id Int  @default(autoincrement())
+  clubId Int
+  club clubs @relation(fields: [clubId], references: [id])
+  facilityId Int
+  facility facilities @relation(fields: [facilityId, clubId], references: [id, clubId])
+  userId Int
+  userTypeId Int
+  scheduled_activities_assistant_workers scheduled_activities_assistant_workers[]
+  scheduled_activities_membership_types scheduled_activities_membership_types[]
+  scheduled_activities_members scheduled_activities_members[]
+  datetime_scheduled_activities datetime_scheduled_activities[]
+  @@id([id, clubId])
+}
+
+model scheduled_activities_members{
+  id Int @default(autoincrement())
+  clubId Int
+  club clubs @relation(fields: [clubId], references: [id])
+  scheduledActivityId Int
+  scheduled_activities scheduled_activities @relation(fields: [scheduledActivityId, clubId], references: [id, clubId])
+  userId Int
+  userTypeId Int
+  user users @relation(fields: [userId, clubId, userTypeId], references: [id, clubId, typeId])
+  @@id([id, clubId, scheduledActivityId, userId, userTypeId])
+}
+
+model scheduled_activities_assistant_workers{
+  id Int @default(autoincrement())
+  clubId Int
+  club clubs @relation(fields: [clubId], references: [id])
+  scheduledActivityId Int
+  scheduled_activities scheduled_activities @relation(fields: [scheduledActivityId, clubId], references: [id, clubId])
+  userId Int
+  userTypeId Int
+  user users @relation(fields: [userId, clubId, userTypeId], references: [id, clubId, typeId])
+  @@id([id, clubId, scheduledActivityId, userId, userTypeId])
+}
+
+model scheduled_activities_membership_types{
+  id Int @default(autoincrement())
+  clubId Int
+  club clubs @relation(fields: [clubId], references: [id])
+  membershipTypeId Int
+  membership_type membership_type @relation(fields: [membershipTypeId, clubId], references: [id, clubId])
+  scheduledActivityId Int
+  scheduled_activities scheduled_activities @relation(fields: [scheduledActivityId, clubId], references: [id, clubId])
+  @@id([id, clubId, membershipTypeId, scheduledActivityId])
+}
+
+model working_days{
+  id Int @default(autoincrement())
+  clubId Int
+  club clubs @relation(fields: [clubId], references: [id])
+  dayOfWeek String
+  datetime_scheduled_activities datetime_scheduled_activities[]
+  @@id([id, clubId])
+}
+
+model datetime_scheduled_activities{
+  id Int @default(autoincrement())
+  clubId Int
+  club clubs @relation(fields: [clubId], references: [id])
+  scheduledActivityId Int
+  scheduled_activities scheduled_activities @relation(fields: [scheduledActivityId, clubId], references: [id, clubId])
+  hourStart String
+  hourEnd String
+  workingDayId Int
+  working_day working_days @relation(fields: [workingDayId, clubId], references: [id, clubId])
+  @@id([id, clubId, scheduledActivityId, hourStart, hourEnd])
+}
+
+

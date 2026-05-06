@@ -19,7 +19,7 @@ export interface FacilityNavigation {
   type: string;
   capacity: number;
   responsibleWorker: UserNavigation | null;
-  assistantWorker: UserNavigation | null;
+  assistantWorkers: UserNavigation[] | null;
   isActive: boolean;
 };
 

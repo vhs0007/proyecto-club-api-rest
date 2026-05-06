@@ -23,7 +23,7 @@ export class AuthService {
         userId: 0,
         email: 'admin@admin.com',
         document: '145647910928',
-        type: 4,
+        userTypeId: 4,
       };
     }
     const user = await this.prisma.users.findFirst({
@@ -50,7 +50,7 @@ export class AuthService {
       role: roleName,
       clubId: loginRequest.clubId,
       userId: user.id,
-      type: user.typeId,
+      userTypeId: user.typeId,
       email: user.email ?? undefined,
       document: user.document,
     };
