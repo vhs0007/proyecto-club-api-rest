@@ -66,7 +66,9 @@ function mapMembership(row: MembershipWithTypeRow): membershipNavigation {
   };
 }
 
-function getLastMembership(memberships: MembershipWithTypeRow[]): membershipNavigation | undefined {
+function getLastMembership(
+  memberships: MembershipWithTypeRow[],
+): membershipNavigation | undefined {
   if (memberships.length === 0) return undefined;
 
   const latest = memberships.reduce((current, item) =>
@@ -115,8 +117,13 @@ function mapRow(row: UserRow): UserResponseDto {
 export class UsersRepository implements IUsersRepository {
   constructor(private readonly prisma: PrismaService) {}
 
-  private async createNumerator(name: string, clubId: number): Promise<numerator> {
-    const existNumerator = await this.prisma.numerator.findFirst({ where: { name, clubId } });
+  private async createNumerator(
+    name: string,
+    clubId: number,
+  ): Promise<numerator> {
+    const existNumerator = await this.prisma.numerator.findFirst({
+      where: { name, clubId },
+    });
     if (existNumerator) {
       return await this.prisma.numerator.update({
         where: { id: existNumerator.id },
@@ -137,31 +144,47 @@ export class UsersRepository implements IUsersRepository {
       clubId: createUserDto.clubId,
       document: createUserDto.document,
     };
-    const numerator = await this.createNumerator('userId', createUserDto.clubId);
+    const numerator = await this.createNumerator(
+      'userId',
+      createUserDto.clubId,
+    );
     data.id = numerator.value;
     if (createUserDto.email != null) data.email = createUserDto.email;
     if (createUserDto.password != null) data.password = createUserDto.password;
     if (createUserDto.salary != null) data.salary = createUserDto.salary;
-    if (createUserDto.hoursToWorkPerDay != null) data.hoursToWorkPerDay = createUserDto.hoursToWorkPerDay;
-    if (createUserDto.employmentStartDate != null) data.employmentStartDate = createUserDto.employmentStartDate;
-    if (createUserDto.startWorkAt != null) data.startWorkAt = createUserDto.startWorkAt;
-    if (createUserDto.endWorkAt != null) data.endWorkAt = createUserDto.endWorkAt;
+    if (createUserDto.hoursToWorkPerDay != null)
+      data.hoursToWorkPerDay = createUserDto.hoursToWorkPerDay;
+    if (createUserDto.employmentStartDate != null)
+      data.employmentStartDate = createUserDto.employmentStartDate;
+    if (createUserDto.startWorkAt != null)
+      data.startWorkAt = createUserDto.startWorkAt;
+    if (createUserDto.endWorkAt != null)
+      data.endWorkAt = createUserDto.endWorkAt;
     if (createUserDto.weight != null) data.weight = createUserDto.weight;
     if (createUserDto.height != null) data.height = createUserDto.height;
     if (createUserDto.gender != null) data.gender = createUserDto.gender;
-    if (createUserDto.birthDate != null) data.birthDate = createUserDto.birthDate;
+    if (createUserDto.birthDate != null)
+      data.birthDate = createUserDto.birthDate;
     if (createUserDto.diet != null) data.diet = createUserDto.diet;
-    if (createUserDto.trainingPlan != null) data.trainingPlan = createUserDto.trainingPlan;
-    if (createUserDto.medicalHistory != null) data.medicalHistory = createUserDto.medicalHistory;
-    if (createUserDto.allergies != null) data.allergies = createUserDto.allergies;
-    if (createUserDto.medications != null) data.medications = createUserDto.medications;
-    if (createUserDto.medicalConditions != null) data.medicalConditions = createUserDto.medicalConditions;
-   
-    const created = await this.prisma.users.create({ data, include: { type: true, memberships: { include: { type: true } } } });
+    if (createUserDto.trainingPlan != null)
+      data.trainingPlan = createUserDto.trainingPlan;
+    if (createUserDto.medicalHistory != null)
+      data.medicalHistory = createUserDto.medicalHistory;
+    if (createUserDto.allergies != null)
+      data.allergies = createUserDto.allergies;
+    if (createUserDto.medications != null)
+      data.medications = createUserDto.medications;
+    if (createUserDto.medicalConditions != null)
+      data.medicalConditions = createUserDto.medicalConditions;
+
+    const created = await this.prisma.users.create({
+      data,
+      include: { type: true, memberships: { include: { type: true } } },
+    });
     const userResponse = mapRow(created);
     userResponse.membership = getLastMembership(created.memberships);
     return userResponse;
-    //te prometo que fue necesario 
+    //te prometo que fue necesario
   }
 
   async findAll(clubId: number): Promise<UserResponseDto[]> {
@@ -170,7 +193,7 @@ export class UsersRepository implements IUsersRepository {
       include: { type: true, memberships: { include: { type: true } } },
     });
 
-    const usersConMembership = users.map(user => {
+    const usersConMembership = users.map((user) => {
       const userResponse = mapRow(user);
       userResponse.membership = getLastMembership(user.memberships);
       return userResponse;
@@ -178,7 +201,9 @@ export class UsersRepository implements IUsersRepository {
     return usersConMembership;
   }
 
-  async findById(queryUserRequestDto: QueryUserRequestDto): Promise<UserResponseDto | null> {
+  async findById(
+    queryUserRequestDto: QueryUserRequestDto,
+  ): Promise<UserResponseDto | null> {
     const { clubId, userId, typeId } = queryUserRequestDto;
     const user = await this.prisma.users.findUnique({
       where: { id_clubId_typeId: { id: userId, clubId, typeId } },
@@ -190,28 +215,49 @@ export class UsersRepository implements IUsersRepository {
     return userResponse;
   }
 
-  async findByEmail(email: string, clubId: number): Promise<UserResponseDto | null> {
-    const user = await this.prisma.users.findFirst({ where: { email, clubId } });
+  async findByEmail(
+    email: string,
+    clubId: number,
+  ): Promise<UserResponseDto | null> {
+    const user = await this.prisma.users.findFirst({
+      where: { email, clubId },
+    });
     if (!user) return null;
     return mapRow(user);
   }
 
-  async findByDocument(document: string, clubId: number): Promise<UserResponseDto | null> {
-    const user = await this.prisma.users.findFirst({ where: { document, clubId } });
+  async findByDocument(
+    document: string,
+    clubId: number,
+  ): Promise<UserResponseDto | null> {
+    const user = await this.prisma.users.findFirst({
+      where: { document, clubId },
+    });
     if (!user) return null;
     return mapRow(user);
   }
 
   async existsTypeId(typeId: number): Promise<boolean> {
-    const row = await this.prisma.user_type.findUnique({ where: { id: typeId } });
+    const row = await this.prisma.user_type.findUnique({
+      where: { id: typeId },
+    });
     return row != null;
   }
 
-  async update(id: number, updateUserDto: UpdateUserDto): Promise<UserResponseDto> {
+  async update(
+    id: number,
+    updateUserDto: UpdateUserDto,
+  ): Promise<UserResponseDto> {
     const updated = await this.prisma.users.update({
-      where: { id_clubId_typeId: { id, clubId: updateUserDto.clubId, typeId: updateUserDto.typeId } },
+      where: {
+        id_clubId_typeId: {
+          id,
+          clubId: updateUserDto.clubId,
+          typeId: updateUserDto.typeId,
+        },
+      },
       data: updateUserDto as Prisma.usersUncheckedUpdateInput,
-      include: { type: true , memberships: { include: { type: true } } },
+      include: { type: true, memberships: { include: { type: true } } },
     });
     const userResponse = mapRow(updated);
     userResponse.membership = getLastMembership(updated.memberships);
@@ -220,6 +266,8 @@ export class UsersRepository implements IUsersRepository {
 
   async delete(queryUserRequestDto: QueryUserRequestDto): Promise<void> {
     const { clubId, userId, typeId } = queryUserRequestDto;
-    await this.prisma.users.delete({ where: { id_clubId_typeId: { id: userId, clubId, typeId } } });
+    await this.prisma.users.delete({
+      where: { id_clubId_typeId: { id: userId, clubId, typeId } },
+    });
   }
 }

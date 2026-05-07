@@ -6,5 +6,5 @@ export interface LoginResponse {
   membershipTypeId?: number;
   userId?: number;
   email?: string;
-  document?: string
+  document?: string;
 }

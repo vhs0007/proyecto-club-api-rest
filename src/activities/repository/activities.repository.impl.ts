@@ -1,6 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
-import type { IActivitiesRepository, UserNavigation, FacilityNavigation } from './activitities.repository';
+import type {
+  IActivitiesRepository,
+  UserNavigation,
+  FacilityNavigation,
+} from './activitities.repository';
 import { CreateActivityDto } from '../dto/request/create-activities.dto';
 import { UpdateActivityDto } from '../dto/request/update-activities.dto';
 import { QueryActivitiesRequestDto } from '../dto/request/query-activities.request.dto';
@@ -110,7 +114,9 @@ export class ActivitiesRepository implements IActivitiesRepository {
     };
   }
 
-  async create(createActivityDto: CreateActivityDto): Promise<ActivityResponseDto> {
+  async create(
+    createActivityDto: CreateActivityDto,
+  ): Promise<ActivityResponseDto> {
     const { facilityId, isActive, ...rest } = createActivityDto;
     const numerator = await this.generateNumerator(createActivityDto.clubId);
     const id = numerator.value;
@@ -129,7 +135,9 @@ export class ActivitiesRepository implements IActivitiesRepository {
   }
 
   private async generateNumerator(clubId: number): Promise<numerator> {
-    const existNumerator = await this.prisma.numerator.findFirst({ where: { name: 'activityId', clubId } });
+    const existNumerator = await this.prisma.numerator.findFirst({
+      where: { name: 'activityId', clubId },
+    });
     if (existNumerator) {
       return await this.prisma.numerator.update({
         where: { id: existNumerator.id },
@@ -154,7 +162,9 @@ export class ActivitiesRepository implements IActivitiesRepository {
     return list.map((row) => this.mapRow(row));
   }
 
-  async findById(query: QueryActivitiesRequestDto): Promise<ActivityResponseDto | null> {
+  async findById(
+    query: QueryActivitiesRequestDto,
+  ): Promise<ActivityResponseDto | null> {
     const row = await this.prisma.activity.findUnique({
       where: { id_clubId: { id: query.id, clubId: query.clubId } },
       include: ACTIVITY_QUERY_INCLUDE,
@@ -162,17 +172,29 @@ export class ActivitiesRepository implements IActivitiesRepository {
     return row ? this.mapRow(row) : null;
   }
 
-  async update(query: QueryActivitiesRequestDto, updateActivityDto: UpdateActivityDto): Promise<ActivityResponseDto> {
+  async update(
+    query: QueryActivitiesRequestDto,
+    updateActivityDto: UpdateActivityDto,
+  ): Promise<ActivityResponseDto> {
     const data: Record<string, unknown> = {};
-    if (updateActivityDto.name !== undefined) data.name = updateActivityDto.name;
-    if (updateActivityDto.type !== undefined) data.type = updateActivityDto.type;
-    if (updateActivityDto.hourStart !== undefined) data.hourStart = updateActivityDto.hourStart;
-    if (updateActivityDto.hourEnd !== undefined) data.hourEnd = updateActivityDto.hourEnd;
-    if (updateActivityDto.date !== undefined) data.date = updateActivityDto.date;
-    if (updateActivityDto.userId !== undefined) data.userId = updateActivityDto.userId;
-    if (updateActivityDto.cost !== undefined) data.cost = updateActivityDto.cost;
-    if (updateActivityDto.facilityId !== undefined) data.facilityId = updateActivityDto.facilityId;
-    if (updateActivityDto.isActive !== undefined) data.isActive = updateActivityDto.isActive;
+    if (updateActivityDto.name !== undefined)
+      data.name = updateActivityDto.name;
+    if (updateActivityDto.type !== undefined)
+      data.type = updateActivityDto.type;
+    if (updateActivityDto.hourStart !== undefined)
+      data.hourStart = updateActivityDto.hourStart;
+    if (updateActivityDto.hourEnd !== undefined)
+      data.hourEnd = updateActivityDto.hourEnd;
+    if (updateActivityDto.date !== undefined)
+      data.date = updateActivityDto.date;
+    if (updateActivityDto.userId !== undefined)
+      data.userId = updateActivityDto.userId;
+    if (updateActivityDto.cost !== undefined)
+      data.cost = updateActivityDto.cost;
+    if (updateActivityDto.facilityId !== undefined)
+      data.facilityId = updateActivityDto.facilityId;
+    if (updateActivityDto.isActive !== undefined)
+      data.isActive = updateActivityDto.isActive;
     const updated = await this.prisma.activity.update({
       where: { id_clubId: { id: query.id, clubId: query.clubId } },
       data,
@@ -183,6 +205,8 @@ export class ActivitiesRepository implements IActivitiesRepository {
   }
 
   async delete(query: QueryActivitiesRequestDto): Promise<void> {
-    await this.prisma.activity.delete({ where: { id_clubId: { id: query.id, clubId: query.clubId } } });
+    await this.prisma.activity.delete({
+      where: { id_clubId: { id: query.id, clubId: query.clubId } },
+    });
   }
 }

@@ -18,13 +18,19 @@ export class AllExceptionsFilter implements ExceptionFilter {
     const request = ctx.getRequest<Request & { requestId?: string }>();
 
     const isHttpException = exception instanceof HttpException;
-    const status = isHttpException ? exception.getStatus() : HttpStatus.INTERNAL_SERVER_ERROR;
+    const status = isHttpException
+      ? exception.getStatus()
+      : HttpStatus.INTERNAL_SERVER_ERROR;
 
-    const responseBody = isHttpException ? exception.getResponse() : { message: 'Internal error' };
+    const responseBody = isHttpException
+      ? exception.getResponse()
+      : { message: 'Internal error' };
     const message =
-      isHttpException && typeof responseBody === 'object' && responseBody && 'message' in responseBody
-        ? // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          (responseBody as any).message
+      isHttpException &&
+      typeof responseBody === 'object' &&
+      responseBody &&
+      'message' in responseBody
+        ? (responseBody as any).message
         : undefined;
 
     const requestId = request.requestId;

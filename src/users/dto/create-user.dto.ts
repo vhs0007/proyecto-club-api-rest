@@ -25,13 +25,21 @@ export class CreateUserDto {
   @Min(1, { message: 'clubId debe ser al menos 1' })
   clubId: number;
 
-  @ApiProperty({ required: false, example: [new Date(), new Date()], description: 'Fichadas del usuario' })
+  @ApiProperty({
+    required: false,
+    example: [new Date(), new Date()],
+    description: 'Fichadas del usuario',
+  })
   @IsOptional()
   @IsArray({ message: 'time_entries debe ser un array' })
   @IsDate({ message: 'time_entries debe ser una fecha válida' })
   time_entries?: Date[] | null;
 
-  @ApiProperty({ required: false, example: 1, description: 'ID del rol (por defecto 1)' })
+  @ApiProperty({
+    required: false,
+    example: 1,
+    description: 'ID del rol (por defecto 1)',
+  })
   @IsOptional()
   @IsNumber({}, { message: 'roleId debe ser un número' })
   @Min(1, { message: 'roleId debe ser al menos 1' })
@@ -49,12 +57,18 @@ export class CreateUserDto {
 
   @ApiProperty({ required: false })
   @IsOptional()
-  @IsDateString({}, { message: 'createdAt debe ser una fecha válida en formato ISO' })
+  @IsDateString(
+    {},
+    { message: 'createdAt debe ser una fecha válida en formato ISO' },
+  )
   createdAt?: Date;
 
   @ApiProperty({ required: false })
   @IsOptional()
-  @IsDateString({}, { message: 'deletedAt debe ser una fecha válida en formato ISO' })
+  @IsDateString(
+    {},
+    { message: 'deletedAt debe ser una fecha válida en formato ISO' },
+  )
   deletedAt?: Date | null;
 
   @ApiProperty({ example: true })

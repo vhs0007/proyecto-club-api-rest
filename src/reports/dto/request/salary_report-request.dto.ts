@@ -1,5 +1,5 @@
-import { ApiProperty } from "@nestjs/swagger";
-import { IsNumber, Min } from "class-validator";
+import { ApiProperty } from '@nestjs/swagger';
+import { IsNumber, Min } from 'class-validator';
 
 export class SalaryReportRequestDto {
   @ApiProperty({ example: 1, description: 'ID del usuario' })

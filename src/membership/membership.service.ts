@@ -1,11 +1,14 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { CreateMembershipDto } from './dto/request/create-membership.dto';
 import { UpdateMembershipDto } from './dto/request/update-membership.dto';
 import { MembershipRepository } from './repository/membership.repository.impl';
 import { PrismaService } from '../prisma/prisma.service';
 import { MembershipResponseDto } from './dto/response/membership-response.dto';
 import { QueryMembershipRequestDto } from './dto/request/query-membership.request.dto';
-
 
 @Injectable()
 export class MembershipService {
@@ -14,9 +17,9 @@ export class MembershipService {
     private readonly prisma: PrismaService,
   ) {}
 
-
-
-  async create(createMembershipDto: CreateMembershipDto): Promise<MembershipResponseDto> {
+  async create(
+    createMembershipDto: CreateMembershipDto,
+  ): Promise<MembershipResponseDto> {
     const user = await this.prisma.users.findUnique({
       where: {
         id_clubId_typeId: {
@@ -27,8 +30,16 @@ export class MembershipService {
       },
     });
     if (!user) throw new BadRequestException('User not found');
-    const membershipType = await this.prisma.membership_type.findUnique({ where: { id_clubId: { id: createMembershipDto.type, clubId: createMembershipDto.clubId } } });
-    if (!membershipType) throw new BadRequestException('Membership type not found');
+    const membershipType = await this.prisma.membership_type.findUnique({
+      where: {
+        id_clubId: {
+          id: createMembershipDto.type,
+          clubId: createMembershipDto.clubId,
+        },
+      },
+    });
+    if (!membershipType)
+      throw new BadRequestException('Membership type not found');
     const res = await this.membershipRepository.create(createMembershipDto);
     return res;
   }
@@ -38,14 +49,19 @@ export class MembershipService {
     return list;
   }
 
-  async findOne(queryMembershipRequestDto: QueryMembershipRequestDto): Promise<MembershipResponseDto> {
+  async findOne(
+    queryMembershipRequestDto: QueryMembershipRequestDto,
+  ): Promise<MembershipResponseDto> {
     const { clubId, id } = queryMembershipRequestDto;
     const row = await this.membershipRepository.findById({ clubId, id });
     if (!row) throw new NotFoundException('Membership not found');
     return row;
   }
 
-  async update(queryMembershipRequestDto: QueryMembershipRequestDto, updateMembershipDto: UpdateMembershipDto): Promise<MembershipResponseDto> {
+  async update(
+    queryMembershipRequestDto: QueryMembershipRequestDto,
+    updateMembershipDto: UpdateMembershipDto,
+  ): Promise<MembershipResponseDto> {
     const { clubId, id } = queryMembershipRequestDto;
     const row = await this.membershipRepository.findById({ clubId, id });
     if (!row) throw new NotFoundException('Membership not found');
@@ -68,14 +84,27 @@ export class MembershipService {
       if (!user) throw new BadRequestException('User not found');
     }
     if (updateMembershipDto.type !== undefined) {
-      const membershipType = await this.prisma.membership_type.findUnique({ where: { id_clubId: { id: updateMembershipDto.type, clubId: updateMembershipDto.clubId } } });
-      if (!membershipType) throw new BadRequestException('Membership type not found');
+      const membershipType = await this.prisma.membership_type.findUnique({
+        where: {
+          id_clubId: {
+            id: updateMembershipDto.type,
+            clubId: updateMembershipDto.clubId,
+          },
+        },
+      });
+      if (!membershipType)
+        throw new BadRequestException('Membership type not found');
     }
-    const updated = await this.membershipRepository.update({ clubId, id }, updateMembershipDto);
+    const updated = await this.membershipRepository.update(
+      { clubId, id },
+      updateMembershipDto,
+    );
     return updated;
   }
 
-  async remove(queryMembershipRequestDto: QueryMembershipRequestDto): Promise<MembershipResponseDto> {
+  async remove(
+    queryMembershipRequestDto: QueryMembershipRequestDto,
+  ): Promise<MembershipResponseDto> {
     const { clubId, id } = queryMembershipRequestDto;
     const row = await this.membershipRepository.findById({ clubId, id });
     if (!row) throw new NotFoundException('Membership not found');

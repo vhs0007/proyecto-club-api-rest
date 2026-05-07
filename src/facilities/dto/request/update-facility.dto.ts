@@ -1,5 +1,12 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsString, IsNumber, IsOptional, IsBoolean, IsArray, Min } from 'class-validator';
+import {
+  IsString,
+  IsNumber,
+  IsOptional,
+  IsBoolean,
+  IsArray,
+  Min,
+} from 'class-validator';
 
 export class UpdateFacilityDto {
   @ApiProperty({ example: 'Sala de musculación', required: false })
@@ -19,11 +26,22 @@ export class UpdateFacilityDto {
   @Min(1, { message: 'El id del trabajador responsable debe ser al menos 1' })
   responsibleWorker?: number;
 
-  @ApiProperty({ example: 1, required: false })
+  @ApiProperty({
+    example: [2, 3],
+    required: false,
+    description: 'Ids de los trabajadores asistentes',
+  })
   @IsOptional()
-  @IsNumber({}, { message: 'assistantWorker debe ser un número' })
-  @Min(1, { message: 'El id del trabajador asistente debe ser al menos 1' })
-  assistantWorker?: number | null;
+  @IsArray({ message: 'assistantWorkers debe ser un array' })
+  @IsNumber(
+    {},
+    { each: true, message: 'Cada assistantWorker debe ser un número' },
+  )
+  @Min(1, {
+    each: true,
+    message: 'Cada id de assistantWorker debe ser al menos 1',
+  })
+  assistantWorkers?: number[];
 
   @ApiProperty({ example: true, required: false })
   @IsOptional()

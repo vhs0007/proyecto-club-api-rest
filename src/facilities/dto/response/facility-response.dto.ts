@@ -1,5 +1,9 @@
 import { ApiProperty } from '@nestjs/swagger';
-import type { ActivitiesNavigation, UserNavigation, MembershipTypeNavigation } from '../../repository/facilities.repository';
+import type {
+  ActivitiesNavigation,
+  UserNavigation,
+  MembershipTypeNavigation,
+} from '../../repository/facilities.repository';
 
 const userNavExample = {
   id: 1,
@@ -27,7 +31,8 @@ export class FacilityResponseDto {
   @ApiProperty({
     example: [userNavExample],
     nullable: true,
-    description: 'Trabajadores asistentes (excluye al responsable); null si no hay ninguno',
+    description:
+      'Trabajadores asistentes (excluye al responsable); null si no hay ninguno',
   })
   assistantWorkers: UserNavigation[] | null;
   @ApiProperty({ example: true, description: 'Estado de la instalación' })
@@ -49,6 +54,9 @@ export class FacilityResponseDto {
     description: 'Actividades',
   })
   activities: ActivitiesNavigation[];
-  @ApiProperty({ example: [{ id: 1, name: 'Membresía 1', price: 99.99 }], description: 'Membresías' })
+  @ApiProperty({
+    example: [{ id: 1, name: 'Membresía 1', price: 99.99 }],
+    description: 'Membresías',
+  })
   membershipTypes: MembershipTypeNavigation[];
 }

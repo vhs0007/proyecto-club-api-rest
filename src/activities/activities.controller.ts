@@ -1,4 +1,17 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, InternalServerErrorException, NotFoundException, ParseIntPipe, Query } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  UseGuards,
+  InternalServerErrorException,
+  NotFoundException,
+  ParseIntPipe,
+  Query,
+} from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth, ApiBody } from '@nestjs/swagger';
 import { ActivitiesService } from './activities.service';
 import { CreateActivityDto } from './dto/request/create-activities.dto';
@@ -16,8 +29,10 @@ export class ActivitiesController {
   @Post()
   @ApiOperation({ summary: 'Crear actividad' })
   @ApiBody({ type: CreateActivityDto })
-  create(@Body() createActivityDto: CreateActivityDto): Promise<ActivityResponseDto> {
-    try{
+  create(
+    @Body() createActivityDto: CreateActivityDto,
+  ): Promise<ActivityResponseDto> {
+    try {
       return this.activitiesService.create(createActivityDto);
     } catch (error) {
       throw new InternalServerErrorException(error);
@@ -26,8 +41,10 @@ export class ActivitiesController {
 
   @Get()
   @ApiOperation({ summary: 'Obtener todas las actividades' })
-  findAll(@Query('clubId', ParseIntPipe) clubId: number): Promise<ActivityResponseDto[]> {
-    try{
+  findAll(
+    @Query('clubId', ParseIntPipe) clubId: number,
+  ): Promise<ActivityResponseDto[]> {
+    try {
       return this.activitiesService.findAll(clubId);
     } catch (error) {
       throw new InternalServerErrorException(error);
@@ -36,14 +53,15 @@ export class ActivitiesController {
 
   @Get(':id')
   @ApiOperation({ summary: 'Obtener actividad por ID' })
-  findOne(@Param('id') id: string, @Query('clubId', ParseIntPipe) clubId: number): Promise<ActivityResponseDto> {
-    try{
-      return this.activitiesService.findOne(
-        {
-          id:+id,
-          clubId:clubId
-        }
-      );
+  findOne(
+    @Param('id') id: string,
+    @Query('clubId', ParseIntPipe) clubId: number,
+  ): Promise<ActivityResponseDto> {
+    try {
+      return this.activitiesService.findOne({
+        id: +id,
+        clubId: clubId,
+      });
     } catch (error) {
       throw new NotFoundException(error);
     }
@@ -52,9 +70,16 @@ export class ActivitiesController {
   @Patch(':id')
   @ApiOperation({ summary: 'Actualizar actividad' })
   @ApiBody({ type: UpdateActivityDto })
-  update(@Param('id') id: string, @Query('clubId', ParseIntPipe) clubId: number, @Body() updateActivityDto: UpdateActivityDto): Promise<ActivityResponseDto> {
-    try{
-      return this.activitiesService.update({id:+id, clubId: clubId}, updateActivityDto);
+  update(
+    @Param('id') id: string,
+    @Query('clubId', ParseIntPipe) clubId: number,
+    @Body() updateActivityDto: UpdateActivityDto,
+  ): Promise<ActivityResponseDto> {
+    try {
+      return this.activitiesService.update(
+        { id: +id, clubId: clubId },
+        updateActivityDto,
+      );
     } catch (error) {
       throw new InternalServerErrorException(error);
     }
@@ -62,9 +87,12 @@ export class ActivitiesController {
 
   @Delete(':id')
   @ApiOperation({ summary: 'Eliminar actividad' })
-  remove(@Param('id') id: string, @Query('clubId', ParseIntPipe) clubId: number): Promise<ActivityResponseDto> {
-    try{
-      return this.activitiesService.remove({id: +id, clubId: clubId});
+  remove(
+    @Param('id') id: string,
+    @Query('clubId', ParseIntPipe) clubId: number,
+  ): Promise<ActivityResponseDto> {
+    try {
+      return this.activitiesService.remove({ id: +id, clubId: clubId });
     } catch (error) {
       throw new InternalServerErrorException(error);
     }

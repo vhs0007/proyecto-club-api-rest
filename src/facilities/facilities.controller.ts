@@ -1,5 +1,25 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, InternalServerErrorException, NotFoundException, ParseIntPipe, Query } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiBearerAuth, ApiOkResponse, ApiCreatedResponse, ApiBody } from '@nestjs/swagger';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  UseGuards,
+  InternalServerErrorException,
+  NotFoundException,
+  ParseIntPipe,
+  Query,
+} from '@nestjs/common';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiBearerAuth,
+  ApiOkResponse,
+  ApiCreatedResponse,
+  ApiBody,
+} from '@nestjs/swagger';
 import { FacilitiesService } from './facilities.service';
 import { CreateFacilityDto } from './dto/request/create-facility.dto';
 import { UpdateFacilityDto } from './dto/request/update-facility.dto';
@@ -17,8 +37,10 @@ export class FacilitiesController {
   @ApiOperation({ summary: 'Crear instalación' })
   @ApiBody({ type: CreateFacilityDto })
   @ApiCreatedResponse({ description: 'Instalación creada' })
-  create(@Body() createFacilityDto: CreateFacilityDto): Promise<FacilityResponseDto> {
-    try{
+  create(
+    @Body() createFacilityDto: CreateFacilityDto,
+  ): Promise<FacilityResponseDto> {
+    try {
       return this.facilitiesService.create(createFacilityDto);
     } catch (error) {
       throw new InternalServerErrorException(error);
@@ -28,8 +50,10 @@ export class FacilitiesController {
   @Get()
   @ApiOperation({ summary: 'Obtener todas las instalaciones' })
   @ApiOkResponse({ description: 'Lista de instalaciones' })
-  findAll(@Query('clubId', ParseIntPipe) clubId: number): Promise<FacilityResponseDto[]> {
-    try{
+  findAll(
+    @Query('clubId', ParseIntPipe) clubId: number,
+  ): Promise<FacilityResponseDto[]> {
+    try {
       return this.facilitiesService.findAll(clubId);
     } catch (error) {
       throw new InternalServerErrorException(error);
@@ -39,9 +63,12 @@ export class FacilitiesController {
   @Get(':id')
   @ApiOperation({ summary: 'Obtener instalación por ID' })
   @ApiOkResponse({ description: 'Instalación encontrada' })
-  findOne(id: number, @Query('clubId', ParseIntPipe) clubId): Promise<FacilityResponseDto> {
-    try{
-      return this.facilitiesService.findOne({id: +id, clubId: clubId});
+  findOne(
+    id: number,
+    @Query('clubId', ParseIntPipe) clubId,
+  ): Promise<FacilityResponseDto> {
+    try {
+      return this.facilitiesService.findOne({ id: +id, clubId: clubId });
     } catch (error) {
       throw new NotFoundException(error);
     }
@@ -51,9 +78,16 @@ export class FacilitiesController {
   @ApiOperation({ summary: 'Actualizar instalación' })
   @ApiBody({ type: UpdateFacilityDto })
   @ApiOkResponse({ description: 'Instalación actualizada' })
-  update(@Param('id') id: string, @Query('clubId', ParseIntPipe) clubId, @Body() updateFacilityDto: UpdateFacilityDto): Promise<FacilityResponseDto> {
-    try{
-      return this.facilitiesService.update({id:+id,clubId: clubId}, updateFacilityDto);
+  update(
+    @Param('id') id: string,
+    @Query('clubId', ParseIntPipe) clubId,
+    @Body() updateFacilityDto: UpdateFacilityDto,
+  ): Promise<FacilityResponseDto> {
+    try {
+      return this.facilitiesService.update(
+        { id: +id, clubId: clubId },
+        updateFacilityDto,
+      );
     } catch (error) {
       throw new InternalServerErrorException(error);
     }
@@ -62,12 +96,14 @@ export class FacilitiesController {
   @Delete(':id')
   @ApiOperation({ summary: 'Eliminar instalación' })
   @ApiOkResponse({ description: 'Instalación eliminada' })
-  remove(@Param('id') id: string, @Query('clubId', ParseIntPipe) clubId): Promise<FacilityResponseDto> {
-    try{
-      return this.facilitiesService.remove({id:+id, clubId: clubId});
+  remove(
+    @Param('id') id: string,
+    @Query('clubId', ParseIntPipe) clubId,
+  ): Promise<FacilityResponseDto> {
+    try {
+      return this.facilitiesService.remove({ id: +id, clubId: clubId });
     } catch (error) {
       throw new InternalServerErrorException(error);
     }
   }
 }
-

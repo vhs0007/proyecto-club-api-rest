@@ -1,4 +1,9 @@
-import { CallHandler, ExecutionContext, Injectable, NestInterceptor } from '@nestjs/common';
+import {
+  CallHandler,
+  ExecutionContext,
+  Injectable,
+  NestInterceptor,
+} from '@nestjs/common';
 import { Request } from 'express';
 import { Observable } from 'rxjs';
 import { tap } from 'rxjs/operators';
@@ -14,7 +19,9 @@ export type ResponseLogMeta = {
 @Injectable()
 export class HttpLoggingInterceptor implements NestInterceptor {
   intercept(context: ExecutionContext, next: CallHandler): Observable<unknown> {
-    const req = context.switchToHttp().getRequest<Request & { responseLogMeta?: ResponseLogMeta }>();
+    const req = context
+      .switchToHttp()
+      .getRequest<Request & { responseLogMeta?: ResponseLogMeta }>();
 
     return next.handle().pipe(
       tap((data: unknown) => {

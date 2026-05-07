@@ -13,19 +13,27 @@ import { MonthlyProgressionIncomeReportResponseDto } from './dto/response/monthl
 export class ReportsService {
   constructor(private readonly reportsRepository: ReportsRepository) {}
 
-  async getSalariesReport(request: SalaryReportRequestDto): Promise<SalaryReportResponseDto> {
+  async getSalariesReport(
+    request: SalaryReportRequestDto,
+  ): Promise<SalaryReportResponseDto> {
     return this.reportsRepository.getSalariesReport(request);
   }
 
-  async getNewUsersReport(request: NewUsersReportRequestDto): Promise<NewUsersReportResponseDto> {
+  async getNewUsersReport(
+    request: NewUsersReportRequestDto,
+  ): Promise<NewUsersReportResponseDto> {
     return this.reportsRepository.getNewUsersReport(request);
   }
 
-  async getMonthIncomeReport(request: MonthIncomeReportRequestDto): Promise<MonthIncomeReportResponseDto> {
+  async getMonthIncomeReport(
+    request: MonthIncomeReportRequestDto,
+  ): Promise<MonthIncomeReportResponseDto> {
     return this.reportsRepository.getMonthIncomeReport(request);
   }
 
-  async getMonthlyProgressionIncomeReport(request: MonthlyProgressionIncomeReportRequestDto): Promise<MonthlyProgressionIncomeReportResponseDto> {
+  async getMonthlyProgressionIncomeReport(
+    request: MonthlyProgressionIncomeReportRequestDto,
+  ): Promise<MonthlyProgressionIncomeReportResponseDto> {
     return this.reportsRepository.getMonthlyProgressionIncomeReport(request);
   }
 }

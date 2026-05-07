@@ -1,8 +1,19 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsString, IsNumber, IsOptional, IsBoolean, Min, IsDate, Matches } from 'class-validator';
+import {
+  IsString,
+  IsNumber,
+  IsOptional,
+  IsBoolean,
+  Min,
+  IsDate,
+  Matches,
+} from 'class-validator';
 
 export class CreateActivityDto {
-  @ApiProperty({ example: 'Partido de fútbol', description: 'Nombre de la actividad' })
+  @ApiProperty({
+    example: 'Partido de fútbol',
+    description: 'Nombre de la actividad',
+  })
   @IsString({ message: 'name debe ser un texto' })
   name: string;
 
@@ -12,17 +23,22 @@ export class CreateActivityDto {
 
   @ApiProperty({ example: '12:00', description: 'Hora de fin (HH:mm, 24h)' })
   @IsString({ message: 'hourEnd debe ser un texto' })
-  @Matches(/^([01]\d|2[0-3]):([0-5]\d)$/, { message: 'hourEnd debe tener formato HH:mm' })
+  @Matches(/^([01]\d|2[0-3]):([0-5]\d)$/, {
+    message: 'hourEnd debe tener formato HH:mm',
+  })
   hourEnd: string;
 
   @ApiProperty({ example: '10:00', description: 'Hora de inicio (HH:mm, 24h)' })
   @IsString({ message: 'hourStart debe ser un texto' })
-  @Matches(/^([01]\d|2[0-3]):([0-5]\d)$/, { message: 'hourStart debe tener formato HH:mm' })
+  @Matches(/^([01]\d|2[0-3]):([0-5]\d)$/, {
+    message: 'hourStart debe tener formato HH:mm',
+  })
   hourStart: string;
 
   @ApiProperty({
     example: 1,
-    description: 'Id del usuario que reserva la actividad (socio/miembro), no del instructor',
+    description:
+      'Id del usuario que reserva la actividad (socio/miembro), no del instructor',
   })
   @IsNumber({}, { message: 'userId debe ser un número' })
   @Min(1, { message: 'userId debe ser al menos 1' })
@@ -51,10 +67,11 @@ export class CreateActivityDto {
   @ApiProperty({ example: '2026-03-03', description: 'Fecha de la actividad' })
   @IsDate({ message: 'date debe ser una fecha válida' })
   date: Date;
-  
+
   @ApiProperty({
     example: 1,
-    description: 'Tipo del usuario que reserva (clave compuesta con userId y clubId)',
+    description:
+      'Tipo del usuario que reserva (clave compuesta con userId y clubId)',
   })
   @IsNumber({}, { message: 'userTypeId debe ser un número' })
   @Min(1, { message: 'userTypeId debe ser al menos 1' })

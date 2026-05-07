@@ -18,4 +18,3 @@ describe('ActivitiesController', () => {
     expect(controller).toBeDefined();
   });
 });
-

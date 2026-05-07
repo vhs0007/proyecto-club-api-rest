@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import type { IUserTypeRepository } from './user_type.repository';
-import {UserTypeResponseDto} from '../dto/response/user-type-response.dto';
+import { UserTypeResponseDto } from '../dto/response/user-type-response.dto';
 
 @Injectable()
 export class UserTypeRepository implements IUserTypeRepository {
@@ -24,10 +24,12 @@ export class UserTypeRepository implements IUserTypeRepository {
     };
   }
 
-   async create(data: { name: string }): Promise<UserTypeResponseDto> {
-     const row = await this.prisma.user_type.create({ data: { name: data.name } });
-     return { id: row.id, name: row.name };
-   }
+  async create(data: { name: string }): Promise<UserTypeResponseDto> {
+    const row = await this.prisma.user_type.create({
+      data: { name: data.name },
+    });
+    return { id: row.id, name: row.name };
+  }
 
   // async update(id: number, data: UpdateUserTypeData): Promise<UserTypeResponse> {
   //   const updateData: { name?: string } = {};

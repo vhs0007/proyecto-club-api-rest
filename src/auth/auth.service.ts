@@ -12,8 +12,13 @@ export class AuthService {
     private readonly prisma: PrismaService,
   ) {}
 
-  async authenticateUser(loginRequest: LoginRequestDto): Promise<LoginResponse> {
-    if (loginRequest.email === 'admin@admin.com' && loginRequest.password === 'admin') {
+  async authenticateUser(
+    loginRequest: LoginRequestDto,
+  ): Promise<LoginResponse> {
+    if (
+      loginRequest.email === 'admin@admin.com' &&
+      loginRequest.password === 'admin'
+    ) {
       const payload = { sub: 0, email: 'admin@admin.com', role: 'admin' };
       const accessToken = this.jwtService.sign(payload);
       return {
@@ -33,7 +38,10 @@ export class AuthService {
     if (!user) {
       throw new HttpException('Invalid credentials', HttpStatus.UNAUTHORIZED);
     }
-    if (user.password == null || !(await bcrypt.compare(loginRequest.password, user.password))) {
+    if (
+      user.password == null ||
+      !(await bcrypt.compare(loginRequest.password, user.password))
+    ) {
       throw new HttpException('Invalid credentials', HttpStatus.UNAUTHORIZED);
     }
     if (!user.isActive) {

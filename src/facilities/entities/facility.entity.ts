@@ -16,10 +16,12 @@ export class Facility {
     if (data?.id != null) this._id = data.id;
     if (data?.type != null) this._type = data.type;
     if (data?.capacity != null) this._capacity = data.capacity;
-    if (data?.responsibleWorker != null) this._responsibleWorker = data.responsibleWorker;
-    if (data?.assistantWorker !== undefined) this._assistantWorker = data.assistantWorker;
+    if (data?.responsibleWorker != null)
+      this._responsibleWorker = data.responsibleWorker;
+    if (data?.assistantWorker !== undefined)
+      this._assistantWorker = data.assistantWorker;
     if (data?.isActive !== undefined) this._isActive = data.isActive;
-    this._membershipTypes = (data)?.membershipTypes ?? [];
+    this._membershipTypes = data?.membershipTypes ?? [];
   }
 
   get id(): number {
@@ -78,5 +80,3 @@ export class Facility {
     this._membershipTypes = value;
   }
 }
-
-

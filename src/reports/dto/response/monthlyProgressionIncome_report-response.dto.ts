@@ -1,11 +1,10 @@
-import { MonthIncomeReportResponseDto } from "./monthIncome_report-respones.dto";
+import { MonthIncomeReportResponseDto } from './monthIncome_report-respones.dto';
 
 export interface MonthlyProgressionIncomeReportResponseDto {
-    dateStart: Date;
-    dateEnd: Date;
-    totalIncome: number;
-    totalIncomeMemberships: number;
-    totalIncomeActivities: number;
-    monthlyIncomes: MonthIncomeReportResponseDto[];
-  }
-  
+  dateStart: Date;
+  dateEnd: Date;
+  totalIncome: number;
+  totalIncomeMemberships: number;
+  totalIncomeActivities: number;
+  monthlyIncomes: MonthIncomeReportResponseDto[];
+}

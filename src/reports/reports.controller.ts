@@ -1,4 +1,10 @@
-import { Controller, Get, Body, InternalServerErrorException, Query} from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Body,
+  InternalServerErrorException,
+  Query,
+} from '@nestjs/common';
 import { ReportsService } from './reports.service';
 import { SalaryReportRequestDto } from './dto/request/salary_report-request.dto';
 import { SalaryReportResponseDto } from './dto/response/salary_report-response.dto';
@@ -16,18 +22,22 @@ export class ReportsController {
 
   @Get('salaries')
   @ApiOperation({ summary: 'Obtener reporte de salarios' })
-  async getSalariesReport(@Query() request: SalaryReportRequestDto): Promise<SalaryReportResponseDto> {
-    try{
+  async getSalariesReport(
+    @Query() request: SalaryReportRequestDto,
+  ): Promise<SalaryReportResponseDto> {
+    try {
       return this.reportsService.getSalariesReport(request);
     } catch (error) {
       throw new InternalServerErrorException(error);
     }
   }
-  
+
   @Get('monthIncome')
   @ApiOperation({ summary: 'Obtener reporte de ingresos mensuales' })
-  async getMonthIncomeReport(@Query() request: MonthIncomeReportRequestDto): Promise<MonthIncomeReportResponseDto> {
-    try{
+  async getMonthIncomeReport(
+    @Query() request: MonthIncomeReportRequestDto,
+  ): Promise<MonthIncomeReportResponseDto> {
+    try {
       return this.reportsService.getMonthIncomeReport(request);
     } catch (error) {
       throw new InternalServerErrorException(error);
@@ -36,8 +46,10 @@ export class ReportsController {
 
   @Get('newUsers')
   @ApiOperation({ summary: 'Obtener reporte de nuevos usuarios' })
-  async getNewUsersReport(@Query() request: NewUsersReportRequestDto): Promise<NewUsersReportResponseDto> {
-    try{
+  async getNewUsersReport(
+    @Query() request: NewUsersReportRequestDto,
+  ): Promise<NewUsersReportResponseDto> {
+    try {
       return this.reportsService.getNewUsersReport(request);
     } catch (error) {
       throw new InternalServerErrorException(error);
@@ -46,8 +58,10 @@ export class ReportsController {
 
   @Get('monthlyProgressionIncome')
   @ApiOperation({ summary: 'Obtener reporte de ingresos mensuales' })
-  async getMonthlyProgressionIncomeReport(@Query() request: MonthlyProgressionIncomeReportRequestDto): Promise<MonthlyProgressionIncomeReportResponseDto> {
-    try{
+  async getMonthlyProgressionIncomeReport(
+    @Query() request: MonthlyProgressionIncomeReportRequestDto,
+  ): Promise<MonthlyProgressionIncomeReportResponseDto> {
+    try {
       return this.reportsService.getMonthlyProgressionIncomeReport(request);
     } catch (error) {
       throw new InternalServerErrorException(error);

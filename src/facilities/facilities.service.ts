@@ -1,4 +1,8 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { CreateFacilityDto } from './dto/request/create-facility.dto';
 import { UpdateFacilityDto } from './dto/request/update-facility.dto';
 import { FacilitiesRepository } from './repository/facilities.repository.impl';
@@ -13,7 +17,11 @@ export class FacilitiesService {
     private readonly prisma: PrismaService,
   ) {}
 
-  private async ensureWorker(userId: number, clubId: number, field: string): Promise<void> {
+  private async ensureWorker(
+    userId: number,
+    clubId: number,
+    field: string,
+  ): Promise<void> {
     const user = await this.prisma.users.findUnique({
       where: {
         id_clubId_typeId: {
@@ -44,13 +52,38 @@ export class FacilitiesService {
     }
   }
 
-  async create(createFacilityDto: CreateFacilityDto): Promise<FacilityResponseDto> {
-    await this.ensureWorker(createFacilityDto.responsibleWorker, createFacilityDto.clubId, 'Responsible worker');
-    if (createFacilityDto.assistantWorker != null) {
-      await this.ensureWorker(createFacilityDto.assistantWorker, createFacilityDto.clubId, 'Assistant worker');
+  private normalizeAssistantWorkers(
+    assistantWorkers?: number[],
+  ): number[] | undefined {
+    if (assistantWorkers === undefined) return undefined;
+    return [...new Set(assistantWorkers)];
+  }
+
+  async create(
+    createFacilityDto: CreateFacilityDto,
+  ): Promise<FacilityResponseDto> {
+    const assistantWorkers = this.normalizeAssistantWorkers(
+      createFacilityDto.assistantWorkers,
+    );
+    await this.ensureWorker(
+      createFacilityDto.responsibleWorker,
+      createFacilityDto.clubId,
+      'Responsible worker',
+    );
+    if (assistantWorkers) {
+      for (const assistantWorker of assistantWorkers) {
+        await this.ensureWorker(
+          assistantWorker,
+          createFacilityDto.clubId,
+          'Assistant worker',
+        );
+      }
     }
     await this.ensureMembershipTypes(createFacilityDto.membershipTypeIds);
-    const res = await this.facilitiesRepository.create(createFacilityDto);
+    const res = await this.facilitiesRepository.create({
+      ...createFacilityDto,
+      assistantWorkers,
+    });
     return res;
   }
 
@@ -69,20 +102,32 @@ export class FacilitiesService {
     const row = await this.facilitiesRepository.findById(query);
     if (!row) throw new NotFoundException('Facility not found');
     const facility = await this.prisma.facilities.findUnique({
-      where: { id_clubId: {id: query.id, clubId: query.clubId} },
+      where: { id_clubId: { id: query.id, clubId: query.clubId } },
       select: { clubId: true },
     });
     if (!facility) throw new NotFoundException('Facility not found');
     if (updateFacilityDto.responsibleWorker !== undefined) {
       await this.ensureWorker(updateFacilityDto.responsibleWorker, facility.clubId, 'Responsible worker');
     }
-    if (updateFacilityDto.assistantWorker !== undefined && updateFacilityDto.assistantWorker != null) {
-      await this.ensureWorker(updateFacilityDto.assistantWorker, facility.clubId, 'Assistant worker');
+    const assistantWorkers = this.normalizeAssistantWorkers(
+      updateFacilityDto.assistantWorkers,
+    );
+    if (assistantWorkers !== undefined) {
+      for (const assistantWorker of assistantWorkers) {
+        await this.ensureWorker(
+          assistantWorker,
+          facility.clubId,
+          'Assistant worker',
+        );
+      }
     }
     if (updateFacilityDto.membershipTypeIds !== undefined) {
       await this.ensureMembershipTypes(updateFacilityDto.membershipTypeIds);
     }
-    const updated = await this.facilitiesRepository.update(query, updateFacilityDto);
+    const updated = await this.facilitiesRepository.update(query, {
+      ...updateFacilityDto,
+      assistantWorkers,
+    });
     return updated;
   }
 

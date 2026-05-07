@@ -14,7 +14,9 @@ export function sanitizeLogBody(body: unknown): string | undefined {
   }
   if (typeof body === 'object' && !Array.isArray(body)) {
     const out: Record<string, unknown> = {};
-    for (const [key, value] of Object.entries(body as Record<string, unknown>)) {
+    for (const [key, value] of Object.entries(
+      body as Record<string, unknown>,
+    )) {
       if (REDACT_KEYS.has(key.toLowerCase())) {
         out[key] = '[REDACTED]';
       } else {

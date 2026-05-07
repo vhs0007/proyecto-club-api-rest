@@ -1,5 +1,8 @@
 import { ApiProperty } from '@nestjs/swagger';
-import type { UserNavigation, FacilityNavigation } from '../../repository/activitities.repository';
+import type {
+  UserNavigation,
+  FacilityNavigation,
+} from '../../repository/activitities.repository';
 
 const userNavExample: UserNavigation = {
   id: 1,
