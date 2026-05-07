@@ -9,7 +9,8 @@ export class Worker extends User {
   constructor(data: Partial<Worker>) {
     super(data);
     if (data?.salary != null) this._salary = data.salary;
-    if (data?.hoursToWorkPerDay !== undefined) this._hoursToWorkPerDay = data.hoursToWorkPerDay;
+    if (data?.hoursToWorkPerDay !== undefined)
+      this._hoursToWorkPerDay = data.hoursToWorkPerDay;
     if (data?.startWorkAt != null) this._startWorkAt = data.startWorkAt;
     if (data?.endWorkAt != null) this._endWorkAt = data.endWorkAt;
   }

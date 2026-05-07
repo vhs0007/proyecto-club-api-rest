@@ -7,7 +7,8 @@ export class Membership {
   constructor(data: Partial<Membership>) {
     if (data?.id != null) this._id = data.id;
     if (data?.type != null) this._type = data.type;
-    if (data?.expirationDate != null) this._expirationDate = data.expirationDate;
+    if (data?.expirationDate != null)
+      this._expirationDate = data.expirationDate;
     if (data?.clubId != null) this._clubId = data.clubId;
     if (data?.createdAt != null) this._createdAt = data.createdAt;
   }

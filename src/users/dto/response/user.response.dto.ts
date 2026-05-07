@@ -28,7 +28,10 @@ export class UserResponseDto {
   @Min(1, { message: 'typeId debe ser mayor 1' })
   typeId: number;
 
-  @ApiProperty({ type: () => UserTypeResponseDto, description: 'Tipo de usuario (navegación)' })
+  @ApiProperty({
+    type: () => UserTypeResponseDto,
+    description: 'Tipo de usuario (navegación)',
+  })
   @IsOptional()
   type?: UserTypeResponseDto;
 
@@ -45,7 +48,7 @@ export class UserResponseDto {
   @ApiProperty({ required: true })
   @IsString({ message: 'document debe ser un texto' })
   document: string;
-  
+
   @ApiProperty({ required: false })
   @IsOptional()
   @IsString({ message: 'email debe ser un texto' })
@@ -58,12 +61,18 @@ export class UserResponseDto {
 
   @ApiProperty({ required: false })
   @IsOptional()
-  @IsDateString({}, { message: 'createdAt debe ser una fecha válida en formato ISO' })
+  @IsDateString(
+    {},
+    { message: 'createdAt debe ser una fecha válida en formato ISO' },
+  )
   createdAt?: Date;
 
   @ApiProperty({ required: false })
   @IsOptional()
-  @IsDateString({}, { message: 'deletedAt debe ser una fecha válida en formato ISO' })
+  @IsDateString(
+    {},
+    { message: 'deletedAt debe ser una fecha válida en formato ISO' },
+  )
   deletedAt?: Date | null;
 
   @ApiProperty({ example: true })

@@ -20,11 +20,14 @@ export class Athlete extends Member {
     if (data?.gender != null) this._gender = data.gender;
     if (data?.birthDate != null) this._birthDate = data.birthDate;
     if (data?.diet !== undefined) this._diet = data.diet;
-    if (data?.trainingPlan !== undefined) this._trainingPlan = data.trainingPlan;
-    if (data?.medicalHistory !== undefined) this._medicalHistory = data.medicalHistory;
+    if (data?.trainingPlan !== undefined)
+      this._trainingPlan = data.trainingPlan;
+    if (data?.medicalHistory !== undefined)
+      this._medicalHistory = data.medicalHistory;
     if (data?.allergies !== undefined) this._allergies = data.allergies;
     if (data?.medications !== undefined) this._medications = data.medications;
-    if (data?.medicalConditions !== undefined) this._medicalConditions = data.medicalConditions;
+    if (data?.medicalConditions !== undefined)
+      this._medicalConditions = data.medicalConditions;
   }
 
   override get type(): UserType {

@@ -1,5 +1,12 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsString, IsNumber, IsOptional, IsBoolean, Min, Matches } from 'class-validator';
+import {
+  IsString,
+  IsNumber,
+  IsOptional,
+  IsBoolean,
+  Min,
+  Matches,
+} from 'class-validator';
 
 export class UpdateActivityDto {
   @ApiProperty({ example: 'Partido de fútbol', required: false })
@@ -15,13 +22,17 @@ export class UpdateActivityDto {
   @ApiProperty({ example: '10:00', required: false })
   @IsOptional()
   @IsString({ message: 'hourStart debe ser un texto' })
-  @Matches(/^([01]\d|2[0-3]):([0-5]\d)$/, { message: 'hourStart debe tener formato HH:mm' })
+  @Matches(/^([01]\d|2[0-3]):([0-5]\d)$/, {
+    message: 'hourStart debe tener formato HH:mm',
+  })
   hourStart?: string;
 
   @ApiProperty({ example: '12:00', required: false })
   @IsOptional()
   @IsString({ message: 'hourEnd debe ser un texto' })
-  @Matches(/^([01]\d|2[0-3]):([0-5]\d)$/, { message: 'hourEnd debe tener formato HH:mm' })
+  @Matches(/^([01]\d|2[0-3]):([0-5]\d)$/, {
+    message: 'hourEnd debe tener formato HH:mm',
+  })
   hourEnd?: string;
 
   @ApiProperty({

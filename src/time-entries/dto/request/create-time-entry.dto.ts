@@ -1,5 +1,11 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsDateString, IsNumber, IsOptional, IsString, Min } from 'class-validator';
+import {
+  IsDateString,
+  IsNumber,
+  IsOptional,
+  IsString,
+  Min,
+} from 'class-validator';
 
 export class CreateTimeEntryDto {
   @ApiProperty({ example: 1, description: 'Id del usuario' })
@@ -16,8 +22,14 @@ export class CreateTimeEntryDto {
   @IsString({ message: 'userDocument debe ser un texto' })
   userDocument: string;
 
-  @ApiProperty({ example: '2026-03-03T08:00:00.000Z', description: 'Fecha y hora de ingreso' })
-  @IsDateString({}, { message: 'clockIn debe ser una fecha válida en formato ISO' })
+  @ApiProperty({
+    example: '2026-03-03T08:00:00.000Z',
+    description: 'Fecha y hora de ingreso',
+  })
+  @IsDateString(
+    {},
+    { message: 'clockIn debe ser una fecha válida en formato ISO' },
+  )
   clockIn: string;
 
   @ApiProperty({
@@ -26,6 +38,9 @@ export class CreateTimeEntryDto {
     required: false,
   })
   @IsOptional()
-  @IsDateString({}, { message: 'clockOut debe ser una fecha válida en formato ISO' })
+  @IsDateString(
+    {},
+    { message: 'clockOut debe ser una fecha válida en formato ISO' },
+  )
   clockOut?: string | null;
 }

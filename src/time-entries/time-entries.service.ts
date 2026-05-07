@@ -8,7 +8,9 @@ import { TimeEntryRepository } from './repository/time-entry.repository.impl';
 export class TimeEntriesService {
   constructor(private readonly timeEntriesRepository: TimeEntryRepository) {}
 
-  async create(createTimeEntryDto: CreateTimeEntryDto): Promise<TimeEntryResponseDto> {
+  async create(
+    createTimeEntryDto: CreateTimeEntryDto,
+  ): Promise<TimeEntryResponseDto> {
     return this.timeEntriesRepository.create(createTimeEntryDto);
   }
 
@@ -23,10 +25,12 @@ export class TimeEntriesService {
     return row;
   }
 
-  async update(id: number, updateTimeEntryDto: UpdateTimeEntryDto): Promise<TimeEntryResponseDto> {
+  async update(
+    id: number,
+    updateTimeEntryDto: UpdateTimeEntryDto,
+  ): Promise<TimeEntryResponseDto> {
     const row = await this.timeEntriesRepository.update(id, updateTimeEntryDto);
     if (!row) throw new NotFoundException('Time entry not found');
     return row;
   }
-
 }

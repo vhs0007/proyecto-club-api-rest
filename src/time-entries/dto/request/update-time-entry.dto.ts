@@ -8,7 +8,10 @@ export class UpdateTimeEntryDto {
     required: false,
   })
   @IsOptional()
-  @IsDateString({}, { message: 'clockIn debe ser una fecha válida en formato ISO' })
+  @IsDateString(
+    {},
+    { message: 'clockIn debe ser una fecha válida en formato ISO' },
+  )
   clockIn?: string;
 
   @ApiProperty({
@@ -17,6 +20,9 @@ export class UpdateTimeEntryDto {
     required: false,
   })
   @IsOptional()
-  @IsDateString({}, { message: 'clockOut debe ser una fecha válida en formato ISO' })
+  @IsDateString(
+    {},
+    { message: 'clockOut debe ser una fecha válida en formato ISO' },
+  )
   clockOut?: string | null;
 }

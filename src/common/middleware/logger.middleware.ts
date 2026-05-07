@@ -12,14 +12,19 @@ export class LoggerMiddleware implements NestMiddleware {
     const started = Date.now();
     const headerId = req.headers['x-request-id'];
     const requestId =
-      typeof headerId === 'string' && headerId.length > 0 ? headerId : randomUUID();
-    (req as Request & { requestId?: string; responseLogMeta?: ResponseLogMeta }).requestId =
-      requestId;
+      typeof headerId === 'string' && headerId.length > 0
+        ? headerId
+        : randomUUID();
+    (
+      req as Request & { requestId?: string; responseLogMeta?: ResponseLogMeta }
+    ).requestId = requestId;
 
     const bodyPreview = sanitizeLogBody(req.body);
     const bodyPart = bodyPreview ? ` body=${bodyPreview}` : '';
 
-    this.logger.log(`[REQUEST] ${requestId} ${req.method} ${req.originalUrl}${bodyPart}`);
+    this.logger.log(
+      `[REQUEST] ${requestId} ${req.method} ${req.originalUrl}${bodyPart}`,
+    );
 
     res.on('finish', () => {
       const durationMs = Date.now() - started;

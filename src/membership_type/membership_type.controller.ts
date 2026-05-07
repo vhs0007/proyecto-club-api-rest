@@ -13,11 +13,11 @@ import {
   Delete,
 } from '@nestjs/common';
 import { MembershipTypeService } from './membership_type.service';
-import { ApiTags, ApiOperation, ApiBearerAuth , ApiBody} from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiBearerAuth, ApiBody } from '@nestjs/swagger';
 import { MembershipTypeResponseDto } from './dto/response/membership_type-response.dto';
 import { AuthGuard } from '../auth/guards/jwt-auth.guard';
-import { CreateMembershipTypeDto } from './dto/request/create-membership_type.dto'
-import { UpdateMembershipTypeDto } from './dto/request/update-membership_type.dto'
+import { CreateMembershipTypeDto } from './dto/request/create-membership_type.dto';
+import { UpdateMembershipTypeDto } from './dto/request/update-membership_type.dto';
 @ApiTags('Membership Type')
 @ApiBearerAuth()
 @Controller('membership-type')
@@ -27,25 +27,32 @@ export class MembershipTypeController {
 
   @ApiOperation({ summary: 'Obtener todos los tipos de membresía' })
   @Get()
-  findAll(@Query('clubId', ParseIntPipe) clubId: number): Promise<MembershipTypeResponseDto[]> {
-    try{
+  findAll(
+    @Query('clubId', ParseIntPipe) clubId: number,
+  ): Promise<MembershipTypeResponseDto[]> {
+    try {
       return this.membershipTypeService.findAll(clubId);
     } catch (error) {
       throw new InternalServerErrorException(error);
     }
   }
 
-   @Post()
-   @ApiOperation({ summary: 'Crear tipo de membresía' })
-   @ApiBody({ type: CreateMembershipTypeDto })
-   create(@Body() dto: CreateMembershipTypeDto): Promise<MembershipTypeResponseDto> {
-     return this.membershipTypeService.create(dto);
-   }
+  @Post()
+  @ApiOperation({ summary: 'Crear tipo de membresía' })
+  @ApiBody({ type: CreateMembershipTypeDto })
+  create(
+    @Body() dto: CreateMembershipTypeDto,
+  ): Promise<MembershipTypeResponseDto> {
+    return this.membershipTypeService.create(dto);
+  }
 
   @ApiOperation({ summary: 'Obtener tipo de membresía por ID' })
   @Get(':id')
-  findOne(@Param('id') id: string, @Query('clubId', ParseIntPipe) clubId: number): Promise<MembershipTypeResponseDto> {
-    try{
+  findOne(
+    @Param('id') id: string,
+    @Query('clubId', ParseIntPipe) clubId: number,
+  ): Promise<MembershipTypeResponseDto> {
+    try {
       return this.membershipTypeService.findOne({ clubId, id: +id });
     } catch (error) {
       throw new NotFoundException(error);
@@ -60,12 +67,18 @@ export class MembershipTypeController {
     @Query('clubId', ParseIntPipe) clubId: number,
     @Body() updateMembershipTypeDto: UpdateMembershipTypeDto,
   ): Promise<MembershipTypeResponseDto> {
-    return this.membershipTypeService.update({ clubId, id: +id }, updateMembershipTypeDto);
+    return this.membershipTypeService.update(
+      { clubId, id: +id },
+      updateMembershipTypeDto,
+    );
   }
 
   @ApiOperation({ summary: 'Eliminar tipo de membresía' })
   @Delete(':id')
-  remove(@Param('id') id: string, @Query('clubId', ParseIntPipe) clubId: number): Promise<void> {
+  remove(
+    @Param('id') id: string,
+    @Query('clubId', ParseIntPipe) clubId: number,
+  ): Promise<void> {
     return this.membershipTypeService.remove({ clubId, id: +id });
   }
 }

@@ -16,4 +16,3 @@ describe('ActivitiesService', () => {
     expect(service).toBeDefined();
   });
 });
-

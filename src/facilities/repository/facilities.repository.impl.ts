@@ -1,7 +1,11 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { numerator, Prisma } from '@prisma/client';
 import { PrismaService } from '../../prisma/prisma.service';
-import type { IFacilitiesRepository, MembershipTypeNavigation, UserNavigation } from './facilities.repository';
+import type {
+  IFacilitiesRepository,
+  MembershipTypeNavigation,
+  UserNavigation,
+} from './facilities.repository';
 import { CreateFacilityDto } from '../dto/request/create-facility.dto';
 import { UpdateFacilityDto } from '../dto/request/update-facility.dto';
 import type { ActivitiesNavigation } from './facilities.repository';
@@ -135,7 +139,9 @@ export class FacilitiesRepository implements IFacilitiesRepository {
     };
   }
 
-  private membershipTypePrismaToInterface(membershipType: MembershipTypeFromPrisma): MembershipTypeNavigation {
+  private membershipTypePrismaToInterface(
+    membershipType: MembershipTypeFromPrisma,
+  ): MembershipTypeNavigation {
     return {
       id: membershipType.id,
       name: membershipType.name,
@@ -144,10 +150,12 @@ export class FacilitiesRepository implements IFacilitiesRepository {
   }
 
   private mapRow(row: FacilityQueryRow): FacilityResponseDto {
-    const workers: FacilityWorkerNavigation[] = row.facility_workers.map((fw) => ({
-      id: fw.id,
-      user: this.userToNav(fw.user),
-    }));
+    const workers: FacilityWorkerNavigation[] = row.facility_workers.map(
+      (fw) => ({
+        id: fw.id,
+        user: this.userToNav(fw.user),
+      }),
+    );
 
     const assistantsList = workers
       .filter((w) => w.user.id !== row.ResponsibleWorkerUserId)
@@ -165,8 +173,18 @@ export class FacilitiesRepository implements IFacilitiesRepository {
     };
   }
 
-  async create(createFacilityDto: CreateFacilityDto): Promise<FacilityResponseDto> {
-    const { responsibleWorker, assistantWorker, membershipTypeIds, id: _id, clubId, type, capacity } = createFacilityDto;
+  async create(
+    createFacilityDto: CreateFacilityDto,
+  ): Promise<FacilityResponseDto> {
+    const {
+      responsibleWorker,
+      assistantWorkers = [],
+      membershipTypeIds,
+      id: _id,
+      clubId,
+      type,
+      capacity,
+    } = createFacilityDto;
 
     const responsibleUser = await this.prisma.users.findFirst({
       where: { id: responsibleWorker, clubId },
@@ -191,20 +209,34 @@ export class FacilitiesRepository implements IFacilitiesRepository {
       include: FACILITY_INCLUDE,
     });
 
-    if (assistantWorker != null) {
-      const assistantUser = await this.prisma.users.findFirst({
-        where: { id: assistantWorker, clubId },
-      });
-      if (!assistantUser) {
-        throw new NotFoundException(`Assistant worker ${assistantWorker} not found`);
-      }
-      await this.prisma.facility_workers.create({
-        data: {
-          facilityId: created.id,
+    if (assistantWorkers.length > 0) {
+      const assistantUsers = await this.prisma.users.findMany({
+        where: {
           clubId,
-          userId: assistantUser.id,
-          userTypeId: assistantUser.typeId,
+          id: { in: assistantWorkers },
         },
+      });
+      const assistantUsersById = new Map(
+        assistantUsers.map((assistant) => [assistant.id, assistant]),
+      );
+      const missingAssistantWorkers = assistantWorkers.filter(
+        (assistantWorkerId) => !assistantUsersById.has(assistantWorkerId),
+      );
+      if (missingAssistantWorkers.length > 0) {
+        throw new NotFoundException(
+          `Assistant worker(s) not found: ${missingAssistantWorkers.join(', ')}`,
+        );
+      }
+      await this.prisma.facility_workers.createMany({
+        data: assistantWorkers.map((assistantWorkerId) => {
+          const assistantUser = assistantUsersById.get(assistantWorkerId)!;
+          return {
+            facilityId: created.id,
+            clubId,
+            userId: assistantUser.id,
+            userTypeId: assistantUser.typeId,
+          };
+        }),
       });
     }
 
@@ -260,10 +292,15 @@ export class FacilitiesRepository implements IFacilitiesRepository {
   async update(query: QueryFacilitiesRequestDto, updateFacilityDto: UpdateFacilityDto): Promise<FacilityResponseDto> {
     if (updateFacilityDto.responsibleWorker !== undefined) {
       const user = await this.prisma.users.findFirst({
-        where: { id: updateFacilityDto.responsibleWorker, clubId: query.clubId },
+        where: {
+          id: updateFacilityDto.responsibleWorker,
+          clubId: query.clubId,
+        },
       });
       if (!user) {
-        throw new NotFoundException(`Responsible worker ${updateFacilityDto.responsibleWorker} not found`);
+        throw new NotFoundException(
+          `Responsible worker ${updateFacilityDto.responsibleWorker} not found`,
+        );
       }
       await this.prisma.facilities.update({
         where: { id_clubId: { id: query.id, clubId: query.clubId } },
@@ -274,32 +311,50 @@ export class FacilitiesRepository implements IFacilitiesRepository {
       });
     }
 
-    if (updateFacilityDto.assistantWorker !== undefined) {
+    if (updateFacilityDto.assistantWorkers !== undefined) {
       await this.prisma.facility_workers.deleteMany({
         where: { facilityId: query.id, clubId: query.clubId },
       });
-      if (updateFacilityDto.assistantWorker != null) {
-        const assistant = await this.prisma.users.findFirst({
-          where: { id: updateFacilityDto.assistantWorker, clubId: query.clubId },
-        });
-        if (!assistant) {
-          throw new NotFoundException(`Assistant worker ${updateFacilityDto.assistantWorker} not found`);
-        }
-        await this.prisma.facility_workers.create({
-          data: {
-            facilityId: query.id,
+      if (updateFacilityDto.assistantWorkers.length > 0) {
+        const assistantUsers = await this.prisma.users.findMany({
+          where: {
             clubId: query.clubId,
-            userId: assistant.id,
-            userTypeId: assistant.typeId,
+            id: { in: updateFacilityDto.assistantWorkers },
           },
+        });
+        const assistantUsersById = new Map(
+          assistantUsers.map((assistant) => [assistant.id, assistant]),
+        );
+        const missingAssistantWorkers =
+          updateFacilityDto.assistantWorkers.filter(
+            (assistantWorkerId) => !assistantUsersById.has(assistantWorkerId),
+          );
+        if (missingAssistantWorkers.length > 0) {
+          throw new NotFoundException(
+            `Assistant worker(s) not found: ${missingAssistantWorkers.join(', ')}`,
+          );
+        }
+        await this.prisma.facility_workers.createMany({
+          data: updateFacilityDto.assistantWorkers.map((assistantWorkerId) => {
+            const assistantUser = assistantUsersById.get(assistantWorkerId)!;
+            return {
+              facilityId: query.id,
+              clubId: query.clubId,
+              userId: assistantUser.id,
+              userTypeId: assistantUser.typeId,
+            };
+          }),
         });
       }
     }
 
     const scalarData: Prisma.facilitiesUncheckedUpdateInput = {};
-    if (updateFacilityDto.type !== undefined) scalarData.type = updateFacilityDto.type;
-    if (updateFacilityDto.capacity !== undefined) scalarData.capacity = updateFacilityDto.capacity;
-    if (updateFacilityDto.isActive !== undefined) scalarData.isActive = updateFacilityDto.isActive;
+    if (updateFacilityDto.type !== undefined)
+      scalarData.type = updateFacilityDto.type;
+    if (updateFacilityDto.capacity !== undefined)
+      scalarData.capacity = updateFacilityDto.capacity;
+    if (updateFacilityDto.isActive !== undefined)
+      scalarData.isActive = updateFacilityDto.isActive;
 
     if (updateFacilityDto.membershipTypeIds !== undefined) {
       await this.prisma.facilities_membership.deleteMany({
@@ -329,15 +384,9 @@ export class FacilitiesRepository implements IFacilitiesRepository {
   }
 
   async delete(query: QueryFacilitiesRequestDto): Promise<void> {
-    await this.prisma.activity.deleteMany({
-      where: { facilityId: query.id, clubId: query.clubId },
-    });
-    await this.prisma.facility_workers.deleteMany({
-      where: { facilityId: query.id, clubId: query.clubId },
-    });
-    await this.prisma.facilities_membership.deleteMany({
-      where: { facilityId: query.id, clubId: query.clubId },
-    });
+    await this.prisma.activity.deleteMany({ where: { facilityId: query.id, clubId: query.clubId } });
+    await this.prisma.facility_workers.deleteMany({ where: { facilityId: query.id, clubId: query.clubId } });
+    await this.prisma.facilities_membership.deleteMany({ where: { facilityId: query.id, clubId: query.clubId } });
     await this.prisma.facilities.delete({ where: { id_clubId: { id: query.id, clubId: query.clubId } } });
   }
 }

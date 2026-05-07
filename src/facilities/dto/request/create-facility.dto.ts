@@ -28,11 +28,22 @@ export class CreateFacilityDto {
   @Min(1, { message: 'El id del trabajador responsable es requerido' })
   responsibleWorker: number;
 
-  @ApiProperty({ example: '1', description: 'Id del trabajador asistente' })
+  @ApiProperty({
+    example: [2, 3],
+    description: 'Ids de los trabajadores asistentes',
+    required: false,
+  })
   @IsOptional()
-  @IsNumber()
-  @Min(1, { message: 'El id del trabajador asistente es requerido' })
-  assistantWorker?: number | null;
+  @IsArray({ message: 'assistantWorkers debe ser un array' })
+  @IsNumber(
+    {},
+    { each: true, message: 'Cada assistantWorker debe ser un número' },
+  )
+  @Min(1, {
+    each: true,
+    message: 'Cada id de assistantWorker debe ser al menos 1',
+  })
+  assistantWorkers?: number[];
 
   @ApiProperty({ example: true, description: 'Estado de la instalacion' })
   @IsOptional()

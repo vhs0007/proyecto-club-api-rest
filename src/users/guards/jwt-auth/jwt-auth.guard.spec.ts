@@ -10,7 +10,9 @@ describe('AuthGuard', () => {
 
   let guard: AuthGuard;
 
-  const createMockContext = (headers: Record<string, string> = {}): ExecutionContext => {
+  const createMockContext = (
+    headers: Record<string, string> = {},
+  ): ExecutionContext => {
     return {
       switchToHttp: () => ({
         getRequest: () => ({ headers }),
@@ -44,22 +46,31 @@ describe('AuthGuard', () => {
   });
 
   it('should throw UnauthorizedException when token is invalid or expired', () => {
-    const context = createMockContext({ authorization: 'Bearer invalid-token' });
+    const context = createMockContext({
+      authorization: 'Bearer invalid-token',
+    });
     mockJwtService.verify.mockImplementation(() => {
       throw new Error('invalid');
     });
 
     expect(() => guard.canActivate(context)).toThrow(UnauthorizedException);
-    expect(() => guard.canActivate(context)).toThrow('Invalid or expired token');
+    expect(() => guard.canActivate(context)).toThrow(
+      'Invalid or expired token',
+    );
     expect(mockJwtService.verify).toHaveBeenCalledWith('invalid-token');
   });
 
   it('should return true and set request.user when token is valid', () => {
     const payload = { sub: 1, email: 'admin@admin.com', role: 'admin' };
-    const request = { headers: { authorization: 'Bearer valid-token' }, user: null };
+    const request = {
+      headers: { authorization: 'Bearer valid-token' },
+      user: null,
+    };
     mockJwtService.verify.mockReturnValue(payload);
 
-    const result = guard.canActivate(createMockContext({ authorization: 'Bearer valid-token' }));
+    const result = guard.canActivate(
+      createMockContext({ authorization: 'Bearer valid-token' }),
+    );
 
     expect(result).toBe(true);
     expect(request.user).toEqual(payload);

@@ -28,7 +28,9 @@ export class MembershipRepository implements IMembershipRepository {
   }
 
   private async generateNumerator(clubId: number): Promise<numerator> {
-    const existNumerator = await this.prisma.numerator.findFirst({ where: { name: 'membershipId', clubId } });
+    const existNumerator = await this.prisma.numerator.findFirst({
+      where: { name: 'membershipId', clubId },
+    });
     if (existNumerator) {
       return await this.prisma.numerator.update({
         where: { id: existNumerator.id },
@@ -42,12 +44,12 @@ export class MembershipRepository implements IMembershipRepository {
         value: 1,
       },
     });
-      return numerator;
+    return numerator;
   }
 
-
-
-  async create(createMembershipDto: CreateMembershipDto): Promise<MembershipResponseDto> {
+  async create(
+    createMembershipDto: CreateMembershipDto,
+  ): Promise<MembershipResponseDto> {
     const membershipTypeId = await this.getTypeIdById(createMembershipDto.type);
     const dateCreated = new Date();
     const expirationDate = new Date();
@@ -66,15 +68,15 @@ export class MembershipRepository implements IMembershipRepository {
       },
       include: { type: true, user: { include: { type: true } } },
     });
-    
+
     return this.mapToMembershipResponse(created);
   }
-  
+
   private mapToMembershipResponse(row: {
     id: number;
     membershipTypeId: number;
     expiration: Date;
-    type: { id: number; name: string, price: Prisma.Decimal } | null;
+    type: { id: number; name: string; price: Prisma.Decimal } | null;
     createdAt: Date;
     user: {
       id: number;
@@ -86,7 +88,9 @@ export class MembershipRepository implements IMembershipRepository {
     };
   }): MembershipResponseDto {
     const type =
-      row.type != null ? { id: row.type.id, name: row.type.name, price: row.type.price } : { id: row.membershipTypeId, name: '', price: new Prisma.Decimal(0) };
+      row.type != null
+        ? { id: row.type.id, name: row.type.name, price: row.type.price }
+        : { id: row.membershipTypeId, name: '', price: new Prisma.Decimal(0) };
     const u = row.user;
     const user = {
       id: u.id,
@@ -94,20 +98,31 @@ export class MembershipRepository implements IMembershipRepository {
       email: u.email ?? '',
       createdAt: u.createdAt,
       isActive: u.isActive,
-      type: u.type != null ? { id: u.type.id, name: u.type.name } : { id: 0, name: '' },
+      type:
+        u.type != null
+          ? { id: u.type.id, name: u.type.name }
+          : { id: 0, name: '' },
     };
-    return { id: row.id, membershipType: type, user, expiration : row.expiration , createdAt: row.createdAt};
+    return {
+      id: row.id,
+      membershipType: type,
+      user,
+      expiration: row.expiration,
+      createdAt: row.createdAt,
+    };
   }
 
   async findAll(clubId: number): Promise<MembershipResponseDto[]> {
     const list = await this.membership.findMany({
       where: { clubId },
       include: { type: true, user: { include: { type: true } } },
-    }); 
+    });
     return list.map((row) => this.mapToMembershipResponse(row));
   }
 
-  async findById(queryMembershipRequestDto: QueryMembershipRequestDto): Promise<MembershipResponseDto | null> {
+  async findById(
+    queryMembershipRequestDto: QueryMembershipRequestDto,
+  ): Promise<MembershipResponseDto | null> {
     const { clubId, id } = queryMembershipRequestDto;
     const row = await this.membership.findUnique({
       where: { id_clubId: { id: id, clubId: clubId } },
@@ -117,11 +132,20 @@ export class MembershipRepository implements IMembershipRepository {
     return this.mapToMembershipResponse(row);
   }
 
-  async update(queryMembershipRequestDto: QueryMembershipRequestDto, updateMembershipDto: UpdateMembershipDto): Promise<MembershipResponseDto> {
+  async update(
+    queryMembershipRequestDto: QueryMembershipRequestDto,
+    updateMembershipDto: UpdateMembershipDto,
+  ): Promise<MembershipResponseDto> {
     const { clubId, id } = queryMembershipRequestDto;
-    const data: { membershipTypeId?: number; userId?: number; userTypeId?: number } = {};
+    const data: {
+      membershipTypeId?: number;
+      userId?: number;
+      userTypeId?: number;
+    } = {};
     if (updateMembershipDto.type != null) {
-      data.membershipTypeId = await this.getTypeIdById(updateMembershipDto.type);
+      data.membershipTypeId = await this.getTypeIdById(
+        updateMembershipDto.type,
+      );
     }
     if (updateMembershipDto.userId != null) {
       data.userId = updateMembershipDto.userId;
@@ -137,8 +161,12 @@ export class MembershipRepository implements IMembershipRepository {
     return this.mapToMembershipResponse(updated);
   }
 
-  async delete(queryMembershipRequestDto: QueryMembershipRequestDto): Promise<void> {
+  async delete(
+    queryMembershipRequestDto: QueryMembershipRequestDto,
+  ): Promise<void> {
     const { clubId, id } = queryMembershipRequestDto;
-    await this.membership.delete({ where: { id_clubId: { id: id, clubId: clubId } } });
+    await this.membership.delete({
+      where: { id_clubId: { id: id, clubId: clubId } },
+    });
   }
 }

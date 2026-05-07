@@ -16,7 +16,7 @@ export class CreateMembershipDto {
   @IsNumber({}, { message: 'clubId debe ser un número' })
   @Min(1, { message: 'clubId debe ser al menos 1' })
   clubId: number;
-  
+
   @ApiProperty({ example: 1, description: 'Id del tipo de usuario' })
   @IsNumber({}, { message: 'userTypeId debe ser un número' })
   @Min(1, { message: 'userTypeId debe ser al menos 1' })

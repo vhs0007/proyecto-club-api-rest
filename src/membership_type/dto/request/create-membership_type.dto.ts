@@ -2,7 +2,10 @@ import { ApiProperty } from '@nestjs/swagger';
 import { IsString, IsNumber, Min } from 'class-validator';
 
 export class CreateMembershipTypeDto {
-  @ApiProperty({ example: 'Premium', description: 'Nombre del tipo de membresía' })
+  @ApiProperty({
+    example: 'Premium',
+    description: 'Nombre del tipo de membresía',
+  })
   @IsString()
   name: string;
 

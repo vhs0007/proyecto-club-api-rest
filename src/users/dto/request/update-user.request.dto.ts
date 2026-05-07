@@ -85,12 +85,18 @@ export class UpdateUserDto {
 
   @ApiProperty({ required: false })
   @IsOptional()
-  @IsDateString({}, { message: 'createdAt debe ser una fecha válida en formato ISO' })
+  @IsDateString(
+    {},
+    { message: 'createdAt debe ser una fecha válida en formato ISO' },
+  )
   createdAt?: string;
 
   @ApiProperty({ required: false })
   @IsOptional()
-  @IsDateString({}, { message: 'deletedAt debe ser una fecha válida en formato ISO' })
+  @IsDateString(
+    {},
+    { message: 'deletedAt debe ser una fecha válida en formato ISO' },
+  )
   deletedAt?: string | null;
 
   @ApiProperty({ required: false })
@@ -128,7 +134,11 @@ export class UpdateUserDto {
   @IsString({ message: 'medicalConditions debe ser un texto' })
   medicalConditions?: string;
 
-  @ApiProperty({ required: false, example: [new Date(), new Date()], description: 'Fichadas del usuario' })
+  @ApiProperty({
+    required: false,
+    example: [new Date(), new Date()],
+    description: 'Fichadas del usuario',
+  })
   @IsOptional()
   @IsArray({ message: 'time_entries debe ser un array' })
   @IsDate({ message: 'time_entries debe ser una fecha válida' })

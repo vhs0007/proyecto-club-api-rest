@@ -9,7 +9,10 @@ function needsFlexibleSslForConnection(connectionString: string): boolean {
     return true;
   }
   try {
-    const normalized = connectionString.replace(/^postgresql(\+[\w]+)?:/i, 'http:');
+    const normalized = connectionString.replace(
+      /^postgresql(\+[\w]+)?:/i,
+      'http:',
+    );
     const host = new URL(normalized).hostname.toLowerCase();
     return host.includes('render.com') || host.startsWith('dpg-');
   } catch {
@@ -59,4 +62,3 @@ export class PrismaService
     }
   }
 }
-
