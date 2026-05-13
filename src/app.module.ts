@@ -19,6 +19,7 @@ import { ReportsModule } from './reports/reports.module';
 import { TimeEntriesModule } from './time-entries/time-entries.module';
 import { HttpLoggingInterceptor } from './common/interceptors/http-logging.interceptor';
 import { LoggerMiddleware } from './common/middleware/logger.middleware';
+import { FacilityWorkersModule } from './facility_workers/facility_workers.module';
 
 @Module({
   imports: [
@@ -32,6 +33,7 @@ import { LoggerMiddleware } from './common/middleware/logger.middleware';
     UserTypeModule,
     ReportsModule,
     TimeEntriesModule,
+    FacilityWorkersModule,
   ],
   controllers: [AppController],
   providers: [
