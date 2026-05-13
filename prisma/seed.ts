@@ -13,18 +13,20 @@ dotenv.config({ path: path.resolve(__dirname, '../.env') });
  *
  *   npx prisma migrate deploy && npx prisma db seed
  *
+ * user_type: 1 = Trabajador, 2 = Socio, 3 = Atleta
+ *
  * Referencia rápida para probar APIs (IDs fijos):
  *
  * Club 1 — Club Deportivo Norte
- *   Staff: userId=1 typeId=2 (Ana), asistente userId=2 typeId=2 (Luis)
- *   Socio: userId=3 typeId=1 (María)
+ *   Trabajadores: userId=1 typeId=1 (Ana), userId=2 typeId=1 (Luis asistente)
+ *   Socio: userId=3 typeId=2 (María) | Atleta: userId=4 typeId=3 (Diego)
  *   Facilities: id 1 (musculación + asistente), id 2 (piscina, sin asistente)
  *   Activities: id 1 (fútbol en facility 1), id 2 (yoga en facility 2)
  *   Tipos membresía facility: id 1 Básica, id 2 Premium
  *
  * Club 2 — Club Sur
- *   Staff: userId=1 typeId=2 (Pedro), asistente userId=2 typeId=2 (Lucía)
- *   Socio: userId=3 typeId=1 (Carlos)
+ *   Trabajadores: userId=1 typeId=1 (Pedro), userId=2 typeId=1 (Lucía asistente)
+ *   Socio: userId=3 typeId=2 (Carlos) | Atleta: userId=4 typeId=3 (Juana)
  *   Facility: id 1 (salón multiuso)
  *   Activity: id 1 (spinning)
  *
@@ -71,8 +73,9 @@ async function seedTestingData(prisma: PrismaClient): Promise<void> {
 
   await prisma.user_type.createMany({
     data: [
-      { id: 1, name: 'Socio' },
-      { id: 2, name: 'Staff / Entrenador' },
+      { id: 1, name: 'Trabajador' },
+      { id: 2, name: 'Socio' },
+      { id: 3, name: 'Atleta' },
     ],
   });
 
@@ -104,7 +107,7 @@ async function seedTestingData(prisma: PrismaClient): Promise<void> {
       {
         id: 1,
         clubId: 1,
-        typeId: 2,
+        typeId: 1,
         name: 'Ana Entrenadora',
         document: 'C1-DNI-ANA',
         email: 'ana.work@c1.test',
@@ -114,7 +117,7 @@ async function seedTestingData(prisma: PrismaClient): Promise<void> {
       {
         id: 2,
         clubId: 1,
-        typeId: 2,
+        typeId: 1,
         name: 'Luis Asistente',
         document: 'C1-DNI-LUIS',
         email: 'luis.work@c1.test',
@@ -124,7 +127,7 @@ async function seedTestingData(prisma: PrismaClient): Promise<void> {
       {
         id: 3,
         clubId: 1,
-        typeId: 1,
+        typeId: 2,
         name: 'María Socia',
         document: 'C1-DNI-MAR',
         email: 'maria@c1.test',
@@ -132,9 +135,19 @@ async function seedTestingData(prisma: PrismaClient): Promise<void> {
         isActive: true,
       },
       {
+        id: 4,
+        clubId: 1,
+        typeId: 3,
+        name: 'Diego Atleta',
+        document: 'C1-DNI-DIE',
+        email: 'diego.atleta@c1.test',
+        password: passwordHash,
+        isActive: true,
+      },
+      {
         id: 1,
         clubId: 2,
-        typeId: 2,
+        typeId: 1,
         name: 'Pedro Entrenador',
         document: 'C2-DNI-PED',
         email: 'pedro.work@c2.test',
@@ -144,7 +157,7 @@ async function seedTestingData(prisma: PrismaClient): Promise<void> {
       {
         id: 2,
         clubId: 2,
-        typeId: 2,
+        typeId: 1,
         name: 'Lucía Asistente',
         document: 'C2-DNI-LUC',
         email: 'lucia.work@c2.test',
@@ -154,10 +167,20 @@ async function seedTestingData(prisma: PrismaClient): Promise<void> {
       {
         id: 3,
         clubId: 2,
-        typeId: 1,
+        typeId: 2,
         name: 'Carlos Socio',
         document: 'C2-DNI-CAR',
         email: 'carlos@c2.test',
+        password: passwordHash,
+        isActive: true,
+      },
+      {
+        id: 4,
+        clubId: 2,
+        typeId: 3,
+        name: 'Juana Atleta',
+        document: 'C2-DNI-JUA',
+        email: 'juana.atleta@c2.test',
         password: passwordHash,
         isActive: true,
       },
@@ -196,7 +219,7 @@ async function seedTestingData(prisma: PrismaClient): Promise<void> {
         capacity: 40,
         isActive: true,
         ResponsibleWorkerUserId: 1,
-        ResponsibleWorkerTypeId: 2,
+        ResponsibleWorkerTypeId: 1,
       },
       {
         id: 2,
@@ -205,7 +228,7 @@ async function seedTestingData(prisma: PrismaClient): Promise<void> {
         capacity: 24,
         isActive: true,
         ResponsibleWorkerUserId: 1,
-        ResponsibleWorkerTypeId: 2,
+        ResponsibleWorkerTypeId: 1,
       },
       {
         id: 1,
@@ -214,7 +237,7 @@ async function seedTestingData(prisma: PrismaClient): Promise<void> {
         capacity: 35,
         isActive: true,
         ResponsibleWorkerUserId: 1,
-        ResponsibleWorkerTypeId: 2,
+        ResponsibleWorkerTypeId: 1,
       },
     ],
   });
@@ -226,14 +249,14 @@ async function seedTestingData(prisma: PrismaClient): Promise<void> {
         facilityId: 1,
         clubId: 1,
         userId: 2,
-        userTypeId: 2,
+        userTypeId: 1,
       },
       {
         id: 1,
         facilityId: 1,
         clubId: 2,
         userId: 2,
-        userTypeId: 2,
+        userTypeId: 1,
       },
     ],
   });
@@ -267,7 +290,7 @@ async function seedTestingData(prisma: PrismaClient): Promise<void> {
         hourStart: '18:00',
         hourEnd: '19:30',
         userId: 3,
-        userTypeId: 1,
+        userTypeId: 2,
         cost: new Prisma.Decimal(1500),
         facilityId: 1,
         isActive: true,
@@ -281,7 +304,7 @@ async function seedTestingData(prisma: PrismaClient): Promise<void> {
         hourStart: '09:00',
         hourEnd: '10:00',
         userId: 3,
-        userTypeId: 1,
+        userTypeId: 2,
         cost: new Prisma.Decimal(800),
         facilityId: 2,
         isActive: true,
@@ -295,7 +318,7 @@ async function seedTestingData(prisma: PrismaClient): Promise<void> {
         hourStart: '07:30',
         hourEnd: '08:15',
         userId: 3,
-        userTypeId: 1,
+        userTypeId: 2,
         cost: new Prisma.Decimal(1200),
         facilityId: 1,
         isActive: true,
@@ -310,7 +333,7 @@ async function seedTestingData(prisma: PrismaClient): Promise<void> {
         clubId: 1,
         membershipTypeId: 1,
         userId: 3,
-        userTypeId: 1,
+        userTypeId: 2,
         createdAt: new Date('2026-01-01'),
         expiration: new Date('2027-01-01'),
       },
@@ -319,7 +342,7 @@ async function seedTestingData(prisma: PrismaClient): Promise<void> {
         clubId: 2,
         membershipTypeId: 1,
         userId: 3,
-        userTypeId: 1,
+        userTypeId: 2,
         createdAt: new Date('2026-02-01'),
         expiration: new Date('2026-12-31'),
       },
