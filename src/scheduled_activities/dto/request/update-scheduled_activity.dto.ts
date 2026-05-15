@@ -1,6 +1,6 @@
 import { ApiProperty, PartialType } from '@nestjs/swagger';
 import { CreateScheduledActivityDto } from './create-scheduled_activity.dto';
-import { IsArray, IsNumber, Min, ValidateNested } from 'class-validator';
+import { Equals, IsArray, IsNumber, Min, ValidateIf, ValidateNested } from 'class-validator';
 import { Type } from 'class-transformer';
 import { DatetimeScheduledActivity } from './create-scheduled_activity.dto';
 
@@ -21,8 +21,9 @@ export class UpdateScheduledActivityDto extends PartialType(CreateScheduledActiv
     userId?: number;
 
     @ApiProperty({ example: 1, description: 'ID del tipo de usuario del trabajador responsable' })
+    @ValidateIf((o) => o.userTypeId !== undefined)
     @IsNumber({}, { message: 'userTypeId debe ser un número' })
-    @Min(1, { message: 'userTypeId debe ser al menos 1' })
+    @Equals(1, { message: 'userTypeId debe ser 1 (solo trabajadores)' })
     userTypeId?: number;
 
     @ApiProperty({ example: [1, 2], description: 'IDs de los tipos de membresía' })
@@ -35,4 +36,10 @@ export class UpdateScheduledActivityDto extends PartialType(CreateScheduledActiv
     @ValidateNested({ each: true })
     @Type(() => DatetimeScheduledActivity)
     datetimeScheduledActivities?: DatetimeScheduledActivity[];
+
+    @ApiProperty({ example: [1,2,3], description: 'IDs de los trabajadores asistentes' })
+    @IsArray({ message: 'assistantWorkerIds debe ser un array' })
+    @IsNumber({}, { each: true, message: 'Cada assistantWorkerId debe ser un número' })
+    @Min(1, { each: true, message: 'Cada assistantWorkerId debe ser al menos 1' })
+    assistantWorkerIds?: number[];
 }

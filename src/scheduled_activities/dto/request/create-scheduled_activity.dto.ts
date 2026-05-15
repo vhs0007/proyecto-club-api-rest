@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
-import { IsArray, IsNumber, IsString, Min, ValidateNested } from 'class-validator';
+import { Equals, IsArray, IsNumber, IsString, Min, ValidateNested } from 'class-validator';
 
 export class DatetimeScheduledActivity {
     hourStart: string;
@@ -26,7 +26,7 @@ export class CreateScheduledActivityDto {
 
     @ApiProperty({ example: 1, description: 'ID del tipo de usuario del trabajador responsable' })
     @IsNumber({}, { message: 'userTypeId debe ser un número' })
-    @Min(1, { message: 'userTypeId debe ser al menos 1' })
+    @Equals(1, { message: 'userTypeId debe ser 1 (solo trabajadores)' })
     userTypeId: number;
 
     @ApiProperty({ example: [1, 2], description: 'IDs de los tipos de membresía' })
@@ -39,4 +39,10 @@ export class CreateScheduledActivityDto {
     @ValidateNested({ each: true })
     @Type(() => DatetimeScheduledActivity)
     datetimeScheduledActivities: DatetimeScheduledActivity[];
+
+    @ApiProperty({ example: [1,2,3], description: 'IDs de los trabajadores asistentes' })
+    @IsArray({ message: 'assistantWorkerIds debe ser un array' })
+    @IsNumber({}, { each: true, message: 'Cada assistantWorkerId debe ser un número' })
+    @Min(1, { each: true, message: 'Cada assistantWorkerId debe ser al menos 1' })
+    assistantWorkerIds: number[];
 }

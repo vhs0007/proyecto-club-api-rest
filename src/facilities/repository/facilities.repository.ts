@@ -28,6 +28,7 @@ export interface ActivitiesNavigation {
   cost: number;
   isActive: boolean;
 }
+
 export interface MembershipTypeNavigation {
   id: number;
   name: string;
