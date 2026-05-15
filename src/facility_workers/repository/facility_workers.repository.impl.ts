@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from "@nestjs/common";
+import { BadRequestException, Injectable, NotFoundException } from "@nestjs/common";
 import { CreateFacilityWorkerDto } from "../dto/request/create-facility_worker.dto";
 import { UpdateFacilityWorkerDto } from "../dto/request/update-facility_worker.dto";
 import { FacilityNavigation, IFacilityWorkersRepository, UserNavigation } from "./facility_workers.repository";
@@ -82,6 +82,10 @@ export class FacilityWorkersRepository implements IFacilityWorkersRepository {
     async create(createFacilityWorkerDto: CreateFacilityWorkerDto): Promise<FacilityWorkerResponseDto> {
         const { clubId, facilityId, userId, userTypeId } = createFacilityWorkerDto;
 
+        if (userTypeId !== 1) {
+            throw new BadRequestException('userTypeId debe ser 1 (solo trabajadores)');
+        }
+
         const user = await this.prisma.users.findUnique({
             where: { id_clubId_typeId: { id: userId, clubId, typeId: userTypeId } },
         });
@@ -114,6 +118,11 @@ export class FacilityWorkersRepository implements IFacilityWorkersRepository {
     async update(id: number, updateFacilityWorkerDto: UpdateFacilityWorkerDto): Promise<FacilityWorkerResponseDto> {
         const existing = await this.prisma.facility_workers.findFirst({ where: { id, clubId: updateFacilityWorkerDto.clubId } });
         if (!existing) throw new NotFoundException(`Facility worker ${id} not found`);
+
+        const effectiveUserTypeId = updateFacilityWorkerDto.userTypeId ?? existing.userTypeId;
+        if (effectiveUserTypeId !== 1) {
+            throw new BadRequestException('userTypeId debe ser 1 (solo trabajadores)');
+        }
 
         const facilityWorker = await this.prisma.facility_workers.update({
             where: {

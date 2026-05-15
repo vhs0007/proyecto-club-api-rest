@@ -1,5 +1,5 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { IsNumber, Min } from "class-validator";
+import { Equals, IsNumber, Min } from "class-validator";
 
 export class CreateFacilityWorkerDto {
     @ApiProperty({ example: 1, description: 'ID del club' })
@@ -17,8 +17,8 @@ export class CreateFacilityWorkerDto {
     @Min(1, { message: 'userId debe ser al menos 1' })
     userId: number;
 
-    @ApiProperty({ example: 1, description: 'ID del tipo de usuario' })
+    @ApiProperty({ example: 1, description: 'Debe ser 1 (trabajador)' })
     @IsNumber({}, { message: 'userTypeId debe ser un número' })
-    @Min(1, { message: 'userTypeId debe ser al menos 1' })
+    @Equals(1, { message: 'userTypeId debe ser 1 (solo trabajadores)' })
     userTypeId: number;
 }

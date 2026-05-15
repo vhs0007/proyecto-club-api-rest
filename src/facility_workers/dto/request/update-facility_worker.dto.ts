@@ -1,6 +1,6 @@
 import { ApiProperty, PartialType } from '@nestjs/swagger';
 import { CreateFacilityWorkerDto } from './create-facility_worker.dto';
-import { IsNumber, Min } from 'class-validator';
+import { Equals, IsNumber, Min, ValidateIf } from 'class-validator';
 
 export class UpdateFacilityWorkerDto extends PartialType(CreateFacilityWorkerDto) {
     @ApiProperty({ example: 1, description: 'ID del club' })
@@ -12,4 +12,15 @@ export class UpdateFacilityWorkerDto extends PartialType(CreateFacilityWorkerDto
     @IsNumber({}, { message: 'facilityId debe ser un número' })
     @Min(1, { message: 'facilityId debe ser al menos 1' })
     facilityId?: number;
+
+    @ApiProperty({ example: 1, description: 'ID del usuario del trabajador responsable' })
+    @IsNumber({}, { message: 'userId debe ser un número' })
+    @Min(1, { message: 'userId debe ser al menos 1' })
+    userId?: number;
+
+    @ApiProperty({ example: 1, description: 'Debe ser 1 (trabajador) si se envía' })
+    @ValidateIf((o) => o.userTypeId !== undefined)
+    @IsNumber({}, { message: 'userTypeId debe ser un número' })
+    @Equals(1, { message: 'userTypeId debe ser 1 (solo trabajadores)' })
+    userTypeId?: number;
 }
