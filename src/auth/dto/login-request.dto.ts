@@ -14,7 +14,12 @@ export class LoginRequestDto {
   @MinLength(1, { message: 'password es requerido' })
   password: string;
 
+<<<<<<< Updated upstream
   @ApiProperty({ example: 1, description: 'Id del club' })
   @IsNumber({}, { message: 'clubId debe ser un número' })
   clubId: number;
+=======
+  @IsNumber()
+  clubId:number;
+>>>>>>> Stashed changes
 }
