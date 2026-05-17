@@ -1,18 +1,17 @@
 import { ApiProperty } from '@nestjs/swagger';
 import type {
-  UserNavigation,
   FacilityNavigation,
-} from '../../repository/activitities.repository';
+  UserNavigation,
+} from '../../../facilities/repository/facilities.repository';
 
 const userNavExample: UserNavigation = {
   id: 1,
   name: 'Juan Perez',
-  typeId: 1,
+  type: { id: 1, name: 'Entrenador' },
   email: 'juan@example.com',
   createdAt: new Date('2026-01-01'),
   deletedAt: null,
   isActive: true,
-  document: '12345678',
 };
 
 const facilityExample: FacilityNavigation = {
@@ -22,6 +21,7 @@ const facilityExample: FacilityNavigation = {
   responsibleWorker: userNavExample,
   assistantWorkers: [userNavExample],
   isActive: true,
+  membershipTypes: [{ id: 1, name: 'Membresía básica', price: 99.99 }],
 };
 
 export class ActivityResponseDto {
@@ -57,7 +57,7 @@ export class ActivityResponseDto {
   @ApiProperty({
     example: facilityExample,
     description:
-      'Instalación anidada: responsibleWorker y assistantWorkers (null si no hay asistentes), alineado con el módulo facilities',
+      'Instalación anidada con trabajadores y tipos de membresía asociados, alineado con el módulo facilities',
   })
   facility: FacilityNavigation;
 

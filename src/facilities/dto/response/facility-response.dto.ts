@@ -1,8 +1,8 @@
 import { ApiProperty } from '@nestjs/swagger';
 import type {
   ActivitiesNavigation,
-  UserNavigation,
   MembershipTypeNavigation,
+  UserNavigation,
 } from '../../repository/facilities.repository';
 
 const userNavExample = {

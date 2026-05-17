@@ -1,0 +1,32 @@
+[1mdiff --git a/src/auth/auth.service.ts b/src/auth/auth.service.ts[m
+[1mindex 6c7e1d9..03f2b1f 100644[m
+[1m--- a/src/auth/auth.service.ts[m
+[1m+++ b/src/auth/auth.service.ts[m
+[36m@@ -12,8 +12,13 @@[m [mexport class AuthService {[m
+     private readonly prisma: PrismaService,[m
+   ) {}[m
+ [m
+[31m-  async authenticateUser(loginRequest: LoginRequestDto): Promise<LoginResponse> {[m
+[31m-    if (loginRequest.email === 'admin@admin.com' && loginRequest.password === 'admin') {[m
+[32m+[m[32m  async authenticateUser([m
+[32m+[m[32m    loginRequest: LoginRequestDto,[m
+[32m+[m[32m  ): Promise<LoginResponse> {[m
+[32m+[m[32m    if ([m
+[32m+[m[32m      loginRequest.email === 'admin@admin.com' &&[m
+[32m+[m[32m      loginRequest.password === 'admin'[m
+[32m+[m[32m    ) {[m
+       const payload = { sub: 0, email: 'admin@admin.com', role: 'admin' };[m
+       const accessToken = this.jwtService.sign(payload);[m
+       return {[m
+[36m@@ -33,7 +38,10 @@[m [mexport class AuthService {[m
+     if (!user) {[m
+       throw new HttpException('Invalid credentials', HttpStatus.UNAUTHORIZED);[m
+     }[m
+[31m-    if (user.password == null || !(await bcrypt.compare(loginRequest.password, user.password))) {[m
+[32m+[m[32m    if ([m
+[32m+[m[32m      user.password == null ||[m
+[32m+[m[32m      !(await bcrypt.compare(loginRequest.password, user.password))[m
+[32m+[m[32m    ) {[m
+       throw new HttpException('Invalid credentials', HttpStatus.UNAUTHORIZED);[m
+     }[m
+     if (!user.isActive) {[m

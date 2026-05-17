@@ -17,6 +17,23 @@ export interface UserNavigation {
   deletedAt: Date | null;
   isActive: boolean;
 }
+
+export interface MembershipTypeNavigation {
+  id: number;
+  name: string;
+  price: number;
+}
+
+export interface FacilityNavigation {
+  id: number;
+  type: string;
+  capacity: number;
+  isActive: boolean;
+  responsibleWorker: UserNavigation | null;
+  assistantWorkers: UserNavigation[] | null;
+  membershipTypes: MembershipTypeNavigation[];
+}
+
 export interface ActivitiesNavigation {
   id: number;
   name: string;
@@ -27,12 +44,6 @@ export interface ActivitiesNavigation {
   user: UserNavigation;
   cost: number;
   isActive: boolean;
-}
-
-export interface MembershipTypeNavigation {
-  id: number;
-  name: string;
-  price: number;
 }
 
 export interface IFacilitiesRepository {

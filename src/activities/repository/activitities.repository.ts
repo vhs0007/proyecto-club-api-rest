@@ -2,26 +2,12 @@ import { CreateActivityDto } from '../dto/request/create-activities.dto';
 import { UpdateActivityDto } from '../dto/request/update-activities.dto';
 import { QueryActivitiesRequestDto } from '../dto/request/query-activities.request.dto';
 import { ActivityResponseDto } from '../dto/response/activity-response.dto';
+import type {
+  FacilityNavigation,
+  UserNavigation,
+} from '../../facilities/repository/facilities.repository';
 
-export interface UserNavigation {
-  id: number;
-  name: string;
-  typeId: number;
-  email: string | null;
-  createdAt: Date;
-  deletedAt: Date | null;
-  isActive: boolean;
-  document: string;
-}
-
-export interface FacilityNavigation {
-  id: number;
-  type: string;
-  capacity: number;
-  responsibleWorker: UserNavigation | null;
-  assistantWorkers: UserNavigation[] | null;
-  isActive: boolean;
-}
+export type { FacilityNavigation, UserNavigation };
 
 export interface IActivitiesRepository {
   create(createActivityDto: CreateActivityDto): Promise<ActivityResponseDto>;

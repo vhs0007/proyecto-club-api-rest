@@ -1,10 +1,12 @@
 import { Injectable } from '@nestjs/common';
+import { Prisma } from '@prisma/client';
 import { PrismaService } from '../../prisma/prisma.service';
 import type {
-  IActivitiesRepository,
-  UserNavigation,
   FacilityNavigation,
-} from './activitities.repository';
+  MembershipTypeNavigation,
+  UserNavigation,
+} from '../../facilities/repository/facilities.repository';
+import type { IActivitiesRepository } from './activitities.repository';
 import { CreateActivityDto } from '../dto/request/create-activities.dto';
 import { UpdateActivityDto } from '../dto/request/update-activities.dto';
 import { QueryActivitiesRequestDto } from '../dto/request/query-activities.request.dto';
@@ -16,20 +18,34 @@ import { ActivityResponseDto } from '../dto/response/activity-response.dto';
  * Prisma devuelve más columnas; aquí solo lo que usa este repo.
  */
 
-interface UserPlainRow {
+interface UserTypeRow {
   id: number;
   name: string;
-  typeId: number;
+}
+
+interface UserWithTypeRow {
+  id: number;
+  name: string;
   email: string | null;
   createdAt: Date;
   deletedAt: Date | null;
   isActive: boolean;
-  document: string;
+  type: UserTypeRow;
 }
 
 interface FacilityWorkerLinkRow {
   id: number;
-  user: UserPlainRow;
+  user: UserWithTypeRow;
+}
+
+type MembershipTypeFromPrisma = {
+  id: number;
+  name: string;
+  price: Prisma.Decimal;
+};
+
+interface FacilitiesMembershipLinkRow {
+  type: MembershipTypeFromPrisma;
 }
 
 interface FacilityNestedRow {
@@ -38,8 +54,9 @@ interface FacilityNestedRow {
   capacity: number;
   isActive: boolean;
   ResponsibleWorkerUserId: number;
-  user: UserPlainRow | null;
+  user: UserWithTypeRow | null;
   facility_workers: FacilityWorkerLinkRow[];
+  facilities_membership: FacilitiesMembershipLinkRow[];
 }
 
 interface ActivityQueryRow {
@@ -52,34 +69,64 @@ interface ActivityQueryRow {
   cost: { toNumber(): number };
   isActive: boolean;
   clubId: number;
-  user: UserPlainRow | null;
+  user: UserWithTypeRow | null;
   facility: FacilityNestedRow;
 }
 
 const ACTIVITY_QUERY_INCLUDE = {
-  user: true,
-  facility: {
+  user: {
     include: {
-      user: true,
-      facility_workers: { include: { user: true } },
+      type: true,
     },
   },
-};
+  facility: {
+    include: {
+      user: {
+        include: {
+          type: true,
+        },
+      },
+      facility_workers: {
+        include: {
+          user: {
+            include: {
+              type: true,
+            },
+          },
+        },
+      },
+      facilities_membership: {
+        include: {
+          type: true,
+        },
+      },
+    },
+  },
+} as const;
 
 @Injectable()
 export class ActivitiesRepository implements IActivitiesRepository {
   constructor(private readonly prisma: PrismaService) {}
 
-  private userToNav(user: UserPlainRow): UserNavigation {
+  private userToNav(user: UserWithTypeRow): UserNavigation {
     return {
       id: user.id,
       name: user.name,
-      typeId: user.typeId,
+      type: { id: user.type.id, name: user.type.name },
       email: user.email,
       createdAt: user.createdAt,
       deletedAt: user.deletedAt,
       isActive: user.isActive,
-      document: user.document,
+    };
+  }
+
+  private membershipTypeToNav(
+    membershipType: MembershipTypeFromPrisma,
+  ): MembershipTypeNavigation {
+    return {
+      id: membershipType.id,
+      name: membershipType.name,
+      price: Number(membershipType.price),
     };
   }
 
@@ -95,6 +142,9 @@ export class ActivitiesRepository implements IActivitiesRepository {
       isActive: facility.isActive,
       responsibleWorker: facility.user ? this.userToNav(facility.user) : null,
       assistantWorkers: assistants.length > 0 ? assistants : null,
+      membershipTypes: facility.facilities_membership.map((fm) =>
+        this.membershipTypeToNav(fm.type),
+      ),
     };
   }
 
