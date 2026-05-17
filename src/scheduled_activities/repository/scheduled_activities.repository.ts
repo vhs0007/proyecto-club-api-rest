@@ -1,6 +1,7 @@
 import { CreateScheduledActivityDto } from "../dto/request/create-scheduled_activity.dto";
 import { ScheduledActivityResponseDto } from "../dto/response/scheduled_activity.response.dto";
 import { UpdateScheduledActivityDto } from "../dto/request/update-scheduled_activity.dto";
+import { QueryScheduledActivityDto } from "../dto/request/query-scheduled_activity.dto";
 
 export interface UserNavigation {
     id: number;
@@ -22,12 +23,12 @@ export interface FacilityNavigation {
     isActive: boolean;
 }
 
-interface ScheduledActivityRepository {
+export interface ScheduledActivityRepository {
     create(createScheduledActivityDto: CreateScheduledActivityDto): Promise<ScheduledActivityResponseDto>;
     findAll(clubId: number): Promise<ScheduledActivityResponseDto[]>;
-    findById(id: number): Promise<ScheduledActivityResponseDto>;
-    update(id: number, updateScheduledActivityDto: UpdateScheduledActivityDto): Promise<ScheduledActivityResponseDto>;
-    delete(id: number): Promise<void>;
+    findById(query: QueryScheduledActivityDto): Promise<ScheduledActivityResponseDto>;
+    update(query: QueryScheduledActivityDto, updateScheduledActivityDto: UpdateScheduledActivityDto): Promise<ScheduledActivityResponseDto>;
+    delete(query: QueryScheduledActivityDto): Promise<void>;
 }
 
 export default ScheduledActivityRepository;

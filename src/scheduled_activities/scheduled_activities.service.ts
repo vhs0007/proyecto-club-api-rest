@@ -1,26 +1,50 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { CreateScheduledActivityDto } from './dto/request/create-scheduled_activity.dto';
 import { UpdateScheduledActivityDto } from './dto/request/update-scheduled_activity.dto';
+import { ScheduledActivitiesRepositoryImpl } from './repository/scheduled_activities.repository.impl';
+import { QueryScheduledActivityDto } from './dto/request/query-scheduled_activity.dto';
 
 @Injectable()
 export class ScheduledActivitiesService {
+
+  constructor(private readonly scheduledActivitiesRepository: ScheduledActivitiesRepositoryImpl) {}
   create(createScheduledActivityDto: CreateScheduledActivityDto) {
-    return 'This action adds a new scheduledActivity';
+    try {
+      return this.scheduledActivitiesRepository.create(createScheduledActivityDto);
+    } catch (error) {
+      throw new BadRequestException(error.message);
+    }
   }
 
-  findAll() {
-    return `This action returns all scheduledActivities`;
+  findAll(clubId: number) {
+    try {
+      return this.scheduledActivitiesRepository.findAll(clubId);
+    } catch (error) {
+      throw new BadRequestException(error.message);
+    }
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} scheduledActivity`;
+  findOne(query: QueryScheduledActivityDto) {
+    try {
+      return this.scheduledActivitiesRepository.findById(query);
+    } catch (error) {
+      throw new BadRequestException(error.message);
+    }
   }
 
-  update(id: number, updateScheduledActivityDto: UpdateScheduledActivityDto) {
-    return `This action updates a #${id} scheduledActivity`;
+  update(query: QueryScheduledActivityDto, updateScheduledActivityDto: UpdateScheduledActivityDto) {
+    try {
+      return this.scheduledActivitiesRepository.update(query, updateScheduledActivityDto);
+    } catch (error) {
+      throw new BadRequestException(error.message);
+    }
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} scheduledActivity`;
+  remove(query: QueryScheduledActivityDto) {
+    try {
+      return this.scheduledActivitiesRepository.delete(query);
+    } catch (error) {
+      throw new BadRequestException(error.message);
+    }
   }
 }
