@@ -3,9 +3,10 @@ import { FacilityWorkersService } from './facility_workers.service';
 import { FacilityWorkersController } from './facility_workers.controller';
 import { FacilityWorkersRepository } from './repository/facility_workers.repository.impl';
 import { PrismaModule } from '../prisma/prisma.module';
+import { AuthModule } from '../auth/auth.module';
 
 @Module({
-  imports: [PrismaModule],
+  imports: [PrismaModule, AuthModule],
   controllers: [FacilityWorkersController],
   providers: [FacilityWorkersService, FacilityWorkersRepository],
 })
