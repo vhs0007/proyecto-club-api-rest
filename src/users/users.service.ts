@@ -13,38 +13,7 @@ import { Member } from './entities/member.entity';
 import { Worker } from './entities/worker.entity';
 import { UserType } from './entities/user.entity';
 import { UsersRepository } from './repository/users.repository.impl';
-<<<<<<< Updated upstream
 import { QueryUserRequestDto } from './dto/request/query-user.request.dto';
-=======
-
-function mapToUserResponseDto(res: UserResponse): UserResponseDto {
-  const dto = new UserResponseDto();
-  dto.id = res.id;
-  dto.name = res.name;
-  dto.typeId = res.typeId;
-  dto.type = res.type;
-  dto.email = res.email;
-  dto.membership = res.membership;
-  dto.createdAt = res.createdAt;
-  dto.deletedAt = res.deletedAt;
-  dto.isActive = res.isActive;
-  dto.salary = res.salary;
-  dto.hoursToWorkPerDay = res.hoursToWorkPerDay;
-  dto.startWorkAt = res.startWorkAt;
-  dto.endWorkAt = res.endWorkAt;
-  dto.weight = res.weight;
-  dto.height = res.height;
-  dto.gender = res.gender;
-  dto.birthDate = res.birthDate;
-  dto.diet = res.diet;
-  dto.trainingPlan = res.trainingPlan;
-  dto.medicalHistory = res.medicalHistory;
-  dto.allergies = res.allergies;
-  dto.medications = res.medications;
-  dto.medicalConditions = res.medicalConditions;
-  return dto;
-}
->>>>>>> Stashed changes
 
 const SALT_ROUNDS = 10;
 
