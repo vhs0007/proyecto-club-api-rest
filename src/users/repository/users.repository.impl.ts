@@ -7,11 +7,8 @@ import { CreateUserDto } from '../dto/request/create-user.request.dto';
 import { UserTypeResponseDto } from '../../user_type/dto/response/user-type-response.dto';
 import { membershipNavigation } from './users.repository';
 import { MembershipTypeResponseDto } from 'src/membership_type/dto/response/membership_type-response.dto';
-<<<<<<< Updated upstream
 import { QueryUserRequestDto } from '../dto/request/query-user.request.dto';
 import { UserResponseDto } from '../dto/response/user.response.dto';
-=======
->>>>>>> Stashed changes
 
 interface UserRow {
   id: number;
@@ -47,11 +44,7 @@ type MembershipWithTypeRow = {
   userId: number;
   expiration: Date;
   createdAt: Date;
-<<<<<<< Updated upstream
   membershipTypeId: number;
-=======
-  typeId: number;
->>>>>>> Stashed changes
   type: {
     id: number;
     name: string;
@@ -61,11 +54,7 @@ type MembershipWithTypeRow = {
 
 function mapMembership(row: MembershipWithTypeRow): membershipNavigation {
   const membershipType = new MembershipTypeResponseDto();
-<<<<<<< Updated upstream
   membershipType.id = row.type?.id ?? row.membershipTypeId;
-=======
-  membershipType.id = row.type?.id ?? row.typeId;
->>>>>>> Stashed changes
   membershipType.name = row.type?.name ?? '';
   membershipType.price = row.type?.price?.toNumber() ?? 0;
 
@@ -77,7 +66,6 @@ function mapMembership(row: MembershipWithTypeRow): membershipNavigation {
   };
 }
 
-<<<<<<< Updated upstream
 function getLastMembership(
   memberships: MembershipWithTypeRow[],
 ): membershipNavigation | undefined {
@@ -91,9 +79,6 @@ function getLastMembership(
 }
 
 function mapRow(row: UserRow): UserResponseDto {
-=======
-function mapRow(row: UserRow): UserResponse {
->>>>>>> Stashed changes
   const type = row.type ? new UserTypeResponseDto() : undefined;
   if (type) {
     type.id = row.type?.id ?? 0;
@@ -202,31 +187,20 @@ export class UsersRepository implements IUsersRepository {
     //te prometo que fue necesario
   }
 
-<<<<<<< Updated upstream
   async findAll(clubId: number): Promise<UserResponseDto[]> {
-=======
-  async findAll(clubId: number): Promise<UserResponse[]> {
->>>>>>> Stashed changes
     const users = await this.prisma.users.findMany({
       where: { clubId },
       include: { type: true, memberships: { include: { type: true } } },
     });
 
-<<<<<<< Updated upstream
     const usersConMembership = users.map((user) => {
       const userResponse = mapRow(user);
       userResponse.membership = getLastMembership(user.memberships);
-=======
-    const usersConMembership = users.map(user => {
-      const userResponse = mapRow(user);
-      userResponse.membership = user.memberships.map((membership) => mapMembership(membership as MembershipWithTypeRow));
->>>>>>> Stashed changes
       return userResponse;
     });
     return usersConMembership;
   }
 
-<<<<<<< Updated upstream
   async findById(
     queryUserRequestDto: QueryUserRequestDto,
   ): Promise<UserResponseDto | null> {
@@ -247,17 +221,11 @@ export class UsersRepository implements IUsersRepository {
   ): Promise<UserResponseDto | null> {
     const user = await this.prisma.users.findFirst({
       where: { email, clubId },
+      include: { memberships: { include: { type: true } } },
     });
-=======
-  async findById(id: number): Promise<UserResponse | null> {
-    const user = await this.prisma.users.findUnique({
-      where: { id },
-      include: { type: true, memberships: { include: { type: true } } },
-    });
->>>>>>> Stashed changes
     if (!user) return null;
     const userResponse = mapRow(user);
-    userResponse.membership = user.memberships.map((membership) => mapMembership(membership as MembershipWithTypeRow));
+    userResponse.membership = getLastMembership(user.memberships);
     return userResponse;
   }
 

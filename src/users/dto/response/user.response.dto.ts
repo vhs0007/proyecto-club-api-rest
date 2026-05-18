@@ -35,15 +35,9 @@ export class UserResponseDto {
   @IsOptional()
   type?: UserTypeResponseDto;
 
-<<<<<<< Updated upstream
   @ApiProperty({ description: 'Ultima Membresía del usuario (navegación)' })
   @IsOptional()
   membership?: membershipNavigation | undefined;
-=======
-  @ApiProperty({ description: 'Membresía del usuario (navegación)' })
-  @IsOptional()
-  membership?: membershipNavigation | null;
->>>>>>> Stashed changes
 
   @ApiProperty({ required: false })
   @IsOptional()

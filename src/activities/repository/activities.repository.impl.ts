@@ -124,25 +124,9 @@ export class ActivitiesRepository implements IActivitiesRepository {
     membershipType: MembershipTypeFromPrisma,
   ): MembershipTypeNavigation {
     return {
-<<<<<<< Updated upstream
       id: membershipType.id,
       name: membershipType.name,
       price: Number(membershipType.price),
-=======
-      id: facility.id,
-      type: facility.type,
-      capacity: facility.capacity,
-      responsibleWorker: facility.responsibleWorkerUser
-        ? this.userPrismaToInterface(facility.responsibleWorkerUser)
-        : stubUser(facility.responsibleWorker),
-      assistantWorker:
-        facility.assistantWorkerUser && facility.assistantWorker != null
-          ? this.userPrismaToInterface(facility.assistantWorkerUser)
-          : facility.assistantWorker != null
-            ? stubUser(facility.assistantWorker)
-            : null,
-      isActive: facility.isActive,
->>>>>>> Stashed changes
     };
   }
 
