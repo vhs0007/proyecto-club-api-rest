@@ -116,10 +116,8 @@ export class FacilityWorkersRepository implements IFacilityWorkersRepository {
     }
 
     async update(id: number, updateFacilityWorkerDto: UpdateFacilityWorkerDto): Promise<FacilityWorkerResponseDto> {
-        const existing = await this.prisma.facility_workers.findFirst({ where: { id, clubId: updateFacilityWorkerDto.clubId } });
-        if (!existing) throw new NotFoundException(`Facility worker ${id} not found`);
 
-        const effectiveUserTypeId = updateFacilityWorkerDto.userTypeId ?? existing.userTypeId;
+        const effectiveUserTypeId = updateFacilityWorkerDto.userTypeId ?? 0;
         if (effectiveUserTypeId !== 1) {
             throw new BadRequestException('userTypeId debe ser 1 (solo trabajadores)');
         }
@@ -127,11 +125,11 @@ export class FacilityWorkersRepository implements IFacilityWorkersRepository {
         const facilityWorker = await this.prisma.facility_workers.update({
             where: {
                 id_facilityId_userId_clubId_userTypeId: {
-                    id: existing.id,
-                    facilityId: existing.facilityId,
-                    userId: existing.userId,
-                    clubId: existing.clubId,
-                    userTypeId: existing.userTypeId,
+                    id: id,
+                    facilityId: updateFacilityWorkerDto.facilityId ?? 0,
+                    userId: updateFacilityWorkerDto.userId ?? 0,
+                    clubId: updateFacilityWorkerDto.clubId ?? 0,
+                    userTypeId: effectiveUserTypeId,
                 },
             },
             data: {
