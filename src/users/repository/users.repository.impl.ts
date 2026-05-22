@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { numerator, Prisma } from '@prisma/client';
 import { PrismaService } from '../../prisma/prisma.service';
 import type { IUsersRepository } from './users.repository';
@@ -9,6 +9,7 @@ import { membershipNavigation } from './users.repository';
 import { MembershipTypeResponseDto } from 'src/membership_type/dto/response/membership_type-response.dto';
 import { QueryUserRequestDto } from '../dto/request/query-user.request.dto';
 import { UserResponseDto } from '../dto/response/user.response.dto';
+import { FacilityNavigation } from 'src/facilities/repository/facilities.repository';
 
 interface UserRow {
   id: number;
@@ -117,6 +118,73 @@ function mapRow(row: UserRow): UserResponseDto {
 export class UsersRepository implements IUsersRepository {
   constructor(private readonly prisma: PrismaService) {}
 
+  private async loadFacilities(
+    userId: number,
+    clubId: number,
+    userTypeId: number,
+  ): Promise<FacilityNavigation[]> {
+    const links = await this.prisma.facility_workers.findMany({
+      where: { userId, clubId, userTypeId },
+      include: {
+        facility: {
+          include: {
+            user: { include: { type: true } },
+            facility_workers: { include: { user: { include: { type: true } } } },
+            facilities_membership: { include: { type: true } },
+          },
+        },
+      },
+    });
+
+    return links.map(({ facility: f }): FacilityNavigation => {
+      const toUserNav = (u: {
+        id: number;
+        name: string;
+        email: string | null;
+        createdAt: Date;
+        deletedAt: Date | null;
+        isActive: boolean;
+        type: { id: number; name: string };
+      }) => ({
+        id: u.id,
+        name: u.name,
+        type: { id: u.type.id, name: u.type.name },
+        email: u.email,
+        createdAt: u.createdAt,
+        deletedAt: u.deletedAt,
+        isActive: u.isActive,
+      });
+
+      const assistants = f.facility_workers
+        .filter((fw) => fw.user.id !== f.ResponsibleWorkerUserId)
+        .map((fw) => toUserNav(fw.user));
+
+      return {
+        id: f.id,
+        type: f.type,
+        capacity: f.capacity,
+        isActive: f.isActive,
+        responsibleWorker: f.user ? toUserNav(f.user) : null,
+        assistantWorkers: assistants.length > 0 ? assistants : null,
+        membershipTypes: f.facilities_membership.map((fm) => ({
+          id: fm.type.id,
+          name: fm.type.name,
+          price: Number(fm.type.price),
+        })),
+      };
+    });
+  }
+
+  private async attachFacilities(
+    userResponse: UserResponseDto,
+    userId: number,
+    clubId: number,
+    typeId: number,
+  ): Promise<void> {
+    if (typeId !== 1) return;
+    userResponse.facilities = await this.loadFacilities(userId, clubId, typeId);
+  }
+
   private async createNumerator(
     name: string,
     clubId: number,
@@ -183,8 +251,13 @@ export class UsersRepository implements IUsersRepository {
     });
     const userResponse = mapRow(created);
     userResponse.membership = getLastMembership(created.memberships);
+    await this.attachFacilities(
+      userResponse,
+      created.id,
+      createUserDto.clubId,
+      created.typeId,
+    );
     return userResponse;
-    //te prometo que fue necesario
   }
 
   async findAll(clubId: number): Promise<UserResponseDto[]> {
@@ -193,12 +266,14 @@ export class UsersRepository implements IUsersRepository {
       include: { type: true, memberships: { include: { type: true } } },
     });
 
-    const usersConMembership = users.map((user) => {
-      const userResponse = mapRow(user);
-      userResponse.membership = getLastMembership(user.memberships);
-      return userResponse;
-    });
-    return usersConMembership;
+    return Promise.all(
+      users.map(async (user) => {
+        const userResponse = mapRow(user);
+        userResponse.membership = getLastMembership(user.memberships);
+        await this.attachFacilities(userResponse, user.id, clubId, user.typeId);
+        return userResponse;
+      }),
+    );
   }
 
   async findById(
@@ -212,6 +287,7 @@ export class UsersRepository implements IUsersRepository {
     if (!user) return null;
     const userResponse = mapRow(user);
     userResponse.membership = getLastMembership(user.memberships);
+    await this.attachFacilities(userResponse, user.id, clubId, user.typeId);
     return userResponse;
   }
 
@@ -226,6 +302,7 @@ export class UsersRepository implements IUsersRepository {
     if (!user) return null;
     const userResponse = mapRow(user);
     userResponse.membership = getLastMembership(user.memberships);
+    await this.attachFacilities(userResponse, user.id, clubId, user.typeId);
     return userResponse;
   }
 
@@ -237,7 +314,9 @@ export class UsersRepository implements IUsersRepository {
       where: { document, clubId },
     });
     if (!user) return null;
-    return mapRow(user);
+    const userResponse = mapRow(user);
+    await this.attachFacilities(userResponse, user.id, clubId, user.typeId);
+    return userResponse;
   }
 
   async existsTypeId(typeId: number): Promise<boolean> {
@@ -264,6 +343,12 @@ export class UsersRepository implements IUsersRepository {
     });
     const userResponse = mapRow(updated);
     userResponse.membership = getLastMembership(updated.memberships);
+    await this.attachFacilities(
+      userResponse,
+      updated.id,
+      updateUserDto.clubId,
+      updated.typeId,
+    );
     return userResponse;
   }
 

@@ -13,6 +13,7 @@ import {
 } from 'class-validator';
 import { UserTypeResponseDto } from '../../../user_type/dto/response/user-type-response.dto';
 import { membershipNavigation } from 'src/users/repository/users.repository';
+import { FacilityNavigation } from 'src/facilities/repository/facilities.repository';
 
 export class UserResponseDto {
   @ApiProperty({ example: 1, description: 'ID del usuario' })
@@ -157,4 +158,11 @@ export class UserResponseDto {
   @IsOptional()
   @IsString({ message: 'medicalConditions debe ser un texto' })
   medicalConditions?: string | null;
+
+  @ApiProperty({ required: false })
+  @IsOptional()
+  @IsArray({ message: 'Instalaciones en las que trabaja el usuario' })
+  @IsNumber({}, { each: true, message: 'Cada instalación debe ser un número' })
+  @Min(1, { each: true, message: 'Cada instalación debe ser al menos 1' })
+  facilities?: FacilityNavigation[] | null;
 }
