@@ -76,6 +76,7 @@ model facility_workers{
   userTypeId Int
   user users @relation(fields: [userId, clubId, userTypeId], references: [id, clubId, typeId])
   @@id([id, facilityId, userId, clubId, userTypeId])
+  @@unique([facilityId, userId, clubId, userTypeId])
 }
 
 model activity {
