@@ -1,5 +1,5 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { Equals, IsNumber, Min } from "class-validator";
+import { Equals, IsNumber, Min , IsArray} from "class-validator";
 
 export class CreateFacilityWorkerDto {
     @ApiProperty({ example: 1, description: 'ID del club' })
@@ -8,9 +8,10 @@ export class CreateFacilityWorkerDto {
     clubId: number;
 
     @ApiProperty({ example: 1, description: 'ID de la instalación' })
-    @IsNumber({}, { message: 'facilityId debe ser un número' })
+    @IsArray({}, { message: 'facilityId debe ser un array de números' })
+    @IsNumber({}, { each: true, message: 'Cada facilityId debe ser un número' })
     @Min(1, { message: 'facilityId debe ser al menos 1' })
-    facilityId: number;
+    facilityId: number[];
 
     @ApiProperty({ example: 1, description: 'ID del usuario' })
     @IsNumber({}, { message: 'userId debe ser un número' })

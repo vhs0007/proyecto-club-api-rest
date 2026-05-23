@@ -9,8 +9,8 @@ export class FacilityWorkerResponseDto {
     @ApiProperty({ example: 1, description: 'ID del club' })
     clubId: number;
 
-    @ApiProperty({ example: 1, description: 'ID de la instalación' })
-    facilityNavigation: FacilityNavigation;
+    @ApiProperty({ example: [1, 2, 3], description: 'ID de las instalaciones' })
+    facilityNavigation: FacilityNavigation[];
 
     @ApiProperty({ example: 1, description: 'ID del usuario' })
     userNavigation: UserNavigation;
