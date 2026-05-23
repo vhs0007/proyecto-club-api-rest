@@ -1,6 +1,6 @@
 import { ApiProperty, PartialType } from '@nestjs/swagger';
 import { CreateFacilityWorkerDto } from './create-facility_worker.dto';
-import { Equals, IsArray, IsNumber, Min, ValidateIf } from 'class-validator';
+import { ArrayMinSize, Equals, IsArray, IsNumber, Min, ValidateIf } from 'class-validator';
 
 export class UpdateFacilityWorkerDto extends PartialType(CreateFacilityWorkerDto) {
     @ApiProperty({ example: 1, description: 'ID del club' })
@@ -9,9 +9,10 @@ export class UpdateFacilityWorkerDto extends PartialType(CreateFacilityWorkerDto
     clubId?: number;
 
     @ApiProperty({ example: 1, description: 'ID de la instalación' })
-    @IsArray({}, { message: 'facilityId debe ser un array de números' })
+    @IsArray({ message: 'facilityId debe ser un array de números' })
+    @ArrayMinSize(1, { message: 'facilityId debe tener al menos un elemento' })
     @IsNumber({}, { each: true, message: 'Cada facilityId debe ser un número' })
-    @Min(1, { message: 'facilityId debe ser al menos 1' })
+    @Min(1, { each: true, message: 'Cada facilityId debe ser al menos 1' })
     facilityId?: number[];
 
     @ApiProperty({ example: 1, description: 'ID del usuario del trabajador responsable' })

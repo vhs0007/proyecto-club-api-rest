@@ -95,8 +95,8 @@ export class FacilityWorkersRepository implements IFacilityWorkersRepository {
 
         const id = await this.generateNumerator(clubId);
 
-        const facilityWorker = await this.prisma.facility_workers.createMany({
-            data: facilityId.map(fid => ({ id, clubId, facilityId: fid, userId, userTypeId })),
+        await this.prisma.facility_workers.createMany({
+            data: facilityId.map((fid) => ({ id, clubId, facilityId: fid, userId, userTypeId })),
         });
 
         const facility = await this.prisma.facilities.findMany({
@@ -108,8 +108,8 @@ export class FacilityWorkersRepository implements IFacilityWorkersRepository {
         }
 
         return {
-            id: id,
-            clubId: facilityWorker.clubId,
+            id,
+            clubId,
             facilityNavigation: facility.map(f => this.mapFacilityNavigation(f)),
             userNavigation: this.mapUserNavigation(user),
         };
@@ -133,52 +133,75 @@ export class FacilityWorkersRepository implements IFacilityWorkersRepository {
             throw new BadRequestException('userTypeId debe ser 1 (solo trabajadores)');
         }
 
-       const facilityId = updateFacilityWorkerDto.facilityId ?? [];
-       facilityId.map(fid => {
-        const facilityWorker = await this.prisma.facility_workers.update({
-            where: {
-                id_facilityId_userId_clubId_userTypeId: {
-                    id: existing.id,
-                    facilityId: fid,
-                    userId: existing.userId,
-                    clubId: existing.clubId,
-                    userTypeId: existing.userTypeId,
+        const facilityIds = updateFacilityWorkerDto.facilityId ?? [existing.facilityId];
+        const userId = updateFacilityWorkerDto.userId ?? existing.userId;
+        const clubId = updateFacilityWorkerDto.clubId ?? existing.clubId;
+        const userTypeId = effectiveUserTypeId;
+
+        for (const fid of facilityIds) {
+            const link = await this.prisma.facility_workers.findUnique({
+                where: {
+                    id_facilityId_userId_clubId_userTypeId: {
+                        id: existing.id,
+                        facilityId: fid,
+                        userId: existing.userId,
+                        clubId: existing.clubId,
+                        userTypeId: existing.userTypeId,
+                    },
                 },
-            },
-            data: {
-                ...(updateFacilityWorkerDto.clubId !== undefined && { clubId: updateFacilityWorkerDto.clubId }),
-                ...(updateFacilityWorkerDto.facilityId !== undefined && { facilityId: fid }),
-                ...(updateFacilityWorkerDto.userId !== undefined && { userId: updateFacilityWorkerDto.userId }),
-                ...(updateFacilityWorkerDto.userTypeId !== undefined && { userTypeId: updateFacilityWorkerDto.userTypeId }),
-            },
-        });
-       })
+            });
+
+            if (link) {
+                await this.prisma.facility_workers.update({
+                    where: {
+                        id_facilityId_userId_clubId_userTypeId: {
+                            id: existing.id,
+                            facilityId: fid,
+                            userId: existing.userId,
+                            clubId: existing.clubId,
+                            userTypeId: existing.userTypeId,
+                        },
+                    },
+                    data: {
+                        ...(updateFacilityWorkerDto.clubId !== undefined && { clubId: updateFacilityWorkerDto.clubId }),
+                        ...(updateFacilityWorkerDto.userId !== undefined && { userId: updateFacilityWorkerDto.userId }),
+                        ...(updateFacilityWorkerDto.userTypeId !== undefined && { userTypeId: updateFacilityWorkerDto.userTypeId }),
+                    },
+                });
+            } else {
+                await this.prisma.facility_workers.create({
+                    data: { id: existing.id, clubId, facilityId: fid, userId, userTypeId },
+                });
+            }
+        }
 
         const user = await this.prisma.users.findUnique({
             where: {
                 id_clubId_typeId: {
-                    id: facilityWorker.userId,
-                    clubId: facilityWorker.clubId,
-                    typeId: facilityWorker.userTypeId,
+                    id: userId,
+                    clubId,
+                    typeId: userTypeId,
                 },
             },
         });
         if (!user) {
-            throw new NotFoundException(`User ${facilityWorker.userId} not found after update`);
+            throw new NotFoundException(`User ${userId} not found after update`);
         }
 
         const facility = await this.prisma.facilities.findMany({
-            where: { id: { in: facilityWorker.facilityId }, clubId: facilityWorker.clubId },
+            where: { id: { in: facilityIds }, clubId },
             include: FACILITY_INCLUDE,
         });
-        if (facility.length !== facilityWorker.facilityId.length) {
-            throw new NotFoundException(`Facility ${facilityWorker.facilityId.filter(id => !facility.some(f => f.id === id))} not found after update`);
+        if (facility.length !== facilityIds.length) {
+            throw new NotFoundException(
+                `Facility ${facilityIds.filter((facilityId) => !facility.some((f) => f.id === facilityId))} not found after update`,
+            );
         }
 
         return {
-            id: facilityWorker.id,
-            clubId: facilityWorker.clubId,
-            facilityNavigation: facility.map(f => this.mapFacilityNavigation(f)),
+            id: existing.id,
+            clubId,
+            facilityNavigation: facility.map((f) => this.mapFacilityNavigation(f)),
             userNavigation: this.mapUserNavigation(user),
         };
     }
