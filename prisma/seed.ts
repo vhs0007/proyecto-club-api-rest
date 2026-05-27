@@ -264,6 +264,7 @@ async function seedTestingData(prisma: PrismaClient): Promise<void> {
         facilityId: n,
         userId: n,
         userTypeId: 1,
+        name: `Actividad ${n} (club ${clubId})`,
       });
     }
   }

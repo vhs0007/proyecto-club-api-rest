@@ -11,4 +11,5 @@ export class ScheduledActivityResponseDto {
     assistantWorkers: UserNavigation[];
     membershipTypesIds: number[];
     datetimeScheduledActivities: DatetimeScheduledActivity[];
+    name: string;
 }

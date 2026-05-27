@@ -1,6 +1,6 @@
 import { ApiProperty, PartialType } from '@nestjs/swagger';
 import { CreateScheduledActivityDto } from './create-scheduled_activity.dto';
-import { Equals, IsArray, IsNumber, Min, ValidateIf, ValidateNested } from 'class-validator';
+import { Equals, IsArray, IsNumber, IsString, Min, ValidateIf, ValidateNested } from 'class-validator';
 import { Type } from 'class-transformer';
 import { DatetimeScheduledActivity } from './create-scheduled_activity.dto';
 
@@ -42,4 +42,8 @@ export class UpdateScheduledActivityDto extends PartialType(CreateScheduledActiv
     @IsNumber({}, { each: true, message: 'Cada assistantWorkerId debe ser un número' })
     @Min(1, { each: true, message: 'Cada assistantWorkerId debe ser al menos 1' })
     assistantWorkerIds?: number[];
+
+    @ApiProperty({ example: "PRACTICA FUTBOL", description: 'nombre de la actividad rutinaria' })
+    @IsString({ message: 'name debe ser un texto' })
+    name?: string;
 }

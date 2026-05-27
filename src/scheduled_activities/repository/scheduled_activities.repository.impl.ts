@@ -38,6 +38,7 @@ type ScheduledActivityRow = {
     userId: number;
     userTypeId: number;
     facility: FacilityRow;
+    name: string;
     scheduled_activities_assistant_workers: { user: UserRow }[];
     scheduled_activities_membership_types: { membershipTypeId: number }[];
     datetime_scheduled_activities: {
@@ -106,6 +107,7 @@ export class ScheduledActivitiesRepositoryImpl implements ScheduledActivityRepos
 
         return {
             id: row.id,
+            name: row.name,
             clubId: row.clubId,
             facility: this.mapFacility(row.facility),
             userId: row.userId,
@@ -162,6 +164,7 @@ export class ScheduledActivitiesRepositoryImpl implements ScheduledActivityRepos
                 facilityId: createScheduledActivityDto.facilityId,
                 userId: createScheduledActivityDto.userId,
                 userTypeId: createScheduledActivityDto.userTypeId,
+                name: createScheduledActivityDto.name,
             }
         });
         if(!created) {
@@ -270,6 +273,7 @@ export class ScheduledActivitiesRepositoryImpl implements ScheduledActivityRepos
             facilityId?: number;
             userId?: number;
             userTypeId?: number;
+            name?: string;
         } = {};
 
         if (updateScheduledActivityDto.facilityId !== undefined) {
@@ -280,6 +284,9 @@ export class ScheduledActivitiesRepositoryImpl implements ScheduledActivityRepos
         }
         if (updateScheduledActivityDto.userTypeId !== undefined) {
             data.userTypeId = updateScheduledActivityDto.userTypeId;
+        }
+        if (updateScheduledActivityDto.name !== undefined) {
+            data.name = updateScheduledActivityDto.name;
         }
 
         if (Object.keys(data).length > 0) {

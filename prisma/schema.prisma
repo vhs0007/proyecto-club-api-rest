@@ -253,6 +253,7 @@ model scheduled_activities {
   facility facilities @relation(fields: [facilityId, clubId], references: [id, clubId])
   userId Int
   userTypeId Int
+  name String @default("-")
   scheduled_activities_assistant_workers scheduled_activities_assistant_workers[]
   scheduled_activities_membership_types scheduled_activities_membership_types[]
   scheduled_activities_members scheduled_activities_members[]
