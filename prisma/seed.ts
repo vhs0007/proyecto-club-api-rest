@@ -119,8 +119,10 @@ async function seedTestingData(prisma: PrismaClient): Promise<void> {
   for (const clubId of CLUB_IDS) {
     for (const typeId of [1, 2, 3] as const) {
       for (let n = 1; n <= PER_TYPE; n++) {
+        // typeId=1 -> ids 1..5, typeId=2 -> ids 6..10, typeId=3 -> ids 11..15
+        const id = (typeId - 1) * PER_TYPE + n;
         usersData.push({
-          id: n,
+          id,
           clubId,
           typeId,
           name: `Club${clubId} Tipo${typeId} Usuario${n}`,
