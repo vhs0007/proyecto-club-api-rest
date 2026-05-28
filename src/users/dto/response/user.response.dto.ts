@@ -12,7 +12,10 @@ import {
   ValidateNested,
 } from 'class-validator';
 import { UserTypeResponseDto } from '../../../user_type/dto/response/user-type-response.dto';
-import { membershipNavigation } from 'src/users/repository/users.repository';
+import {
+  membershipNavigation,
+  ScheduledActivityNavigation,
+} from 'src/users/repository/users.repository';
 import { FacilityNavigation } from 'src/facilities/repository/facilities.repository';
 
 export class UserResponseDto {
@@ -165,4 +168,8 @@ export class UserResponseDto {
   @IsNumber({}, { each: true, message: 'Cada instalación debe ser un número' })
   @Min(1, { each: true, message: 'Cada instalación debe ser al menos 1' })
   facilities?: FacilityNavigation[] | null;
+
+  @ApiProperty({ required: false, description: 'Actividades rutinarias del usuario' })
+  @IsOptional()
+  scheduleActivities?: ScheduledActivityNavigation[] | null;
 }

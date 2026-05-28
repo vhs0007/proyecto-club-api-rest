@@ -2,6 +2,7 @@ import { ApiProperty } from '@nestjs/swagger';
 import type {
   ActivitiesNavigation,
   MembershipTypeNavigation,
+  ScheduledActivityNavigation,
   UserNavigation,
 } from '../../repository/facilities.repository';
 
@@ -59,4 +60,10 @@ export class FacilityResponseDto {
     description: 'Membresías',
   })
   membershipTypes: MembershipTypeNavigation[];
+
+  @ApiProperty({
+    required: false,
+    description: 'Actividades rutinarias de la instalación',
+  })
+  scheduleActivities?: ScheduledActivityNavigation[];
 }

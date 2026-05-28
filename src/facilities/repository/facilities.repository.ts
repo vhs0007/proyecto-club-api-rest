@@ -46,6 +46,28 @@ export interface ActivitiesNavigation {
   isActive: boolean;
 }
 
+export interface WorkingDayNavigation {
+  id: number;
+  dayOfWeek: string;
+}
+
+export interface DatetimeScheduledActivityNavigation {
+  hourStart: string;
+  hourEnd: string;
+  workingDay: WorkingDayNavigation;
+}
+
+export interface ScheduledActivityNavigation {
+  id: number;
+  clubId: number;
+  facilityId: number;
+  userId: number;
+  userTypeId: number;
+  membershipTypes: MembershipTypeNavigation[];
+  assistantWorkerIds: number[];
+  datetimeScheduledActivities: DatetimeScheduledActivityNavigation[];
+}
+
 export interface IFacilitiesRepository {
   create(
     createFacilityDto: CreateFacilityDto,

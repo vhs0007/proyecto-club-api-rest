@@ -1,5 +1,8 @@
-import { DatetimeScheduledActivity } from "../request/create-scheduled_activity.dto";
-import { FacilityNavigation, UserNavigation } from "../../repository/scheduled_activities.repository";
+import {
+    DatetimeScheduledActivityNavigation,
+    MembershipTypeNavigation,
+} from 'src/facilities/repository/facilities.repository';
+import { FacilityNavigation, UserNavigation } from '../../repository/scheduled_activities.repository';
 
 export class ScheduledActivityResponseDto {
     id: number;
@@ -9,7 +12,7 @@ export class ScheduledActivityResponseDto {
     user: UserNavigation;
     userTypeId: number;
     assistantWorkers: UserNavigation[];
-    membershipTypesIds: number[];
-    datetimeScheduledActivities: DatetimeScheduledActivity[];
+    membershipTypes: MembershipTypeNavigation[];
+    datetimeScheduledActivities: DatetimeScheduledActivityNavigation[];
     name: string;
 }
