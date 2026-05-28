@@ -11,6 +11,34 @@ export interface membershipNavigation {
   membershipType: MembershipTypeResponseDto;
 }
 
+export interface WorkingDayNavigation {
+  id: number;
+  dayOfWeek: string;
+}
+
+export interface MembershipTypeNavigation {
+  id: number;
+  name: string;
+  price: number;
+}
+
+export interface DatetimeScheduledActivityNavigation {
+  hourStart: string;
+  hourEnd: string;
+  workingDay: WorkingDayNavigation;
+}
+
+export interface ScheduledActivityNavigation {
+  id: number;
+  clubId: number;
+  facilityId: number;
+  userId: number;
+  userTypeId: number;
+  membershipTypes: MembershipTypeNavigation[];
+  assistantWorkerIds: number[];
+  datetimeScheduledActivities: DatetimeScheduledActivityNavigation[];
+}
+
 export interface IUsersRepository {
   create(createUserDto: CreateUserDto): Promise<UserResponseDto>;
   findAll(clubId: number): Promise<UserResponseDto[]>;

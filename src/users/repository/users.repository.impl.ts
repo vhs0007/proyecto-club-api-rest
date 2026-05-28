@@ -1,7 +1,13 @@
 import { Injectable } from '@nestjs/common';
 import { numerator, Prisma } from '@prisma/client';
 import { PrismaService } from '../../prisma/prisma.service';
-import type { IUsersRepository } from './users.repository';
+import type {
+  DatetimeScheduledActivityNavigation,
+  IUsersRepository,
+  MembershipTypeNavigation,
+  ScheduledActivityNavigation,
+  WorkingDayNavigation,
+} from './users.repository';
 import { UpdateUserDto } from '../dto/request/update-user.request.dto';
 import { CreateUserDto } from '../dto/request/create-user.request.dto';
 import { UserTypeResponseDto } from '../../user_type/dto/response/user-type-response.dto';
@@ -9,7 +15,7 @@ import { membershipNavigation } from './users.repository';
 import { MembershipTypeResponseDto } from 'src/membership_type/dto/response/membership_type-response.dto';
 import { QueryUserRequestDto } from '../dto/request/query-user.request.dto';
 import { UserResponseDto } from '../dto/response/user.response.dto';
-import { FacilityNavigation } from 'src/facilities/repository/facilities.repository';
+import type { FacilityNavigation } from 'src/facilities/repository/facilities.repository';
 
 interface UserRow {
   id: number;
@@ -52,6 +58,38 @@ type MembershipWithTypeRow = {
     price: Prisma.Decimal;
   } | null;
 };
+
+type MembershipTypeFromPrisma = {
+  id: number;
+  name: string;
+  price: Prisma.Decimal;
+};
+
+interface WorkingDayRow {
+  id: number;
+  dayOfWeek: string;
+}
+
+interface DatetimeScheduledActivityRow {
+  hourStart: string;
+  hourEnd: string;
+  working_day: WorkingDayRow;
+}
+
+interface ScheduledActivityMembershipLinkRow {
+  membership_type: MembershipTypeFromPrisma;
+}
+
+interface ScheduledActivityQueryRow {
+  id: number;
+  clubId: number;
+  facilityId: number;
+  userId: number;
+  userTypeId: number;
+  scheduled_activities_assistant_workers: { userId: number }[];
+  scheduled_activities_membership_types: ScheduledActivityMembershipLinkRow[];
+  datetime_scheduled_activities: DatetimeScheduledActivityRow[];
+}
 
 function mapMembership(row: MembershipWithTypeRow): membershipNavigation {
   const membershipType = new MembershipTypeResponseDto();
@@ -185,6 +223,109 @@ export class UsersRepository implements IUsersRepository {
     userResponse.facilities = await this.loadFacilities(userId, clubId, typeId);
   }
 
+  private membershipTypeToNav(
+    membershipType: MembershipTypeFromPrisma,
+  ): MembershipTypeNavigation {
+    return {
+      id: membershipType.id,
+      name: membershipType.name,
+      price: Number(membershipType.price),
+    };
+  }
+
+  private workingDayToNav(workingDay: WorkingDayRow): WorkingDayNavigation {
+    return {
+      id: workingDay.id,
+      dayOfWeek: workingDay.dayOfWeek,
+    };
+  }
+
+  private datetimeScheduleToNavigation(
+    schedule: DatetimeScheduledActivityRow,
+  ): DatetimeScheduledActivityNavigation {
+    return {
+      hourStart: schedule.hourStart,
+      hourEnd: schedule.hourEnd,
+      workingDay: this.workingDayToNav(schedule.working_day),
+    };
+  }
+
+  private scheduledActivityToNavigation(
+    schedule: ScheduledActivityQueryRow,
+  ): ScheduledActivityNavigation {
+    return {
+      id: schedule.id,
+      clubId: schedule.clubId,
+      facilityId: schedule.facilityId,
+      userId: schedule.userId,
+      userTypeId: schedule.userTypeId,
+      membershipTypes: schedule.scheduled_activities_membership_types.map((m) =>
+        this.membershipTypeToNav(m.membership_type),
+      ),
+      assistantWorkerIds: schedule.scheduled_activities_assistant_workers.map(
+        (a) => a.userId,
+      ),
+      datetimeScheduledActivities: schedule.datetime_scheduled_activities.map(
+        (d) => this.datetimeScheduleToNavigation(d),
+      ),
+    };
+  }
+
+  private async loadScheduleActivities(
+    userId: number,
+    clubId: number,
+    userTypeId: number,
+  ): Promise<ScheduledActivityNavigation[]> {
+    const [asMemberLinks, asResponsible] = await Promise.all([
+      this.prisma.scheduled_activities_members.findMany({
+        where: { userId, clubId, userTypeId },
+        include: {
+          scheduled_activities: {
+            include: {
+              scheduled_activities_assistant_workers: true,
+              scheduled_activities_membership_types: { include: { membership_type: true } },
+              datetime_scheduled_activities: { include: { working_day: true } },
+            },
+          },
+        },
+      }),
+      this.prisma.scheduled_activities.findMany({
+        where: { userId, clubId, userTypeId },
+        include: {
+          scheduled_activities_assistant_workers: true,
+          scheduled_activities_membership_types: { include: { membership_type: true } },
+          datetime_scheduled_activities: { include: { working_day: true } },
+        },
+      }),
+    ]);
+
+    const scheduleMap = new Map<number, ScheduledActivityNavigation>();
+
+    for (const link of asMemberLinks) {
+      const s = link.scheduled_activities;
+      scheduleMap.set(s.id, this.scheduledActivityToNavigation(s));
+    }
+
+    for (const s of asResponsible) {
+      scheduleMap.set(s.id, this.scheduledActivityToNavigation(s));
+    }
+
+    return [...scheduleMap.values()];
+  }
+
+  private async attachScheduleActivities(
+    userResponse: UserResponseDto,
+    userId: number,
+    clubId: number,
+    typeId: number,
+  ): Promise<void> {
+    userResponse.scheduleActivities = await this.loadScheduleActivities(
+      userId,
+      clubId,
+      typeId,
+    );
+  }
+
   private async createNumerator(
     name: string,
     clubId: number,
@@ -257,6 +398,12 @@ export class UsersRepository implements IUsersRepository {
       createUserDto.clubId,
       created.typeId,
     );
+    await this.attachScheduleActivities(
+      userResponse,
+      created.id,
+      createUserDto.clubId,
+      created.typeId,
+    );
     return userResponse;
   }
 
@@ -271,6 +418,12 @@ export class UsersRepository implements IUsersRepository {
         const userResponse = mapRow(user);
         userResponse.membership = getLastMembership(user.memberships);
         await this.attachFacilities(userResponse, user.id, clubId, user.typeId);
+        await this.attachScheduleActivities(
+          userResponse,
+          user.id,
+          clubId,
+          user.typeId,
+        );
         return userResponse;
       }),
     );
@@ -288,6 +441,7 @@ export class UsersRepository implements IUsersRepository {
     const userResponse = mapRow(user);
     userResponse.membership = getLastMembership(user.memberships);
     await this.attachFacilities(userResponse, user.id, clubId, user.typeId);
+    await this.attachScheduleActivities(userResponse, user.id, clubId, user.typeId);
     return userResponse;
   }
 
@@ -303,6 +457,7 @@ export class UsersRepository implements IUsersRepository {
     const userResponse = mapRow(user);
     userResponse.membership = getLastMembership(user.memberships);
     await this.attachFacilities(userResponse, user.id, clubId, user.typeId);
+    await this.attachScheduleActivities(userResponse, user.id, clubId, user.typeId);
     return userResponse;
   }
 
@@ -316,6 +471,7 @@ export class UsersRepository implements IUsersRepository {
     if (!user) return null;
     const userResponse = mapRow(user);
     await this.attachFacilities(userResponse, user.id, clubId, user.typeId);
+    await this.attachScheduleActivities(userResponse, user.id, clubId, user.typeId);
     return userResponse;
   }
 
@@ -344,6 +500,12 @@ export class UsersRepository implements IUsersRepository {
     const userResponse = mapRow(updated);
     userResponse.membership = getLastMembership(updated.memberships);
     await this.attachFacilities(
+      userResponse,
+      updated.id,
+      updateUserDto.clubId,
+      updated.typeId,
+    );
+    await this.attachScheduleActivities(
       userResponse,
       updated.id,
       updateUserDto.clubId,

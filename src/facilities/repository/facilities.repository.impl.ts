@@ -2,9 +2,12 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { numerator, Prisma } from '@prisma/client';
 import { PrismaService } from '../../prisma/prisma.service';
 import type {
+  DatetimeScheduledActivityNavigation,
   IFacilitiesRepository,
   MembershipTypeNavigation,
+  ScheduledActivityNavigation,
   UserNavigation,
+  WorkingDayNavigation,
 } from './facilities.repository';
 import { CreateFacilityDto } from '../dto/request/create-facility.dto';
 import { UpdateFacilityDto } from '../dto/request/update-facility.dto';
@@ -60,6 +63,32 @@ interface FacilitiesMembershipLinkRow {
   type: MembershipTypeFromPrisma;
 }
 
+interface WorkingDayRow {
+  id: number;
+  dayOfWeek: string;
+}
+
+interface DatetimeScheduledActivityRow {
+  hourStart: string;
+  hourEnd: string;
+  working_day: WorkingDayRow;
+}
+
+interface ScheduledActivityMembershipLinkRow {
+  membership_type: MembershipTypeFromPrisma;
+}
+
+type ScheduledActivityLinkRow = {
+  id: number;
+  clubId: number;
+  facilityId: number;
+  userId: number;
+  userTypeId: number;
+  scheduled_activities_assistant_workers: { userId: number }[];
+  scheduled_activities_membership_types: ScheduledActivityMembershipLinkRow[];
+  datetime_scheduled_activities: DatetimeScheduledActivityRow[];
+};
+
 interface FacilityQueryRow {
   id: number;
   type: string;
@@ -71,6 +100,7 @@ interface FacilityQueryRow {
   facility_workers: FacilityWorkerLinkRow[];
   activities: ActivityWithUserRow[];
   facilities_membership: FacilitiesMembershipLinkRow[];
+  scheduled_activities: ScheduledActivityLinkRow[];
 }
 
 type FacilityWorkerNavigation = {
@@ -105,6 +135,13 @@ const FACILITY_INCLUDE = {
   facilities_membership: {
     include: {
       type: true,
+    },
+  },
+  scheduled_activities: {
+    include: {
+      scheduled_activities_assistant_workers: true,
+      scheduled_activities_membership_types: { include: { membership_type: true } },
+      datetime_scheduled_activities: { include: { working_day: true } },
     },
   },
 } as const;
@@ -149,6 +186,44 @@ export class FacilitiesRepository implements IFacilitiesRepository {
     };
   }
 
+  private workingDayToNav(workingDay: WorkingDayRow): WorkingDayNavigation {
+    return {
+      id: workingDay.id,
+      dayOfWeek: workingDay.dayOfWeek,
+    };
+  }
+
+  private datetimeScheduleToNavigation(
+    schedule: DatetimeScheduledActivityRow,
+  ): DatetimeScheduledActivityNavigation {
+    return {
+      hourStart: schedule.hourStart,
+      hourEnd: schedule.hourEnd,
+      workingDay: this.workingDayToNav(schedule.working_day),
+    };
+  }
+
+  private scheduledActivityToNavigation(
+    schedule: ScheduledActivityLinkRow,
+  ): ScheduledActivityNavigation {
+    return {
+      id: schedule.id,
+      clubId: schedule.clubId,
+      facilityId: schedule.facilityId,
+      userId: schedule.userId,
+      userTypeId: schedule.userTypeId,
+      membershipTypes: schedule.scheduled_activities_membership_types.map((m) =>
+        this.membershipTypePrismaToInterface(m.membership_type),
+      ),
+      assistantWorkerIds: schedule.scheduled_activities_assistant_workers.map(
+        (a) => a.userId,
+      ),
+      datetimeScheduledActivities: schedule.datetime_scheduled_activities.map(
+        (d) => this.datetimeScheduleToNavigation(d),
+      ),
+    };
+  }
+
   private mapRow(row: FacilityQueryRow): FacilityResponseDto {
     const workers: FacilityWorkerNavigation[] = row.facility_workers.map(
       (fw) => ({
@@ -170,6 +245,9 @@ export class FacilitiesRepository implements IFacilitiesRepository {
       isActive: row.isActive,
       activities: row.activities.map((activity) => this.activityPrismaToInterface(activity)),
       membershipTypes: row.facilities_membership.map((fm) => this.membershipTypePrismaToInterface(fm.type)),
+      scheduleActivities: row.scheduled_activities.map((s) =>
+        this.scheduledActivityToNavigation(s),
+      ),
     };
   }
 

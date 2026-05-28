@@ -1,5 +1,11 @@
 import { Injectable } from "@nestjs/common";
+import { Prisma } from "@prisma/client";
 import { PrismaService } from "src/prisma/prisma.service";
+import type {
+    DatetimeScheduledActivityNavigation,
+    MembershipTypeNavigation,
+    WorkingDayNavigation,
+} from "src/facilities/repository/facilities.repository";
 import {
     FacilityNavigation,
     ScheduledActivityRepository,
@@ -21,6 +27,27 @@ type UserRow = {
     document: string;
 };
 
+type MembershipTypeFromPrisma = {
+    id: number;
+    name: string;
+    price: Prisma.Decimal;
+};
+
+interface WorkingDayRow {
+    id: number;
+    dayOfWeek: string;
+}
+
+interface DatetimeScheduledActivityRow {
+    hourStart: string;
+    hourEnd: string;
+    working_day: WorkingDayRow;
+}
+
+interface ScheduledActivityMembershipLinkRow {
+    membership_type: MembershipTypeFromPrisma;
+}
+
 type FacilityRow = {
     id: number;
     type: string;
@@ -40,12 +67,8 @@ type ScheduledActivityRow = {
     facility: FacilityRow;
     name: string;
     scheduled_activities_assistant_workers: { user: UserRow }[];
-    scheduled_activities_membership_types: { membershipTypeId: number }[];
-    datetime_scheduled_activities: {
-        hourStart: string;
-        hourEnd: string;
-        workingDayId: number;
-    }[];
+    scheduled_activities_membership_types: ScheduledActivityMembershipLinkRow[];
+    datetime_scheduled_activities: DatetimeScheduledActivityRow[];
 };
 
 const SCHEDULED_ACTIVITY_INCLUDE = {
@@ -74,6 +97,31 @@ export class ScheduledActivitiesRepositoryImpl implements ScheduledActivityRepos
             deletedAt: user.deletedAt,
             isActive: user.isActive,
             document: user.document,
+        };
+    }
+
+    private membershipTypeToNav(
+        membershipType: MembershipTypeFromPrisma,
+    ): MembershipTypeNavigation {
+        return {
+            id: membershipType.id,
+            name: membershipType.name,
+            price: Number(membershipType.price),
+        };
+    }
+
+    private workingDayToNav(workingDay: WorkingDayRow): WorkingDayNavigation {
+        return {
+            id: workingDay.id,
+            dayOfWeek: workingDay.dayOfWeek,
+        };
+    }
+
+    private datetimeToNav(datetime: DatetimeScheduledActivityRow): DatetimeScheduledActivityNavigation {
+        return {
+            hourStart: datetime.hourStart,
+            hourEnd: datetime.hourEnd,
+            workingDay: this.workingDayToNav(datetime.working_day),
         };
     }
 
@@ -116,14 +164,12 @@ export class ScheduledActivitiesRepositoryImpl implements ScheduledActivityRepos
             assistantWorkers: row.scheduled_activities_assistant_workers.map((worker) =>
                 this.userToNav(worker.user),
             ),
-            membershipTypesIds: row.scheduled_activities_membership_types.map(
-                (membershipType) => membershipType.membershipTypeId,
+            membershipTypes: row.scheduled_activities_membership_types.map((m) =>
+                this.membershipTypeToNav(m.membership_type),
             ),
-            datetimeScheduledActivities: row.datetime_scheduled_activities.map((datetime) => ({
-                hourStart: datetime.hourStart,
-                hourEnd: datetime.hourEnd,
-                workingDayId: datetime.workingDayId,
-            })),
+            datetimeScheduledActivities: row.datetime_scheduled_activities.map((d) =>
+                this.datetimeToNav(d),
+            ),
         };
     }
 
