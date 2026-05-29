@@ -28,6 +28,7 @@ function isSeedTestingEnabled(): boolean {
 }
 
 const CLUB_IDS = [1, 2] as const;
+type ClubId = (typeof CLUB_IDS)[number];
 const PER_TYPE = 5;
 const DAYS = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes'] as const;
 
@@ -217,12 +218,16 @@ const CLUB_PROFILES: Record<(typeof CLUB_IDS)[number], ClubSeedProfile> = {
   },
 };
 
-function userDocument(clubId: number, typeId: number, n: number): string {
+function getClubProfile(clubId: ClubId): ClubSeedProfile {
+  return CLUB_PROFILES[clubId];
+}
+
+function userDocument(clubId: ClubId, typeId: number, n: number): string {
   return `DNI-${clubId}${typeId}${String(n).padStart(2, '0')}`;
 }
 
-function userEmail(clubId: number, typeId: number, n: number): string {
-  const slug = CLUB_PROFILES[clubId].workers[0].split(' ')[1]?.toLowerCase() ?? 'club';
+function userEmail(clubId: ClubId, typeId: number, n: number): string {
+  const slug = getClubProfile(clubId).workers[0].split(' ')[1]?.toLowerCase() ?? 'club';
   return `${typeId === 1 ? 'staff' : typeId === 2 ? 'socio' : 'atleta'}.${n}@${slug}c${clubId}.test`;
 }
 
@@ -287,7 +292,7 @@ async function seedTestingData(prisma: PrismaClient): Promise<void> {
 
   const usersData: Prisma.usersCreateManyInput[] = [];
   for (const clubId of CLUB_IDS) {
-    const profile = CLUB_PROFILES[clubId];
+    const profile = getClubProfile(clubId);
     for (const typeId of [1, 2, 3] as const) {
       const names =
         typeId === 1
@@ -314,7 +319,7 @@ async function seedTestingData(prisma: PrismaClient): Promise<void> {
 
   const membershipTypesData: Prisma.membership_typeCreateManyInput[] = [];
   for (const clubId of CLUB_IDS) {
-    const profile = CLUB_PROFILES[clubId];
+    const profile = getClubProfile(clubId);
     for (let n = 1; n <= 5; n++) {
       membershipTypesData.push({
         id: n,
@@ -328,7 +333,7 @@ async function seedTestingData(prisma: PrismaClient): Promise<void> {
 
   const facilitiesData: Prisma.facilitiesCreateManyInput[] = [];
   for (const clubId of CLUB_IDS) {
-    const profile = CLUB_PROFILES[clubId];
+    const profile = getClubProfile(clubId);
     for (let n = 1; n <= 5; n++) {
       facilitiesData.push({
         id: n,
@@ -387,7 +392,7 @@ async function seedTestingData(prisma: PrismaClient): Promise<void> {
   ];
   const activityData: Prisma.activityCreateManyInput[] = [];
   for (const clubId of CLUB_IDS) {
-    const profile = CLUB_PROFILES[clubId];
+    const profile = getClubProfile(clubId);
     for (let n = 1; n <= 5; n++) {
       activityData.push({
         id: n,
@@ -451,7 +456,7 @@ async function seedTestingData(prisma: PrismaClient): Promise<void> {
 
   const scheduledData: Prisma.scheduled_activitiesCreateManyInput[] = [];
   for (const clubId of CLUB_IDS) {
-    const profile = CLUB_PROFILES[clubId];
+    const profile = getClubProfile(clubId);
     for (let n = 1; n <= 5; n++) {
       scheduledData.push({
         id: n,
@@ -469,7 +474,7 @@ async function seedTestingData(prisma: PrismaClient): Promise<void> {
     [];
   let maxAssistantsPerClub = 0;
   for (const clubId of CLUB_IDS) {
-    const profile = CLUB_PROFILES[clubId];
+    const profile = getClubProfile(clubId);
     let assistantRowId = 0;
     for (let activityId = 1; activityId <= 5; activityId++) {
       const responsibleId = activityId;
@@ -495,7 +500,7 @@ async function seedTestingData(prisma: PrismaClient): Promise<void> {
     [];
   let maxMembershipLinksPerClub = 0;
   for (const clubId of CLUB_IDS) {
-    const profile = CLUB_PROFILES[clubId];
+    const profile = getClubProfile(clubId);
     let membershipLinkRowId = 0;
     for (let activityId = 1; activityId <= 5; activityId++) {
       for (const membershipTypeId of profile.scheduleMembershipTypes[activityId - 1]) {
@@ -531,7 +536,7 @@ async function seedTestingData(prisma: PrismaClient): Promise<void> {
   const datetimeScheduledData: Prisma.datetime_scheduled_activitiesCreateManyInput[] = [];
   let maxDatetimesPerClub = 0;
   for (const clubId of CLUB_IDS) {
-    const profile = CLUB_PROFILES[clubId];
+    const profile = getClubProfile(clubId);
     let datetimeRowId = 0;
     for (let activityId = 1; activityId <= 5; activityId++) {
       for (const slot of profile.scheduleSlots[activityId - 1]) {
