@@ -6,6 +6,7 @@ import type {
   IUsersRepository,
   MembershipTypeNavigation,
   ScheduledActivityNavigation,
+  UserNavigation,
   WorkingDayNavigation,
 } from './users.repository';
 import { UpdateUserDto } from '../dto/request/update-user.request.dto';
@@ -80,13 +81,32 @@ interface ScheduledActivityMembershipLinkRow {
   membership_type: MembershipTypeFromPrisma;
 }
 
+interface UserTypeRow {
+  id: number;
+  name: string;
+}
+
+interface UserWithTypeRow {
+  id: number;
+  name: string;
+  email: string | null;
+  createdAt: Date;
+  deletedAt: Date | null;
+  isActive: boolean;
+  type: UserTypeRow;
+}
+
+interface ScheduledActivityAssistantLinkRow {
+  user: UserWithTypeRow;
+}
+
 interface ScheduledActivityQueryRow {
   id: number;
   clubId: number;
   facilityId: number;
   userId: number;
   userTypeId: number;
-  scheduled_activities_assistant_workers: { userId: number }[];
+  scheduled_activities_assistant_workers: ScheduledActivityAssistantLinkRow[];
   scheduled_activities_membership_types: ScheduledActivityMembershipLinkRow[];
   datetime_scheduled_activities: DatetimeScheduledActivityRow[];
 }
@@ -223,6 +243,18 @@ export class UsersRepository implements IUsersRepository {
     userResponse.facilities = await this.loadFacilities(userId, clubId, typeId);
   }
 
+  private userToNav(user: UserWithTypeRow): UserNavigation {
+    return {
+      id: user.id,
+      name: user.name,
+      type: { id: user.type.id, name: user.type.name },
+      email: user.email,
+      createdAt: user.createdAt,
+      deletedAt: user.deletedAt,
+      isActive: user.isActive,
+    };
+  }
+
   private membershipTypeToNav(
     membershipType: MembershipTypeFromPrisma,
   ): MembershipTypeNavigation {
@@ -250,23 +282,36 @@ export class UsersRepository implements IUsersRepository {
     };
   }
 
-  private scheduledActivityToNavigation(
+  private async scheduledActivityToNavigation(
     schedule: ScheduledActivityQueryRow,
-  ): ScheduledActivityNavigation {
+  ): Promise<ScheduledActivityNavigation> {
+    const responsibleUser = await this.prisma.users.findFirst({
+      where: {
+        id: schedule.userId,
+        clubId: schedule.clubId,
+        typeId: schedule.userTypeId,
+      },
+      include: { type: true },
+    });
+
+    if (!responsibleUser?.type) {
+      throw new Error(
+        `Trabajador responsable no encontrado para la actividad rutinaria ${schedule.id}`,
+      );
+    }
+
     return {
       id: schedule.id,
       clubId: schedule.clubId,
-      facilityId: schedule.facilityId,
-      userId: schedule.userId,
-      userTypeId: schedule.userTypeId,
       membershipTypes: schedule.scheduled_activities_membership_types.map((m) =>
         this.membershipTypeToNav(m.membership_type),
       ),
-      assistantWorkerIds: schedule.scheduled_activities_assistant_workers.map(
-        (a) => a.userId,
+      responsibleWorker: this.userToNav(responsibleUser),
+      assistantWorkers: schedule.scheduled_activities_assistant_workers.map((a) =>
+        this.userToNav(a.user),
       ),
-      datetimeScheduledActivities: schedule.datetime_scheduled_activities.map(
-        (d) => this.datetimeScheduleToNavigation(d),
+      datetimeScheduledActivities: schedule.datetime_scheduled_activities.map((d) =>
+        this.datetimeScheduleToNavigation(d),
       ),
     };
   }
@@ -282,7 +327,9 @@ export class UsersRepository implements IUsersRepository {
         include: {
           scheduled_activities: {
             include: {
-              scheduled_activities_assistant_workers: true,
+              scheduled_activities_assistant_workers: {
+                include: { user: { include: { type: true } } },
+              },
               scheduled_activities_membership_types: { include: { membership_type: true } },
               datetime_scheduled_activities: { include: { working_day: true } },
             },
@@ -292,7 +339,9 @@ export class UsersRepository implements IUsersRepository {
       this.prisma.scheduled_activities.findMany({
         where: { userId, clubId, userTypeId },
         include: {
-          scheduled_activities_assistant_workers: true,
+          scheduled_activities_assistant_workers: {
+            include: { user: { include: { type: true } } },
+          },
           scheduled_activities_membership_types: { include: { membership_type: true } },
           datetime_scheduled_activities: { include: { working_day: true } },
         },
@@ -303,11 +352,14 @@ export class UsersRepository implements IUsersRepository {
 
     for (const link of asMemberLinks) {
       const s = link.scheduled_activities;
-      scheduleMap.set(s.id, this.scheduledActivityToNavigation(s));
+      scheduleMap.set(s.id, await this.scheduledActivityToNavigation(s));
     }
 
     for (const s of asResponsible) {
-      scheduleMap.set(s.id, this.scheduledActivityToNavigation(s));
+      scheduleMap.set(
+        s.id,
+        await this.scheduledActivityToNavigation(s),
+      );
     }
 
     return [...scheduleMap.values()];

@@ -22,6 +22,21 @@ export interface MembershipTypeNavigation {
   price: number;
 }
 
+export interface UserTypeNavigation {
+  id: number;
+  name: string;
+}
+
+export interface UserNavigation {
+  id: number;
+  name: string;
+  type: UserTypeNavigation;
+  email: string | null;
+  createdAt: Date;
+  deletedAt: Date | null;
+  isActive: boolean;
+}
+
 export interface DatetimeScheduledActivityNavigation {
   hourStart: string;
   hourEnd: string;
@@ -31,11 +46,9 @@ export interface DatetimeScheduledActivityNavigation {
 export interface ScheduledActivityNavigation {
   id: number;
   clubId: number;
-  facilityId: number;
-  userId: number;
-  userTypeId: number;
   membershipTypes: MembershipTypeNavigation[];
-  assistantWorkerIds: number[];
+  responsibleWorker: UserNavigation;
+  assistantWorkers: UserNavigation[];
   datetimeScheduledActivities: DatetimeScheduledActivityNavigation[];
 }
 

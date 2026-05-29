@@ -78,13 +78,16 @@ interface ScheduledActivityMembershipLinkRow {
   membership_type: MembershipTypeFromPrisma;
 }
 
+interface ScheduledActivityAssistantLinkRow {
+  user: UserWithTypeRow;
+}
+
 type ScheduledActivityLinkRow = {
   id: number;
   clubId: number;
-  facilityId: number;
   userId: number;
   userTypeId: number;
-  scheduled_activities_assistant_workers: { userId: number }[];
+  scheduled_activities_assistant_workers: ScheduledActivityAssistantLinkRow[];
   scheduled_activities_membership_types: ScheduledActivityMembershipLinkRow[];
   datetime_scheduled_activities: DatetimeScheduledActivityRow[];
 };
@@ -139,7 +142,9 @@ const FACILITY_INCLUDE = {
   },
   scheduled_activities: {
     include: {
-      scheduled_activities_assistant_workers: true,
+      scheduled_activities_assistant_workers: {
+        include: { user: { include: { type: true } } },
+      },
       scheduled_activities_membership_types: { include: { membership_type: true } },
       datetime_scheduled_activities: { include: { working_day: true } },
     },
@@ -203,28 +208,41 @@ export class FacilitiesRepository implements IFacilitiesRepository {
     };
   }
 
-  private scheduledActivityToNavigation(
+  private async scheduledActivityToNavigation(
     schedule: ScheduledActivityLinkRow,
-  ): ScheduledActivityNavigation {
+  ): Promise<ScheduledActivityNavigation> {
+    const responsibleUser = await this.prisma.users.findFirst({
+      where: {
+        id: schedule.userId,
+        clubId: schedule.clubId,
+        typeId: schedule.userTypeId,
+      },
+      include: { type: true },
+    });
+
+    if (!responsibleUser?.type) {
+      throw new Error(
+        `Trabajador responsable no encontrado para la actividad rutinaria ${schedule.id}`,
+      );
+    }
+
     return {
       id: schedule.id,
       clubId: schedule.clubId,
-      facilityId: schedule.facilityId,
-      userId: schedule.userId,
-      userTypeId: schedule.userTypeId,
       membershipTypes: schedule.scheduled_activities_membership_types.map((m) =>
         this.membershipTypePrismaToInterface(m.membership_type),
       ),
-      assistantWorkerIds: schedule.scheduled_activities_assistant_workers.map(
-        (a) => a.userId,
+      responsibleWorker: this.userToNav(responsibleUser),
+      assistantWorkers: schedule.scheduled_activities_assistant_workers.map((a) =>
+        this.userToNav(a.user),
       ),
-      datetimeScheduledActivities: schedule.datetime_scheduled_activities.map(
-        (d) => this.datetimeScheduleToNavigation(d),
+      datetimeScheduledActivities: schedule.datetime_scheduled_activities.map((d) =>
+        this.datetimeScheduleToNavigation(d),
       ),
     };
   }
 
-  private mapRow(row: FacilityQueryRow): FacilityResponseDto {
+  private async mapRow(row: FacilityQueryRow): Promise<FacilityResponseDto> {
     const workers: FacilityWorkerNavigation[] = row.facility_workers.map(
       (fw) => ({
         id: fw.id,
@@ -245,8 +263,8 @@ export class FacilitiesRepository implements IFacilitiesRepository {
       isActive: row.isActive,
       activities: row.activities.map((activity) => this.activityPrismaToInterface(activity)),
       membershipTypes: row.facilities_membership.map((fm) => this.membershipTypePrismaToInterface(fm.type)),
-      scheduleActivities: row.scheduled_activities.map((s) =>
-        this.scheduledActivityToNavigation(s),
+      scheduleActivities: await Promise.all(
+        row.scheduled_activities.map((s) => this.scheduledActivityToNavigation(s)),
       ),
     };
   }
@@ -356,7 +374,7 @@ export class FacilitiesRepository implements IFacilitiesRepository {
       where: { clubId },
       include: FACILITY_INCLUDE,
     });
-    return list.map((row) => this.mapRow(row));
+    return await Promise.all(list.map((row) => this.mapRow(row)));
   }
 
   async findById(query: QueryFacilitiesRequestDto): Promise<FacilityResponseDto | null> {
@@ -364,7 +382,7 @@ export class FacilitiesRepository implements IFacilitiesRepository {
       where: { id_clubId: { id: query.id, clubId: query.clubId } },
       include: FACILITY_INCLUDE,
     });
-    return row ? this.mapRow(row) : null;
+    return row ? await this.mapRow(row) : null;
   }
 
   async update(query: QueryFacilitiesRequestDto, updateFacilityDto: UpdateFacilityDto): Promise<FacilityResponseDto> {
