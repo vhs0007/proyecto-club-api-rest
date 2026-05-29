@@ -9,29 +9,12 @@ dotenv.config({ path: path.resolve(__dirname, '../.env') });
  * Datos de prueba solo si IS_TESTING=true o isTesting=true (ej. variable en Render).
  * Si no, el script termina sin tocar la base (producción segura).
  *
- * En Render: migraciones + seed en el deploy, con IS_TESTING=true solo en el entorno donde querés datos demo.
- *
  *   npx prisma migrate deploy && npx prisma db seed
  *
  * user_type: 1 = Trabajador, 2 = Socio, 3 = Atleta
+ * Por club: 5 trabajadores (ids 1-5), 5 socios (6-10), 5 atletas (11-15)
  *
- * Estructura por club (clubes 1 y 2):
- *   - users: 15 (ids 1..5 typeId=1 trabajadores, 6..10 typeId=2 socios, 11..15 typeId=3 atletas)
- *   - membership_type: 5 (ids 1..5)
- *   - facilities: 5 (ids 1..5, responsable trabajador 1..5)
- *   - facility_workers: 5
- *   - facilities_membership: 5
- *   - activity: 5
- *   - membership: 5 (1 por socio)
- *   - time_entries: 5 (1 por trabajador)
- *   - working_days: 5 (Lunes..Viernes)
- *   - scheduled_activities: 5
- *   - scheduled_activities_assistant_workers: 5
- *   - scheduled_activities_membership_types: 5
- *   - scheduled_activities_members: 5
- *   - datetime_scheduled_activities: 5
- *
- * Login prueba (si usás hash): contraseña semilla `demo1234`
+ * Login prueba: contraseña `demo1234`
  */
 
 import { PrismaClient, Prisma } from '@prisma/client';
@@ -42,6 +25,205 @@ function isSeedTestingEnabled(): boolean {
     process.env.IS_TESTING === 'true' ||
     process.env.isTesting === 'true'
   );
+}
+
+const CLUB_IDS = [1, 2] as const;
+const PER_TYPE = 5;
+const DAYS = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes'] as const;
+
+type ClubSeedProfile = {
+  workers: string[];
+  members: string[];
+  athletes: string[];
+  facilities: string[];
+  membershipPlans: string[];
+  scheduledActivities: string[];
+  /** Por actividad (índice 0..4): ids de trabajadores asistentes (typeId=1) */
+  scheduleAssistants: number[][];
+  /** Por actividad: bloques horarios */
+  scheduleSlots: { workingDayId: number; hourStart: string; hourEnd: string }[][];
+  /** Por actividad: ids de tipos de membresía asociados */
+  scheduleMembershipTypes: number[][];
+};
+
+const CLUB_PROFILES: Record<(typeof CLUB_IDS)[number], ClubSeedProfile> = {
+  1: {
+    workers: [
+      'Ana García',
+      'Luis Martínez',
+      'Carla Rodríguez',
+      'Diego Fernández',
+      'Sofía López',
+    ],
+    members: [
+      'María Pérez',
+      'Carlos Gómez',
+      'Lucía Herrera',
+      'Jorge Ruiz',
+      'Elena Vargas',
+    ],
+    athletes: [
+      'Tomás Acosta',
+      'Valentina Morales',
+      'Facundo Ríos',
+      'Camila Torres',
+      'Benjamín Silva',
+    ],
+    facilities: [
+      'Sala de musculación',
+      'Piscina climatizada',
+      'Cancha de fútbol 7',
+      'Sala de spinning',
+      'Estudio de yoga',
+    ],
+    membershipPlans: [
+      'Membresía Básica',
+      'Membresía Premium',
+      'Membresía Familiar',
+      'Pase diario',
+      'Corporate Wellness',
+    ],
+    scheduledActivities: [
+      'Musculación guiada mañana',
+      'Natación nivel inicial',
+      'Fútbol formativo',
+      'Spinning intenso',
+      'Yoga y estiramiento',
+    ],
+    scheduleAssistants: [
+      [2, 3],
+      [3, 4, 5],
+      [1, 4],
+      [2, 5],
+      [1, 3, 4],
+    ],
+    scheduleSlots: [
+      [
+        { workingDayId: 1, hourStart: '07:00', hourEnd: '09:00' },
+        { workingDayId: 3, hourStart: '07:00', hourEnd: '09:00' },
+        { workingDayId: 5, hourStart: '08:00', hourEnd: '10:00' },
+      ],
+      [
+        { workingDayId: 2, hourStart: '10:00', hourEnd: '11:30' },
+        { workingDayId: 4, hourStart: '10:00', hourEnd: '11:30' },
+      ],
+      [
+        { workingDayId: 1, hourStart: '16:00', hourEnd: '18:00' },
+        { workingDayId: 3, hourStart: '16:00', hourEnd: '18:00' },
+        { workingDayId: 5, hourStart: '17:00', hourEnd: '19:00' },
+      ],
+      [
+        { workingDayId: 2, hourStart: '18:00', hourEnd: '19:00' },
+        { workingDayId: 4, hourStart: '18:00', hourEnd: '19:00' },
+        { workingDayId: 5, hourStart: '19:00', hourEnd: '20:00' },
+      ],
+      [
+        { workingDayId: 1, hourStart: '09:00', hourEnd: '10:00' },
+        { workingDayId: 2, hourStart: '09:00', hourEnd: '10:00' },
+        { workingDayId: 4, hourStart: '09:00', hourEnd: '10:00' },
+      ],
+    ],
+    scheduleMembershipTypes: [
+      [1, 2],
+      [1, 3],
+      [2, 4],
+      [2, 5],
+      [1, 2, 3],
+    ],
+  },
+  2: {
+    workers: [
+      'Pedro Sánchez',
+      'Lucía Fernández',
+      'Miguel Torres',
+      'Andrea Romero',
+      'Javier Navarro',
+    ],
+    members: [
+      'Carmen Díaz',
+      'Roberto Castro',
+      'Isabel Molina',
+      'Fernando Ortega',
+      'Patricia Jiménez',
+    ],
+    athletes: [
+      'Juana Méndez',
+      'Martín Suárez',
+      'Sofía Delgado',
+      'Nicolás Ramos',
+      'Paula Iglesias',
+    ],
+    facilities: [
+      'Gimnasio principal',
+      'Sala multiuso',
+      'Cancha de básquet',
+      'Box de cross training',
+      'Pista de atletismo',
+    ],
+    membershipPlans: [
+      'Plan Mensual',
+      'Plan Trimestral',
+      'Plan Anual',
+      'Socio invitado',
+      'Plan estudiante',
+    ],
+    scheduledActivities: [
+      'Cross training funcional',
+      'Básquet recreativo',
+      'Running en pista',
+      'HIIT multiuso',
+      'Preparación física atletas',
+    ],
+    scheduleAssistants: [
+      [2, 4],
+      [1, 3, 5],
+      [2, 3],
+      [3, 4, 5],
+      [1, 2],
+    ],
+    scheduleSlots: [
+      [
+        { workingDayId: 1, hourStart: '06:30', hourEnd: '08:00' },
+        { workingDayId: 3, hourStart: '06:30', hourEnd: '08:00' },
+        { workingDayId: 5, hourStart: '07:00', hourEnd: '08:30' },
+      ],
+      [
+        { workingDayId: 2, hourStart: '19:00', hourEnd: '21:00' },
+        { workingDayId: 4, hourStart: '19:00', hourEnd: '21:00' },
+      ],
+      [
+        { workingDayId: 1, hourStart: '07:00', hourEnd: '08:30' },
+        { workingDayId: 4, hourStart: '07:00', hourEnd: '08:30' },
+        { workingDayId: 5, hourStart: '08:00', hourEnd: '09:30' },
+      ],
+      [
+        { workingDayId: 2, hourStart: '12:00', hourEnd: '13:00' },
+        { workingDayId: 3, hourStart: '12:00', hourEnd: '13:00' },
+        { workingDayId: 5, hourStart: '12:30', hourEnd: '13:30' },
+      ],
+      [
+        { workingDayId: 1, hourStart: '17:00', hourEnd: '19:00' },
+        { workingDayId: 3, hourStart: '17:00', hourEnd: '19:00' },
+        { workingDayId: 4, hourStart: '18:00', hourEnd: '20:00' },
+      ],
+    ],
+    scheduleMembershipTypes: [
+      [1, 5],
+      [2, 3],
+      [1, 2, 4],
+      [3, 4],
+      [2, 5],
+    ],
+  },
+};
+
+function userDocument(clubId: number, typeId: number, n: number): string {
+  return `DNI-${clubId}${typeId}${String(n).padStart(2, '0')}`;
+}
+
+function userEmail(clubId: number, typeId: number, n: number): string {
+  const slug = CLUB_PROFILES[clubId].workers[0].split(' ')[1]?.toLowerCase() ?? 'club';
+  return `${typeId === 1 ? 'staff' : typeId === 2 ? 'socio' : 'atleta'}.${n}@${slug}c${clubId}.test`;
 }
 
 async function clearDevData(prisma: PrismaClient): Promise<void> {
@@ -67,18 +249,6 @@ async function clearDevData(prisma: PrismaClient): Promise<void> {
   ]);
 }
 
-const CLUB_IDS = [1, 2] as const;
-const PER_TYPE = 5;
-const DAYS = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes'] as const;
-
-function userDocument(clubId: number, typeId: number, n: number): string {
-  return `C${clubId}-T${typeId}-U${n}`;
-}
-
-function userEmail(clubId: number, typeId: number, n: number): string {
-  return `u${typeId}-${n}@c${clubId}.test`;
-}
-
 async function seedTestingData(prisma: PrismaClient): Promise<void> {
   const passwordHash = await bcrypt.hash('demo1234', 10);
 
@@ -97,8 +267,8 @@ async function seedTestingData(prisma: PrismaClient): Promise<void> {
       {
         id: 1,
         name: 'Club Deportivo Norte',
-        address: 'Av. Siempre Viva 123',
-        phone: '+54 11 1234-5678',
+        address: 'Av. del Libertador 2450, Vicente López',
+        phone: '+54 11 4789-3200',
         email: 'contacto@clubnorte.test',
         website: 'https://clubnorte.test',
         isActive: true,
@@ -106,8 +276,8 @@ async function seedTestingData(prisma: PrismaClient): Promise<void> {
       {
         id: 2,
         name: 'Club Sur',
-        address: 'Calle Falsa 456',
-        phone: '+54 221 555-0100',
+        address: 'Bv. Pellegrini 1280, Rosario',
+        phone: '+54 341 555-0100',
         email: 'info@clubsur.test',
         website: 'https://clubsur.test',
         isActive: true,
@@ -117,15 +287,21 @@ async function seedTestingData(prisma: PrismaClient): Promise<void> {
 
   const usersData: Prisma.usersCreateManyInput[] = [];
   for (const clubId of CLUB_IDS) {
+    const profile = CLUB_PROFILES[clubId];
     for (const typeId of [1, 2, 3] as const) {
+      const names =
+        typeId === 1
+          ? profile.workers
+          : typeId === 2
+            ? profile.members
+            : profile.athletes;
       for (let n = 1; n <= PER_TYPE; n++) {
-        // typeId=1 -> ids 1..5, typeId=2 -> ids 6..10, typeId=3 -> ids 11..15
         const id = (typeId - 1) * PER_TYPE + n;
         usersData.push({
           id,
           clubId,
           typeId,
-          name: `Club${clubId} Tipo${typeId} Usuario${n}`,
+          name: names[n - 1],
           document: userDocument(clubId, typeId, n),
           email: userEmail(clubId, typeId, n),
           password: passwordHash,
@@ -138,12 +314,13 @@ async function seedTestingData(prisma: PrismaClient): Promise<void> {
 
   const membershipTypesData: Prisma.membership_typeCreateManyInput[] = [];
   for (const clubId of CLUB_IDS) {
+    const profile = CLUB_PROFILES[clubId];
     for (let n = 1; n <= 5; n++) {
       membershipTypesData.push({
         id: n,
         clubId,
-        name: `Plan ${n} (club ${clubId})`,
-        price: new Prisma.Decimal(40000 + n * 5000),
+        name: profile.membershipPlans[n - 1],
+        price: new Prisma.Decimal(35000 + n * 7500),
       });
     }
   }
@@ -151,12 +328,13 @@ async function seedTestingData(prisma: PrismaClient): Promise<void> {
 
   const facilitiesData: Prisma.facilitiesCreateManyInput[] = [];
   for (const clubId of CLUB_IDS) {
+    const profile = CLUB_PROFILES[clubId];
     for (let n = 1; n <= 5; n++) {
       facilitiesData.push({
         id: n,
         clubId,
-        type: `Instalación ${n} (club ${clubId})`,
-        capacity: 20 + n * 5,
+        type: profile.facilities[n - 1],
+        capacity: 15 + n * 8,
         isActive: true,
         ResponsibleWorkerUserId: n,
         ResponsibleWorkerTypeId: 1,
@@ -166,16 +344,24 @@ async function seedTestingData(prisma: PrismaClient): Promise<void> {
   await prisma.facilities.createMany({ data: facilitiesData });
 
   const facilityWorkersData: Prisma.facility_workersCreateManyInput[] = [];
+  let maxFacilityWorkersPerClub = 0;
   for (const clubId of CLUB_IDS) {
-    for (let n = 1; n <= 5; n++) {
-      facilityWorkersData.push({
-        id: n,
-        clubId,
-        facilityId: n,
-        userId: n,
-        userTypeId: 1,
-      });
+    let facilityWorkerRowId = 0;
+    for (let facilityId = 1; facilityId <= 5; facilityId++) {
+      const responsibleId = facilityId;
+      const assistantIds = [1, 2, 3, 4, 5].filter((id) => id !== responsibleId).slice(0, 2);
+      for (const userId of [responsibleId, ...assistantIds]) {
+        facilityWorkerRowId += 1;
+        facilityWorkersData.push({
+          id: facilityWorkerRowId,
+          clubId,
+          facilityId,
+          userId,
+          userTypeId: 1,
+        });
+      }
     }
+    maxFacilityWorkersPerClub = facilityWorkerRowId;
   }
   await prisma.facility_workers.createMany({ data: facilityWorkersData });
 
@@ -192,20 +378,28 @@ async function seedTestingData(prisma: PrismaClient): Promise<void> {
   }
   await prisma.facilities_membership.createMany({ data: facilitiesMembershipData });
 
+  const activityNames = [
+    'Reserva cancha',
+    'Clase de prueba',
+    'Torneo interno',
+    'Evaluación física',
+    'Sesión personalizada',
+  ];
   const activityData: Prisma.activityCreateManyInput[] = [];
   for (const clubId of CLUB_IDS) {
+    const profile = CLUB_PROFILES[clubId];
     for (let n = 1; n <= 5; n++) {
       activityData.push({
         id: n,
         clubId,
-        name: `Actividad ${n} (club ${clubId})`,
-        type: 'Deporte',
+        name: `${activityNames[n - 1]} — ${profile.members[n - 1].split(' ')[0]}`,
+        type: 'Reserva',
         date: new Date(`2026-06-${10 + n}T12:00:00.000Z`),
         hourStart: `${String(8 + n).padStart(2, '0')}:00`,
         hourEnd: `${String(9 + n).padStart(2, '0')}:00`,
         userId: 5 + n,
         userTypeId: 2,
-        cost: new Prisma.Decimal(800 + n * 100),
+        cost: new Prisma.Decimal(1200 + n * 250),
         facilityId: n,
         isActive: true,
       });
@@ -257,6 +451,7 @@ async function seedTestingData(prisma: PrismaClient): Promise<void> {
 
   const scheduledData: Prisma.scheduled_activitiesCreateManyInput[] = [];
   for (const clubId of CLUB_IDS) {
+    const profile = CLUB_PROFILES[clubId];
     for (let n = 1; n <= 5; n++) {
       scheduledData.push({
         id: n,
@@ -264,39 +459,60 @@ async function seedTestingData(prisma: PrismaClient): Promise<void> {
         facilityId: n,
         userId: n,
         userTypeId: 1,
-        name: `Actividad ${n} (club ${clubId})`,
+        name: profile.scheduledActivities[n - 1],
       });
     }
   }
   await prisma.scheduled_activities.createMany({ data: scheduledData });
 
-  const scheduledAssistantsData: Prisma.scheduled_activities_assistant_workersCreateManyInput[] = [];
+  const scheduledAssistantsData: Prisma.scheduled_activities_assistant_workersCreateManyInput[] =
+    [];
+  let maxAssistantsPerClub = 0;
   for (const clubId of CLUB_IDS) {
-    for (let n = 1; n <= 5; n++) {
-      const assistantUserId = (n % 5) + 1;
-      scheduledAssistantsData.push({
-        id: n,
-        clubId,
-        scheduledActivityId: n,
-        userId: assistantUserId,
-        userTypeId: 1,
-      });
+    const profile = CLUB_PROFILES[clubId];
+    let assistantRowId = 0;
+    for (let activityId = 1; activityId <= 5; activityId++) {
+      const responsibleId = activityId;
+      for (const userId of profile.scheduleAssistants[activityId - 1]) {
+        if (userId === responsibleId) continue;
+        assistantRowId += 1;
+        scheduledAssistantsData.push({
+          id: assistantRowId,
+          clubId,
+          scheduledActivityId: activityId,
+          userId,
+          userTypeId: 1,
+        });
+      }
     }
+    maxAssistantsPerClub = assistantRowId;
   }
-  await prisma.scheduled_activities_assistant_workers.createMany({ data: scheduledAssistantsData });
+  await prisma.scheduled_activities_assistant_workers.createMany({
+    data: scheduledAssistantsData,
+  });
 
-  const scheduledMembershipTypesData: Prisma.scheduled_activities_membership_typesCreateManyInput[] = [];
+  const scheduledMembershipTypesData: Prisma.scheduled_activities_membership_typesCreateManyInput[] =
+    [];
+  let maxMembershipLinksPerClub = 0;
   for (const clubId of CLUB_IDS) {
-    for (let n = 1; n <= 5; n++) {
-      scheduledMembershipTypesData.push({
-        id: n,
-        clubId,
-        scheduledActivityId: n,
-        membershipTypeId: n,
-      });
+    const profile = CLUB_PROFILES[clubId];
+    let membershipLinkRowId = 0;
+    for (let activityId = 1; activityId <= 5; activityId++) {
+      for (const membershipTypeId of profile.scheduleMembershipTypes[activityId - 1]) {
+        membershipLinkRowId += 1;
+        scheduledMembershipTypesData.push({
+          id: membershipLinkRowId,
+          clubId,
+          scheduledActivityId: activityId,
+          membershipTypeId,
+        });
+      }
     }
+    maxMembershipLinksPerClub = membershipLinkRowId;
   }
-  await prisma.scheduled_activities_membership_types.createMany({ data: scheduledMembershipTypesData });
+  await prisma.scheduled_activities_membership_types.createMany({
+    data: scheduledMembershipTypesData,
+  });
 
   const scheduledMembersData: Prisma.scheduled_activities_membersCreateManyInput[] = [];
   for (const clubId of CLUB_IDS) {
@@ -313,17 +529,24 @@ async function seedTestingData(prisma: PrismaClient): Promise<void> {
   await prisma.scheduled_activities_members.createMany({ data: scheduledMembersData });
 
   const datetimeScheduledData: Prisma.datetime_scheduled_activitiesCreateManyInput[] = [];
+  let maxDatetimesPerClub = 0;
   for (const clubId of CLUB_IDS) {
-    for (let n = 1; n <= 5; n++) {
-      datetimeScheduledData.push({
-        id: n,
-        clubId,
-        scheduledActivityId: n,
-        workingDayId: n,
-        hourStart: `${String(8 + n).padStart(2, '0')}:00`,
-        hourEnd: `${String(9 + n).padStart(2, '0')}:00`,
-      });
+    const profile = CLUB_PROFILES[clubId];
+    let datetimeRowId = 0;
+    for (let activityId = 1; activityId <= 5; activityId++) {
+      for (const slot of profile.scheduleSlots[activityId - 1]) {
+        datetimeRowId += 1;
+        datetimeScheduledData.push({
+          id: datetimeRowId,
+          clubId,
+          scheduledActivityId: activityId,
+          workingDayId: slot.workingDayId,
+          hourStart: slot.hourStart,
+          hourEnd: slot.hourEnd,
+        });
+      }
     }
+    maxDatetimesPerClub = datetimeRowId;
   }
   await prisma.datetime_scheduled_activities.createMany({ data: datetimeScheduledData });
 
@@ -338,12 +561,28 @@ async function seedTestingData(prisma: PrismaClient): Promise<void> {
       { name: 'adminId', clubId, value: 5 },
       { name: 'scheduledActivityId', clubId, value: 5 },
       { name: 'workingDayId', clubId, value: 5 },
+      { name: 'facilityWorkerId', clubId, value: maxFacilityWorkersPerClub },
+      {
+        name: 'scheduledActivityAssistantId',
+        clubId,
+        value: maxAssistantsPerClub,
+      },
+      {
+        name: 'scheduledActivityMembershipTypeId',
+        clubId,
+        value: maxMembershipLinksPerClub,
+      },
+      {
+        name: 'datetimeScheduledActivityId',
+        clubId,
+        value: maxDatetimesPerClub,
+      },
     );
   }
   await prisma.numerator.createMany({ data: numeratorData });
 
   console.log(
-    'Seed OK: 2 clubes con 15 users + 5 registros por club en facilities, activities, memberships, scheduled_activities y tablas intermedias.',
+    `Seed OK: 2 clubes, nombres reales, hasta ${maxAssistantsPerClub} asistentes y ${maxDatetimesPerClub} horarios por club en actividades rutinarias.`,
   );
 }
 
