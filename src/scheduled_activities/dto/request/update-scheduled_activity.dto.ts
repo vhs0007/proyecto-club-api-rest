@@ -27,8 +27,9 @@ export class UpdateScheduledActivityDto extends PartialType(CreateScheduledActiv
     userTypeId?: number;
 
     @ApiProperty({ example: [1, 2], description: 'IDs de los tipos de membresía' })
-    @IsNumber({}, { message: 'membershipTypeId debe ser un número' })
-    @Min(1, { message: 'membershipTypeId debe ser al menos 1' })
+    @IsArray({ message: 'membershipTypesIds debe ser un array' })
+    @IsNumber({}, { each: true, message: 'Cada membershipTypeId debe ser un número' })
+    @Min(1, { each: true, message: 'Cada membershipTypeId debe ser al menos 1' })
     membershipTypesIds?: number[];
 
     @ApiProperty({ example: [{ hourStart: '10:00', hourEnd: '12:00', workingDayId: 1 }, { hourStart: '13:00', hourEnd: '15:00', workingDayId: 2 }], description: 'Horarios de la actividad' })

@@ -3,8 +3,17 @@ import { Type } from 'class-transformer';
 import { Equals, IsArray, IsNumber, IsString, Min, ValidateNested } from 'class-validator';
 
 export class DatetimeScheduledActivity {
+    @ApiProperty({ example: '10:00', description: 'Hora de inicio' })
+    @IsString({ message: 'hourStart debe ser un texto' })
     hourStart: string;
+
+    @ApiProperty({ example: '12:00', description: 'Hora de fin' })
+    @IsString({ message: 'hourEnd debe ser un texto' })
     hourEnd: string;
+
+    @ApiProperty({ example: 1, description: 'ID del día de la semana' })
+    @IsNumber({}, { message: 'workingDayId debe ser un número' })
+    @Min(1, { message: 'workingDayId debe ser al menos 1' })
     workingDayId: number;
 }
 
@@ -30,8 +39,9 @@ export class CreateScheduledActivityDto {
     userTypeId: number;
 
     @ApiProperty({ example: [1, 2], description: 'IDs de los tipos de membresía' })
-    @IsNumber({}, { message: 'membershipTypeId debe ser un número' })
-    @Min(1, { message: 'membershipTypeId debe ser al menos 1' })
+    @IsArray({ message: 'membershipTypesIds debe ser un array' })
+    @IsNumber({}, { each: true, message: 'Cada membershipTypeId debe ser un número' })
+    @Min(1, { each: true, message: 'Cada membershipTypeId debe ser al menos 1' })
     membershipTypesIds: number[];
 
     @ApiProperty({ example: [{ hourStart: '10:00', hourEnd: '12:00', workingDayId: 1 }, { hourStart: '13:00', hourEnd: '15:00', workingDayId: 2 }], description: 'Horarios de la actividad' })
