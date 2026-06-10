@@ -237,8 +237,10 @@ export class ActivitiesRepository implements IActivitiesRepository {
       data.hourEnd = updateActivityDto.hourEnd;
     if (updateActivityDto.date !== undefined)
       data.date = updateActivityDto.date;
-    if (updateActivityDto.userId !== undefined)
+    if (updateActivityDto.userId !== undefined) {
       data.userId = updateActivityDto.userId;
+      data.userTypeId = updateActivityDto.userTypeId;
+    }
     if (updateActivityDto.cost !== undefined)
       data.cost = updateActivityDto.cost;
     if (updateActivityDto.facilityId !== undefined)
