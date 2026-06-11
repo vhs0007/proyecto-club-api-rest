@@ -50,6 +50,31 @@ export class ActivitiesService {
     ) {
       throw new BadRequestException('hourStart must be before hourEnd');
     }
+    const requestedDate = new Date(createActivityDto.date);
+    const dayStart = new Date(
+      requestedDate.getFullYear(),
+      requestedDate.getMonth(),
+      requestedDate.getDate(),
+    );
+    const nextDayStart = new Date(
+      requestedDate.getFullYear(),
+      requestedDate.getMonth(),
+      requestedDate.getDate() + 1,
+    );
+    const existing = await this.prisma.activity.findFirst({
+      where: {
+        clubId: createActivityDto.clubId,
+        facilityId: createActivityDto.facilityId,
+        hourStart: createActivityDto.hourStart,
+        hourEnd: createActivityDto.hourEnd,
+        date: { gte: dayStart, lt: nextDayStart },
+      },
+    });
+    if (existing) {
+      throw new BadRequestException(
+        'Ya existe una reserva para esta instalación en la misma fecha y horario',
+      );
+    }
     const result = await this.activitiesRepository.create(createActivityDto);
     return result;
   }
