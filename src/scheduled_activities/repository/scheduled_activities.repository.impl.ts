@@ -1,4 +1,4 @@
-import { Injectable } from "@nestjs/common";
+import { BadRequestException, Injectable } from "@nestjs/common";
 import { Prisma } from "@prisma/client";
 import { PrismaService } from "src/prisma/prisma.service";
 import type {
@@ -200,6 +200,25 @@ export class ScheduledActivitiesRepositoryImpl implements ScheduledActivityRepos
     }
 
     async create(createScheduledActivityDto: CreateScheduledActivityDto): Promise<ScheduledActivityResponseDto> {
+        const existing = await this.prisma.datetime_scheduled_activities.findFirst({
+            where: {
+                clubId: createScheduledActivityDto.clubId,
+                scheduled_activities: {
+                    facilityId: createScheduledActivityDto.facilityId,
+                },
+                OR: createScheduledActivityDto.datetimeScheduledActivities.map((slot) => ({
+                    hourStart: slot.hourStart,
+                    hourEnd: slot.hourEnd,
+                    workingDayId: slot.workingDayId,
+                })),
+            },
+        });
+        if (existing) {
+            throw new BadRequestException(
+                'Ya existe una actividad programada para esta instalación en el mismo día y horario',
+            );
+        }
+
         const numerator : number = await this.generateNumerator(createScheduledActivityDto.clubId);
         const id : number = numerator;
 
@@ -280,6 +299,14 @@ export class ScheduledActivitiesRepositoryImpl implements ScheduledActivityRepos
             throw new Error('Error al consultar la actividad rutinaria creada');
         }
         return this.mapRow(refreshed);
+    }
+
+    async findWorkingDays(clubId: number): Promise<WorkingDayNavigation[]> {
+        const rows = await this.prisma.working_days.findMany({
+            where: { clubId },
+            orderBy: { id: 'asc' },
+        });
+        return rows.map((row) => this.workingDayToNav(row));
     }
 
     async findAll(clubId: number): Promise<ScheduledActivityResponseDto[]> {

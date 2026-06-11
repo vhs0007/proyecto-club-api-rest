@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { PrismaService } from '../../prisma/prisma.service';
 import type {
@@ -148,6 +148,11 @@ export class ActivitiesRepository implements IActivitiesRepository {
     };
   }
 
+  private toMinutes(hour: string): number {
+    const [hh, mm] = hour.split(':').map((value) => Number(value));
+    return hh * 60 + mm;
+  }
+
   private mapRow(row: ActivityQueryRow): ActivityResponseDto {
     return {
       id: row.id,
@@ -167,6 +172,60 @@ export class ActivitiesRepository implements IActivitiesRepository {
   async create(
     createActivityDto: CreateActivityDto,
   ): Promise<ActivityResponseDto> {
+    const user = await this.prisma.users.findUnique({
+      where: {
+        id_clubId_typeId: {
+          id: createActivityDto.userId,
+          clubId: createActivityDto.clubId,
+          typeId: createActivityDto.userTypeId,
+        },
+      },
+    });
+    if (!user) throw new BadRequestException('User not found');
+
+    const facility = await this.prisma.facilities.findUnique({
+      where: {
+        id_clubId: {
+          id: createActivityDto.facilityId,
+          clubId: createActivityDto.clubId,
+        },
+      },
+    });
+    if (!facility) throw new BadRequestException('Facility not found');
+
+    if (
+      this.toMinutes(createActivityDto.hourStart) >=
+      this.toMinutes(createActivityDto.hourEnd)
+    ) {
+      throw new BadRequestException('hourStart must be before hourEnd');
+    }
+
+    const requestedDate = new Date(createActivityDto.date);
+    const dayStart = new Date(
+      requestedDate.getFullYear(),
+      requestedDate.getMonth(),
+      requestedDate.getDate(),
+    );
+    const nextDayStart = new Date(
+      requestedDate.getFullYear(),
+      requestedDate.getMonth(),
+      requestedDate.getDate() + 1,
+    );
+    const existing = await this.prisma.activity.findFirst({
+      where: {
+        clubId: createActivityDto.clubId,
+        facilityId: createActivityDto.facilityId,
+        hourStart: createActivityDto.hourStart,
+        hourEnd: createActivityDto.hourEnd,
+        date: { gte: dayStart, lt: nextDayStart },
+      },
+    });
+    if (existing) {
+      throw new BadRequestException(
+        'Ya existe una reserva para esta instalación en la misma fecha y horario',
+      );
+    }
+
     const { facilityId, isActive, ...rest } = createActivityDto;
     const numerator = await this.generateNumerator(createActivityDto.clubId);
     const id = numerator.value;
@@ -226,6 +285,43 @@ export class ActivitiesRepository implements IActivitiesRepository {
     query: QueryActivitiesRequestDto,
     updateActivityDto: UpdateActivityDto,
   ): Promise<ActivityResponseDto> {
+    const row = await this.findById(query);
+    if (!row) throw new NotFoundException('Activity not found');
+
+    if (updateActivityDto.userId !== undefined) {
+      const user = await this.prisma.users.findUnique({
+        where: {
+          id_clubId_typeId: {
+            id: updateActivityDto.userId,
+            clubId: row.clubId,
+            typeId: updateActivityDto.userTypeId,
+          },
+        },
+      });
+      if (!user) throw new BadRequestException('User not found');
+    }
+
+    if (updateActivityDto.facilityId !== undefined) {
+      const facility = await this.prisma.facilities.findUnique({
+        where: {
+          id_clubId: { id: updateActivityDto.facilityId, clubId: query.clubId },
+        },
+      });
+      if (!facility) throw new BadRequestException('Facility not found');
+    }
+
+    const hourStart =
+      updateActivityDto.hourStart !== undefined
+        ? updateActivityDto.hourStart
+        : row.hourStart;
+    const hourEnd =
+      updateActivityDto.hourEnd !== undefined
+        ? updateActivityDto.hourEnd
+        : row.hourEnd;
+    if (this.toMinutes(hourStart) >= this.toMinutes(hourEnd)) {
+      throw new BadRequestException('hourStart must be before hourEnd');
+    }
+
     const data: Record<string, unknown> = {};
     if (updateActivityDto.name !== undefined)
       data.name = updateActivityDto.name;

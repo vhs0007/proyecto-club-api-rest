@@ -2,6 +2,7 @@ import { CreateScheduledActivityDto } from "../dto/request/create-scheduled_acti
 import { ScheduledActivityResponseDto } from "../dto/response/scheduled_activity.response.dto";
 import { UpdateScheduledActivityDto } from "../dto/request/update-scheduled_activity.dto";
 import { QueryScheduledActivityDto } from "../dto/request/query-scheduled_activity.dto";
+import type { WorkingDayNavigation } from "../../facilities/repository/facilities.repository";
 
 export interface UserNavigation {
     id: number;
@@ -25,6 +26,7 @@ export interface FacilityNavigation {
 
 export interface ScheduledActivityRepository {
     create(createScheduledActivityDto: CreateScheduledActivityDto): Promise<ScheduledActivityResponseDto>;
+    findWorkingDays(clubId: number): Promise<WorkingDayNavigation[]>;
     findAll(clubId: number): Promise<ScheduledActivityResponseDto[]>;
     findById(query: QueryScheduledActivityDto): Promise<ScheduledActivityResponseDto>;
     update(query: QueryScheduledActivityDto, updateScheduledActivityDto: UpdateScheduledActivityDto): Promise<ScheduledActivityResponseDto>;
