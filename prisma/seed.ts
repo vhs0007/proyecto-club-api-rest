@@ -555,18 +555,22 @@ async function seedTestingData(prisma: PrismaClient): Promise<void> {
   }
   await prisma.datetime_scheduled_activities.createMany({ data: datetimeScheduledData });
 
+  // Debe coincidir con los `name` que usan los repositories al crear entidades.
+  const maxUserIdPerClub = PER_TYPE * 3; // trabajadores 1-5, socios 6-10, atletas 11-15
+  const maxMembershipTypeIdPerClub = 5;
+  const maxFacilityIdPerClub = 5;
+
   const numeratorData: Prisma.numeratorCreateManyInput[] = [];
   for (const clubId of CLUB_IDS) {
     numeratorData.push(
-      { name: 'facilityId', clubId, value: 5 },
+      { name: 'userId', clubId, value: maxUserIdPerClub },
+      { name: 'membershipTypeId', clubId, value: maxMembershipTypeIdPerClub },
+      { name: 'facilityId', clubId, value: maxFacilityIdPerClub },
       { name: 'activityId', clubId, value: 5 },
       { name: 'membershipId', clubId, value: 5 },
-      { name: 'memberId', clubId, value: 10 },
-      { name: 'athleteId', clubId, value: 15 },
-      { name: 'adminId', clubId, value: 5 },
       { name: 'scheduledActivityId', clubId, value: 5 },
       { name: 'workingDayId', clubId, value: 5 },
-      { name: 'facilityWorkerId', clubId, value: maxFacilityWorkersPerClub },
+      { name: 'facility_workersId', clubId, value: maxFacilityWorkersPerClub },
       {
         name: 'scheduledActivityAssistantId',
         clubId,
