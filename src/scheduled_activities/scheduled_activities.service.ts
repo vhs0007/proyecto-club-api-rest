@@ -3,17 +3,42 @@ import { CreateScheduledActivityDto } from './dto/request/create-scheduled_activ
 import { UpdateScheduledActivityDto } from './dto/request/update-scheduled_activity.dto';
 import { ScheduledActivitiesRepositoryImpl } from './repository/scheduled_activities.repository.impl';
 import { QueryScheduledActivityDto } from './dto/request/query-scheduled_activity.dto';
+import { PrismaService } from '../prisma/prisma.service';
 
 @Injectable()
 export class ScheduledActivitiesService {
+  constructor(
+    private readonly scheduledActivitiesRepository: ScheduledActivitiesRepositoryImpl,
+    private readonly prisma: PrismaService,
+  ) {}
 
-  constructor(private readonly scheduledActivitiesRepository: ScheduledActivitiesRepositoryImpl) {}
-  create(createScheduledActivityDto: CreateScheduledActivityDto) {
-    try {
-      return this.scheduledActivitiesRepository.create(createScheduledActivityDto);
-    } catch (error) {
-      throw new BadRequestException(error.message);
+  async create(createScheduledActivityDto: CreateScheduledActivityDto) {
+    const existing = await this.prisma.datetime_scheduled_activities.findFirst({
+      where: {
+        clubId: createScheduledActivityDto.clubId,
+        scheduled_activities: {
+          facilityId: createScheduledActivityDto.facilityId,
+        },
+        OR: createScheduledActivityDto.datetimeScheduledActivities.map((slot) => ({
+          hourStart: slot.hourStart,
+          hourEnd: slot.hourEnd,
+          workingDayId: slot.workingDayId,
+        })),
+      },
+    });
+    if (existing) {
+      throw new BadRequestException(
+        'Ya existe una actividad programada para esta instalación en el mismo día y horario',
+      );
     }
+    return this.scheduledActivitiesRepository.create(createScheduledActivityDto);
+  }
+
+  findWorkingDays(clubId: number) {
+    return this.prisma.working_days.findMany({
+      where: { clubId },
+      orderBy: { id: 'asc' },
+    });
   }
 
   findAll(clubId: number) {
@@ -32,9 +57,15 @@ export class ScheduledActivitiesService {
     }
   }
 
-  update(query: QueryScheduledActivityDto, updateScheduledActivityDto: UpdateScheduledActivityDto) {
+  update(
+    query: QueryScheduledActivityDto,
+    updateScheduledActivityDto: UpdateScheduledActivityDto,
+  ) {
     try {
-      return this.scheduledActivitiesRepository.update(query, updateScheduledActivityDto);
+      return this.scheduledActivitiesRepository.update(
+        query,
+        updateScheduledActivityDto,
+      );
     } catch (error) {
       throw new BadRequestException(error.message);
     }

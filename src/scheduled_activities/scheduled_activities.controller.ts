@@ -10,7 +10,6 @@ import { AuthGuard } from '../auth/guards/jwt-auth.guard';
 @ApiBearerAuth()
 @Controller('scheduled-activities')
 @UseGuards(AuthGuard)
-@Controller('scheduled-activities')
 export class ScheduledActivitiesController {
   constructor(private readonly scheduledActivitiesService: ScheduledActivitiesService) {}
 
@@ -22,6 +21,12 @@ export class ScheduledActivitiesController {
   @Get()
   findAll(@Query('clubId', ParseIntPipe) clubId: number): Promise<ScheduledActivityResponseDto[]> {
     return this.scheduledActivitiesService.findAll(clubId);
+  }
+
+  @Get('working-days')
+  @ApiOperation({ summary: 'Obtener días laborales del club' })
+  findWorkingDays(@Query('clubId', ParseIntPipe) clubId: number) {
+    return this.scheduledActivitiesService.findWorkingDays(clubId);
   }
 
   @Get(':id')
