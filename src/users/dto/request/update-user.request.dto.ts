@@ -24,6 +24,11 @@ export class UpdateUserDto {
 
   @ApiProperty({ required: false })
   @IsOptional()
+  @IsString({ message: 'document debe ser un texto' })
+  document?: string | null;
+
+  @ApiProperty({ required: false })
+  @IsOptional()
   @IsString({ message: 'password debe ser un texto' })
   password?: string | null;
 
