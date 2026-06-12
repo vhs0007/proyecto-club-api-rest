@@ -153,6 +153,10 @@ export class ActivitiesRepository implements IActivitiesRepository {
     return hh * 60 + mm;
   }
 
+  private overlaps(ini: string, fin: string, ini2: string, fin2: string): boolean {
+    return this.toMinutes(ini) < this.toMinutes(fin2) && this.toMinutes(ini2) < this.toMinutes(fin);
+  }
+
   private mapRow(row: ActivityQueryRow): ActivityResponseDto {
     return {
       id: row.id,
@@ -211,19 +215,27 @@ export class ActivitiesRepository implements IActivitiesRepository {
       requestedDate.getMonth(),
       requestedDate.getDate() + 1,
     );
-    const existing = await this.prisma.activity.findFirst({
+    const reservas = await this.prisma.activity.findMany({
       where: {
         clubId: createActivityDto.clubId,
         facilityId: createActivityDto.facilityId,
-        hourStart: createActivityDto.hourStart,
-        hourEnd: createActivityDto.hourEnd,
         date: { gte: dayStart, lt: nextDayStart },
       },
+      select: { hourStart: true, hourEnd: true },
     });
-    if (existing) {
-      throw new BadRequestException(
-        'Ya existe una reserva para esta instalación en la misma fecha y horario',
-      );
+    for (const r of reservas) {
+      if (
+        this.overlaps(
+          createActivityDto.hourStart,
+          createActivityDto.hourEnd,
+          r.hourStart,
+          r.hourEnd,
+        )
+      ) {
+        throw new BadRequestException(
+          'Ya existe una reserva para esta instalación en la misma fecha con un horario que se superpone',
+        );
+      }
     }
 
     const { facilityId, isActive, ...rest } = createActivityDto;
@@ -320,6 +332,30 @@ export class ActivitiesRepository implements IActivitiesRepository {
         : row.hourEnd;
     if (this.toMinutes(hourStart) >= this.toMinutes(hourEnd)) {
       throw new BadRequestException('hourStart must be before hourEnd');
+    }
+
+    const facilityId = updateActivityDto.facilityId ?? row.facility.id;
+    const date =
+      updateActivityDto.date !== undefined
+        ? new Date(updateActivityDto.date)
+        : new Date(row.date);
+    const dayStart = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+    const nextDayStart = new Date(date.getFullYear(), date.getMonth(), date.getDate() + 1);
+    const reservas = await this.prisma.activity.findMany({
+      where: {
+        clubId: query.clubId,
+        facilityId,
+        date: { gte: dayStart, lt: nextDayStart },
+        NOT: { id: query.id },
+      },
+      select: { hourStart: true, hourEnd: true },
+    });
+    for (const r of reservas) {
+      if (this.overlaps(hourStart, hourEnd, r.hourStart, r.hourEnd)) {
+        throw new BadRequestException(
+          'Ya existe una reserva para esta instalación en la misma fecha con un horario que se superpone',
+        );
+      }
     }
 
     const data: Record<string, unknown> = {};

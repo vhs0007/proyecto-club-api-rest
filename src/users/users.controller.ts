@@ -78,7 +78,7 @@ export class UsersController {
   }
 
   @Delete(':id')
-  @ApiOperation({ summary: 'Eliminar usuario' })
+  @ApiOperation({ summary: 'Dar de baja usuario (isActive: false)' })
   remove(
     @Param('id', ParseIntPipe) id: number,
     @Query('clubId', ParseIntPipe) clubId: number,

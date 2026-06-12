@@ -128,7 +128,6 @@ export class UsersService {
   ): Promise<UserResponseDto> {
     const row = await this.usersRepository.findById(queryUserRequestDto);
     if (!row) throw new NotFoundException('User not found');
-    await this.usersRepository.delete(queryUserRequestDto);
-    return row;
+    return this.usersRepository.delete(queryUserRequestDto);
   }
 }
