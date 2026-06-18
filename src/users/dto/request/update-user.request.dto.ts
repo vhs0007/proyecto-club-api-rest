@@ -25,11 +25,7 @@ export class UpdateUserDto {
   @ApiProperty({ required: false })
   @IsOptional()
   @IsString({ message: 'document debe ser un texto' })
-<<<<<<< Updated upstream
   document?: string | null;
-=======
-  document?: string;
->>>>>>> Stashed changes
 
   @ApiProperty({ required: false })
   @IsOptional()
