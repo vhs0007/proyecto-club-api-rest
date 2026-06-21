@@ -182,6 +182,15 @@ export class ScheduledActivitiesRepositoryImpl implements ScheduledActivityRepos
         return row as ScheduledActivityRow | null;
     }
 
+    private toMinutes(hour: string): number {
+        const [hh, mm] = hour.split(':').map((value) => Number(value));
+        return hh * 60 + mm;
+    }
+
+    private overlaps(ini: string, fin: string, ini2: string, fin2: string): boolean {
+        return this.toMinutes(ini) < this.toMinutes(fin2) && this.toMinutes(ini2) < this.toMinutes(fin);
+    }
+
     async generateNumerator(clubId: number): Promise<number> {
         const existNumerator = await this.prisma.numerator.findFirst({
             where: { name: 'scheduledActivityId', clubId },
@@ -200,23 +209,31 @@ export class ScheduledActivitiesRepositoryImpl implements ScheduledActivityRepos
     }
 
     async create(createScheduledActivityDto: CreateScheduledActivityDto): Promise<ScheduledActivityResponseDto> {
-        const existing = await this.prisma.datetime_scheduled_activities.findFirst({
+        const horarios = await this.prisma.datetime_scheduled_activities.findMany({
             where: {
                 clubId: createScheduledActivityDto.clubId,
                 scheduled_activities: {
                     facilityId: createScheduledActivityDto.facilityId,
                 },
-                OR: createScheduledActivityDto.datetimeScheduledActivities.map((slot) => ({
-                    hourStart: slot.hourStart,
-                    hourEnd: slot.hourEnd,
-                    workingDayId: slot.workingDayId,
-                })),
             },
+            select: { hourStart: true, hourEnd: true, workingDayId: true },
         });
-        if (existing) {
-            throw new BadRequestException(
-                'Ya existe una actividad programada para esta instalación en el mismo día y horario',
-            );
+        for (const nuevo of createScheduledActivityDto.datetimeScheduledActivities) {
+            for (const existente of horarios) {
+                if (
+                    nuevo.workingDayId === existente.workingDayId &&
+                    this.overlaps(
+                        nuevo.hourStart,
+                        nuevo.hourEnd,
+                        existente.hourStart,
+                        existente.hourEnd,
+                    )
+                ) {
+                    throw new BadRequestException(
+                        'Ya existe una actividad programada para esta instalación en el mismo día con un horario que se superpone',
+                    );
+                }
+            }
         }
 
         const numerator : number = await this.generateNumerator(createScheduledActivityDto.clubId);
@@ -403,6 +420,36 @@ export class ScheduledActivitiesRepositoryImpl implements ScheduledActivityRepos
         }
 
         if (updateScheduledActivityDto.datetimeScheduledActivities !== undefined) {
+            const facilityId =
+                updateScheduledActivityDto.facilityId ?? existing.facilityId;
+            const horarios = await this.prisma.datetime_scheduled_activities.findMany({
+                where: {
+                    clubId: query.clubId,
+                    scheduled_activities: {
+                        facilityId,
+                        NOT: { id: existing.id },
+                    },
+                },
+                select: { hourStart: true, hourEnd: true, workingDayId: true },
+            });
+            for (const nuevo of updateScheduledActivityDto.datetimeScheduledActivities) {
+                for (const existente of horarios) {
+                    if (
+                        nuevo.workingDayId === existente.workingDayId &&
+                        this.overlaps(
+                            nuevo.hourStart,
+                            nuevo.hourEnd,
+                            existente.hourStart,
+                            existente.hourEnd,
+                        )
+                    ) {
+                        throw new BadRequestException(
+                            'Ya existe una actividad programada para esta instalación en el mismo día con un horario que se superpone',
+                        );
+                    }
+                }
+            }
+
             await this.prisma.datetime_scheduled_activities.deleteMany({
                 where: childWhere,
             });

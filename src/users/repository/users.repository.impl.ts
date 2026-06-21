@@ -566,10 +566,17 @@ export class UsersRepository implements IUsersRepository {
     return userResponse;
   }
 
-  async delete(queryUserRequestDto: QueryUserRequestDto): Promise<void> {
+  async delete(queryUserRequestDto: QueryUserRequestDto): Promise<UserResponseDto> {
     const { clubId, userId, typeId } = queryUserRequestDto;
-    await this.prisma.users.delete({
+    const updated = await this.prisma.users.update({
       where: { id_clubId_typeId: { id: userId, clubId, typeId } },
+      data: { isActive: false },
+      include: { type: true, memberships: { include: { type: true } } },
     });
+    const userResponse = mapRow(updated);
+    userResponse.membership = getLastMembership(updated.memberships);
+    await this.attachFacilities(userResponse, updated.id, clubId, typeId);
+    await this.attachScheduleActivities(userResponse, updated.id, clubId, typeId);
+    return userResponse;
   }
 }

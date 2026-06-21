@@ -65,5 +65,5 @@ export interface IUsersRepository {
   ): Promise<UserResponseDto | null>;
   existsTypeId(typeId: number): Promise<boolean>;
   update(id: number, updateUserDto: UpdateUserDto): Promise<UserResponseDto>;
-  delete(queryUserRequestDto: QueryUserRequestDto): Promise<void>;
+  delete(queryUserRequestDto: QueryUserRequestDto): Promise<UserResponseDto>;
 }
