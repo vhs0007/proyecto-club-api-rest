@@ -80,18 +80,6 @@ model facility_workers{
 }
 
 model activity {
-  /*
-    id: number;
-  name: string;
-  type: string;
-  dateStart: Date;
-  hourStart: string;
-  hourEnd: string;
-  userId: number;
-  cost: number;
-  facility: Facility;
-  isActive: boolean;
-  */
   id Int @default(autoincrement())
   name String
   type String
@@ -104,7 +92,7 @@ model activity {
   cost Decimal @db.Decimal(10, 2)
   facilityId Int
   facility facilities @relation(fields: [facilityId, clubId], references: [id, clubId])
-  isActive Boolean
+  state String @db.VarChar(20) @default("PENDIENTE")
   clubId Int
   club clubs @relation(fields: [clubId], references: [id])
   @@id([id, clubId])

@@ -17,7 +17,7 @@ export type ActivityResponse = {
   user: UserNavigation;
   cost: number;
   facility: FacilityNavigation;
-  isActive: boolean;
+  state: string;
   clubId: number;
   document: string;
 };

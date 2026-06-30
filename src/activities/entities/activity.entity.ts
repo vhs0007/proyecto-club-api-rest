@@ -10,7 +10,7 @@ export class Activity {
   private _user: User;
   private _cost: number;
   private _facility: Facility;
-  private _isActive: boolean;
+  private _state: string;
   private _date: Date;
 
   constructor(data: Partial<Activity>) {
@@ -22,7 +22,7 @@ export class Activity {
     if (data?.user != null) this._user = data.user;
     if (data?.cost != null) this._cost = data.cost;
     if (data?.facility != null) this._facility = data.facility;
-    if (data?.isActive !== undefined) this._isActive = data.isActive;
+    if (data?.state != null) this._state = data.state;
     if (data?.date != null) this._date = data.date;
   }
 
@@ -82,11 +82,11 @@ export class Activity {
     this._facility = value;
   }
 
-  get isActive(): boolean {
-    return this._isActive;
+  get state(): string {
+    return this._state;
   }
-  set isActive(value: boolean) {
-    this._isActive = value;
+  set state(value: string) {
+    this._state = value;
   }
 
   get date(): Date {

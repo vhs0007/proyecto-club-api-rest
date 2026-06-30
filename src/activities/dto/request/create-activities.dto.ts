@@ -3,11 +3,19 @@ import {
   IsString,
   IsNumber,
   IsOptional,
-  IsBoolean,
+  IsIn,
   Min,
   IsDate,
   Matches,
 } from 'class-validator';
+
+export const ACTIVITY_STATES = [
+  'PENDIENTE',
+  'CONFIRMADO',
+  'CANCELADO',
+  'COMPLETADO',
+  'SEÑADA',
+] as const;
 
 export class CreateActivityDto {
   @ApiProperty({
@@ -54,10 +62,18 @@ export class CreateActivityDto {
   @Min(1, { message: 'facilityId debe ser al menos 1' })
   facilityId: number;
 
-  @ApiProperty({ example: true, description: 'Activa', required: false })
+  @ApiProperty({
+    example: 'PENDIENTE',
+    description: 'Estado de la actividad',
+    required: false,
+    enum: ACTIVITY_STATES,
+  })
   @IsOptional()
-  @IsBoolean({ message: 'isActive debe ser true o false' })
-  isActive?: boolean;
+  @IsString({ message: 'state debe ser un texto' })
+  @IsIn(ACTIVITY_STATES, {
+    message: 'state debe ser PENDIENTE, CONFIRMADO, CANCELADO, COMPLETADO o SEÑADA',
+  })
+  state?: string;
 
   @ApiProperty({ example: 1, description: 'Id del club' })
   @IsNumber({}, { message: 'clubId debe ser un número' })

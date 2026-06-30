@@ -61,8 +61,12 @@ export class ActivityResponseDto {
   })
   facility: FacilityNavigation;
 
-  @ApiProperty({ example: true, description: '¿Está activa la actividad?' })
-  isActive: boolean;
+  @ApiProperty({
+    example: 'PENDIENTE',
+    description: 'Estado de la actividad',
+    enum: ['PENDIENTE', 'CONFIRMADO', 'CANCELADO', 'COMPLETADO', 'SEÑADA'],
+  })
+  state: string;
 
   @ApiProperty({ example: 1, description: 'ID del club' })
   clubId: number;

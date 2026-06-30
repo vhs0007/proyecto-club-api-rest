@@ -3,10 +3,11 @@ import {
   IsString,
   IsNumber,
   IsOptional,
-  IsBoolean,
+  IsIn,
   Min,
   Matches,
 } from 'class-validator';
+import { ACTIVITY_STATES } from './create-activities.dto';
 
 export class UpdateActivityDto {
   @ApiProperty({ example: 'Partido de fútbol', required: false })
@@ -57,10 +58,17 @@ export class UpdateActivityDto {
   @Min(1, { message: 'facilityId debe ser al menos 1' })
   facilityId?: number;
 
-  @ApiProperty({ example: true, required: false })
+  @ApiProperty({
+    example: 'CONFIRMADO',
+    required: false,
+    enum: ACTIVITY_STATES,
+  })
   @IsOptional()
-  @IsBoolean({ message: 'isActive debe ser true o false' })
-  isActive?: boolean;
+  @IsString({ message: 'state debe ser un texto' })
+  @IsIn(ACTIVITY_STATES, {
+    message: 'state debe ser PENDIENTE, CONFIRMADO, CANCELADO, COMPLETADO o SEÑADA',
+  })
+  state?: string;
 
   @ApiProperty({ example: '2026-03-03', description: 'Fecha de la actividad' })
   @IsOptional()

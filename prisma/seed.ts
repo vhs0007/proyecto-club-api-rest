@@ -406,7 +406,7 @@ async function seedTestingData(prisma: PrismaClient): Promise<void> {
         userTypeId: 2,
         cost: new Prisma.Decimal(1200 + n * 250),
         facilityId: n,
-        isActive: true,
+        state: 'PENDIENTE',
       });
     }
   }

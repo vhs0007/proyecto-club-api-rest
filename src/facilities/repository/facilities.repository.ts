@@ -43,7 +43,7 @@ export interface ActivitiesNavigation {
   hourEnd: string;
   user: UserNavigation;
   cost: number;
-  isActive: boolean;
+  state: string;
 }
 
 export interface WorkingDayNavigation {

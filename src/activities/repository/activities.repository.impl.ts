@@ -67,7 +67,7 @@ interface ActivityQueryRow {
   hourStart: string;
   hourEnd: string;
   cost: { toNumber(): number };
-  isActive: boolean;
+  state: string;
   clubId: number;
   user: UserWithTypeRow | null;
   facility: FacilityNestedRow;
@@ -167,7 +167,7 @@ export class ActivitiesRepository implements IActivitiesRepository {
       date: row.date,
       user: row.user ? this.userToNav(row.user) : null,
       cost: row.cost.toNumber(),
-      isActive: row.isActive,
+      state: row.state,
       facility: this.mapFacility(row.facility),
       clubId: row.clubId,
     };
@@ -238,7 +238,7 @@ export class ActivitiesRepository implements IActivitiesRepository {
       }
     }
 
-    const { facilityId, isActive, ...rest } = createActivityDto;
+    const { facilityId, state, ...rest } = createActivityDto;
     const numerator = await this.generateNumerator(createActivityDto.clubId);
     const id = numerator.value;
     const created = await this.prisma.activity.create({
@@ -246,7 +246,7 @@ export class ActivitiesRepository implements IActivitiesRepository {
         id,
         ...rest,
         facilityId,
-        isActive: isActive ?? true,
+        state: state ?? 'PENDIENTE',
         clubId: createActivityDto.clubId,
       },
       include: ACTIVITY_QUERY_INCLUDE,
@@ -377,8 +377,8 @@ export class ActivitiesRepository implements IActivitiesRepository {
       data.cost = updateActivityDto.cost;
     if (updateActivityDto.facilityId !== undefined)
       data.facilityId = updateActivityDto.facilityId;
-    if (updateActivityDto.isActive !== undefined)
-      data.isActive = updateActivityDto.isActive;
+    if (updateActivityDto.state !== undefined)
+      data.state = updateActivityDto.state;
     const updated = await this.prisma.activity.update({
       where: { id_clubId: { id: query.id, clubId: query.clubId } },
       data,

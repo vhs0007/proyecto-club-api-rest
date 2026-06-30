@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { CreateActivityDto } from './dto/request/create-activities.dto';
 import { UpdateActivityDto } from './dto/request/update-activities.dto';
 import { ActivityResponseDto } from './dto/response/activity-response.dto';
@@ -38,6 +38,11 @@ export class ActivitiesService {
   async remove(query: QueryActivitiesRequestDto): Promise<ActivityResponseDto> {
     const row = await this.activitiesRepository.findById(query);
     if (!row) throw new NotFoundException('Activity not found');
+    if (row.state === 'COMPLETADO' || row.state === 'SEÑADA') {
+      throw new BadRequestException(
+        'No se puede eliminar una actividad en estado COMPLETADO o SEÑADA',
+      );
+    }
     await this.activitiesRepository.delete(query);
     return row;
   }

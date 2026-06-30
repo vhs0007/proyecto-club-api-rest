@@ -49,7 +49,7 @@ interface ActivityWithUserRow {
   hourStart: string;
   hourEnd: string;
   cost: Prisma.Decimal;
-  isActive: boolean;
+  state: string;
   user: UserWithTypeRow;
 }
 
@@ -177,7 +177,7 @@ export class FacilitiesRepository implements IFacilitiesRepository {
       hourEnd: activity.hourEnd,
       user: this.userToNav(activity.user),
       cost: Number(activity.cost),
-      isActive: activity.isActive,
+      state: activity.state,
     };
   }
 

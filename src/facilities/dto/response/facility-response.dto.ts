@@ -49,7 +49,7 @@ export class FacilityResponseDto {
         hourEnd: '10:00',
         user: userNavExample,
         cost: 100,
-        isActive: true,
+        state: 'PENDIENTE',
       },
     ],
     description: 'Actividades',
